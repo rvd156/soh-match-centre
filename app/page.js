@@ -57,7 +57,7 @@ const [playersError, setPlayersError] = useState('')
   }
 
   loadTeams()
-
+}, [])
 useEffect(() => {
   async function loadPlayers() {
     if (!setup.oppositionTeamId) {
@@ -98,7 +98,6 @@ useEffect(() => {
   loadPlayers()
 }, [setup.oppositionTeamId])
     
-}, [])
   useEffect(() => {
     const saved = localStorage.getItem('soh-match-centre-v2-1')
     if (!saved) return

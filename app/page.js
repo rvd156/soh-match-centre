@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
-
+import { supabase } from '../lib/supabase'
 const emptyTeam = { goals: 0, points: 0 }
 const defaultSetup = { opposition: '', oppositionCrest: '', competition: '', venue: '', date: '', throwIn: '', halfLength: '30', sohSide: 'home' }
 
@@ -22,8 +22,36 @@ export default function Home() {
   const [running, setRunning] = useState(false)
   const [period, setPeriod] = useState('PRE-MATCH')
   const [displayMode, setDisplayMode] = useState(false)
+  const [teams, setTeams] = useState([])
+const [teamsLoading, setTeamsLoading] = useState(true)
+const [teamsError, setTeamsError] = useState('')
   const intervalRef = useRef(null)
 
+  useEffect(() => {
+  async function loadTeams() {
+    setTeamsLoading(true)
+    setTeamsError('')
+
+    const { data, error } = await supabase
+      .from('teams')
+      .select('id, name, short_name')
+      .eq('active', true)
+      .neq('id', 1)
+      .order('name')
+
+    if (error) {
+      console.error('Error loading teams:', error)
+      setTeamsError('Could not load teams')
+      setTeams([])
+    } else {
+      setTeams(data || [])
+    }
+
+    setTeamsLoading(false)
+  }
+
+  loadTeams()
+}, [])
   useEffect(() => {
     const saved = localStorage.getItem('soh-match-centre-v2-1')
     if (!saved) return
@@ -70,8 +98,7 @@ export default function Home() {
     setHome(emptyTeam); setAway(emptyTeam); setSeconds(0); setRunning(false); setPeriod('PRE-MATCH'); setSetupComplete(false); setDisplayMode(false)
   }
 
-  if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} onStart={() => setup.opposition.trim() && setSetupComplete(true)} />
-
+  if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} onStart={() => setup.opposition.trim() && setSetupComplete(true)} />
   return <main className={displayMode ? 'display-page' : ''}>
     <section className="scoreboard-card">
       <div className="topbar">
@@ -101,7 +128,7 @@ export default function Home() {
   </main>
 }
 
-function Setup({setup,setSetup,onStart}){
+function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart}){
   const update = (key,value) => setSetup(s=>({...s,[key]:value}))
   function uploadCrest(event) {
     const file = event.target.files?.[0]
@@ -182,7 +209,25 @@ function Setup({setup,setSetup,onStart}){
       </div>
     </div>
     <div className="form-grid">
-      <label className="field"><span>Opposition *</span><input autoFocus placeholder="e.g. Mohill" value={setup.opposition} onChange={e=>update('opposition',e.target.value)}/></label>
+      <label className="field">
+  <span>Opposition *</span>
+  <select
+    autoFocus
+    value={setup.opposition}
+    onChange={e => update('opposition', e.target.value)}
+    disabled={teamsLoading}
+  >
+    <option value="">
+      {teamsLoading ? 'Loading teams...' : 'Select opposition'}
+    </option>
+    {teams.map(team => (
+      <option key={team.id} value={team.name}>
+        {team.name}
+      </option>
+    ))}
+  </select>
+  {teamsError && <small>{teamsError}</small>}
+</label>
       <label className="field"><span>Competition</span><input placeholder="e.g. Senior Championship" value={setup.competition} onChange={e=>update('competition',e.target.value)}/></label>
       <label className="field full"><span>Venue</span><input placeholder="e.g. Pairc Sheáin Uí Eislin" value={setup.venue} onChange={e=>update('venue',e.target.value)}/></label>
       <label className="field"><span>Date</span><input type="date" value={setup.date} onChange={e=>update('date',e.target.value)}/>{setup.date && <small className="date-preview">{formatDate(setup.date)}</small>}</label>

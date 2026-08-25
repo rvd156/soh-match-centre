@@ -249,7 +249,7 @@ useEffect(() => {
 
       <select
         defaultValue=""
-        onChange={(e) => {
+        onChange={async (e) => {
           if (!e.target.value) return
 
           const player = scorerPicker.players.find(
@@ -257,8 +257,29 @@ useEffect(() => {
 )
 if (!player) return
           console.log('SCORER:', player)
-          changeScore(scorerPicker.side, scorerPicker.type, 1)
-          setScorerPicker(null)
+
+const { error } = await supabase
+  .from('match_events')
+  .insert({
+    match_id: matchId,
+    team_id: player.team_id,
+    player_id: player.id,
+    event_type: 'score',
+    score_type: scorerPicker.type === 'goals' ? 'goal' : 'point',
+    match_minute: Math.floor(seconds / 60),
+    clock_seconds: seconds
+  })
+
+if (error) {
+  console.error('Error saving score event:', error)
+  alert('Could not save scorer to database.')
+  return
+}
+
+console.log('SCORE EVENT SAVED')
+
+changeScore(scorerPicker.side, scorerPicker.type, 1)
+setScorerPicker(null)
         }}
       >
         <option value="" disabled>Select player</option>

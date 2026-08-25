@@ -85,6 +85,9 @@ useEffect(() => {
     }
 
     const players = data ?? []
+    
+    console.log('PLAYERS FROM SUPABASE:', players)
+    console.log('OPPOSITION TEAM ID:', setup.oppositionTeamId)
 
     setSohPlayers(players.filter(player => Number(player.team_id) === 1))
     setOppositionPlayers(

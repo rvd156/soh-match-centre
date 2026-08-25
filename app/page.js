@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 const emptyTeam = { goals: 0, points: 0 }
-const defaultSetup = { opposition: '', oppositionCrest: '', competition: '', venue: '', date: '', throwIn: '', halfLength: '30', sohSide: 'home' }
+const defaultSetup = { opposition: '', oppositionTeamId: '', oppositionCrest: '', competition: '', venue: '', date: '', throwIn: '', halfLength: '30', sohSide: 'home' }
 
 function formatDate(value) {
   if (!value) return ''
@@ -320,7 +320,14 @@ function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart}){
   <select
     autoFocus
     value={setup.opposition}
-    onChange={e => update('opposition', e.target.value)}
+    onChange={e => {
+  const team = teams.find(t => t.name === e.target.value)
+  setSetup(s => ({
+    ...s,
+    opposition: e.target.value,
+    oppositionTeamId: team ? team.id : ''
+  }))
+}}
     disabled={teamsLoading}
   >
     <option value="">

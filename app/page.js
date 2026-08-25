@@ -211,6 +211,11 @@ useEffect(() => {
         onChange={(e) => {
           if (!e.target.value) return
 
+          const player = scorerPicker.players.find(
+  p => String(p.id) === String(e.target.value)
+)
+if (!player) return
+          console.log('SCORER:', player)
           changeScore(scorerPicker.side, scorerPicker.type, 1)
           setScorerPicker(null)
         }}

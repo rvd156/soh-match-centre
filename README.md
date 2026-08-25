@@ -1,8 +1,8 @@
-# SOH Match Centre V2.1
+# SOH Match Centre V2.2
 
 Updates:
-- Irish-style displayed date, e.g. Saturday, 29 August 2026
-- SOH crest has a transparent outer background
-- Opposition crest can be uploaded directly on the New Match screen
-- Opposition crest appears on the scoreboard and respects Home/Away selection
-- Uploaded crest is saved locally in the browser with the current match
+- Much larger SOH and opposition crests on Match Setup
+- Larger team crests on the scoreboard
+- Opposition crest uploads automatically remove a flat/near-flat outer background
+- Background removal flood-fills only from the image edges to help preserve white/grey details inside a crest
+- Uploaded opposition crest is converted to a transparent PNG in the browser

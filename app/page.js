@@ -107,8 +107,66 @@ function Setup({setup,setSetup,onStart}){
     const file = event.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('image/')) return alert('Please choose an image file.')
+
     const reader = new FileReader()
-    reader.onload = () => update('oppositionCrest', reader.result)
+    reader.onload = () => {
+      const image = new Image()
+      image.onload = () => {
+        // Resize large uploads so they remain quick to save/load on a phone.
+        const maxSize = 900
+        const scale = Math.min(1, maxSize / Math.max(image.width, image.height))
+        const width = Math.max(1, Math.round(image.width * scale))
+        const height = Math.max(1, Math.round(image.height * scale))
+        const canvas = document.createElement('canvas')
+        canvas.width = width
+        canvas.height = height
+        const ctx = canvas.getContext('2d', { willReadFrequently: true })
+        ctx.drawImage(image, 0, 0, width, height)
+
+        const imgData = ctx.getImageData(0, 0, width, height)
+        const data = imgData.data
+
+        // Estimate the uploaded image's outer background from its corners.
+        const sample = (x, y) => {
+          const i = (y * width + x) * 4
+          return [data[i], data[i+1], data[i+2]]
+        }
+        const corners = [sample(0,0), sample(width-1,0), sample(0,height-1), sample(width-1,height-1)]
+        const bg = [0,1,2].map(c => Math.round(corners.reduce((sum,p)=>sum+p[c],0)/4))
+        const tolerance = 38
+        const similar = (x, y) => {
+          const i = (y * width + x) * 4
+          const dr = data[i]-bg[0], dg=data[i+1]-bg[1], db=data[i+2]-bg[2]
+          return Math.sqrt(dr*dr + dg*dg + db*db) <= tolerance
+        }
+
+        // Flood-fill only pixels connected to an outside edge. This avoids
+        // deleting white/grey details enclosed inside a club crest.
+        const seen = new Uint8Array(width * height)
+        const queue = []
+        let head = 0
+        const add = (x,y) => {
+          const n = y * width + x
+          if (!seen[n] && similar(x,y)) { seen[n] = 1; queue.push([x,y]) }
+        }
+        for (let x=0; x<width; x++) { add(x,0); add(x,height-1) }
+        for (let y=0; y<height; y++) { add(0,y); add(width-1,y) }
+
+        while (head < queue.length) {
+          const [x,y] = queue[head++]
+          const i = (y * width + x) * 4
+          data[i+3] = 0
+          if (x>0) add(x-1,y)
+          if (x<width-1) add(x+1,y)
+          if (y>0) add(x,y-1)
+          if (y<height-1) add(x,y+1)
+        }
+
+        ctx.putImageData(imgData, 0, 0)
+        update('oppositionCrest', canvas.toDataURL('image/png'))
+      }
+      image.src = reader.result
+    }
     reader.readAsDataURL(file)
   }
   return <main className="setup-page"><section className="setup-card">

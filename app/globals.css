@@ -99,3 +99,36 @@ button:hover { filter: brightness(1.08); }
 .crest-preview-card small,.date-preview { color:var(--muted); font-size:.72rem; }
 .date-preview { padding-left:2px; }
 @media(max-width:600px){.team-setup-row{grid-template-columns:1fr 1fr;gap:10px}.crest-preview-card{padding:12px;min-height:165px}.crest-preview-card img,.crest-placeholder{width:72px;height:72px}}
+
+/* V2.2 crest sizing */
+.crest-preview-card {
+  min-height: 300px;
+}
+.crest-preview-card img {
+  width: min(210px, 72%);
+  height: 210px;
+  object-fit: contain;
+  background: transparent;
+}
+.team-crest {
+  width: 150px;
+  height: 150px;
+  object-fit: contain;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+}
+.crest-small {
+  width: 58px;
+  height: 58px;
+  object-fit: contain;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+}
+@media(max-width:600px){
+  .crest-preview-card { min-height: 230px; }
+  .crest-preview-card img { width: min(150px, 78%); height: 150px; }
+  .team-crest { width: 105px; height: 105px; }
+  .crest-small { width: 48px; height: 48px; }
+}

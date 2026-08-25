@@ -3,10 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
 const emptyTeam = { goals: 0, points: 0 }
+const defaultSetup = { opposition: '', competition: '', venue: '', date: '', throwIn: '', halfLength: '30', sohSide: 'home' }
 
 export default function Home() {
-  const [homeName, setHomeName] = useState('SOH')
-  const [awayName, setAwayName] = useState('Opposition')
+  const [setup, setSetup] = useState(defaultSetup)
+  const [setupComplete, setSetupComplete] = useState(false)
   const [home, setHome] = useState(emptyTeam)
   const [away, setAway] = useState(emptyTeam)
   const [seconds, setSeconds] = useState(0)
@@ -16,138 +17,93 @@ export default function Home() {
   const intervalRef = useRef(null)
 
   useEffect(() => {
-    const saved = localStorage.getItem('soh-scoreboard-state')
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved)
-        setHomeName(parsed.homeName ?? 'SOH')
-        setAwayName(parsed.awayName ?? 'Opposition')
-        setHome(parsed.home ?? emptyTeam)
-        setAway(parsed.away ?? emptyTeam)
-        setSeconds(parsed.seconds ?? 0)
-        setPeriod(parsed.period ?? 'PRE-MATCH')
-      } catch {}
-    }
+    const saved = localStorage.getItem('soh-match-centre-v2')
+    if (!saved) return
+    try {
+      const p = JSON.parse(saved)
+      setSetup(p.setup ?? defaultSetup); setSetupComplete(p.setupComplete ?? false)
+      setHome(p.home ?? emptyTeam); setAway(p.away ?? emptyTeam)
+      setSeconds(p.seconds ?? 0); setPeriod(p.period ?? 'PRE-MATCH')
+    } catch {}
   }, [])
 
   useEffect(() => {
-    localStorage.setItem('soh-scoreboard-state', JSON.stringify({ homeName, awayName, home, away, seconds, period }))
-  }, [homeName, awayName, home, away, seconds, period])
+    localStorage.setItem('soh-match-centre-v2', JSON.stringify({ setup, setupComplete, home, away, seconds, period }))
+  }, [setup, setupComplete, home, away, seconds, period])
 
   useEffect(() => {
     if (!running) return
-    intervalRef.current = setInterval(() => setSeconds((s) => s + 1), 1000)
+    intervalRef.current = setInterval(() => setSeconds(s => s + 1), 1000)
     return () => clearInterval(intervalRef.current)
   }, [running])
 
-  const total = (team) => team.goals * 3 + team.points
-  const clock = useMemo(() => {
-    const mins = Math.floor(seconds / 60)
-    const secs = seconds % 60
-    return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
-  }, [seconds])
+  const clock = useMemo(() => `${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`, [seconds])
+  const total = t => t.goals * 3 + t.points
+  const sohIsHome = setup.sohSide === 'home'
+  const homeName = sohIsHome ? 'SOH' : (setup.opposition || 'Opposition')
+  const awayName = sohIsHome ? (setup.opposition || 'Opposition') : 'SOH'
 
   function changeScore(side, type, delta) {
     const setter = side === 'home' ? setHome : setAway
-    setter((prev) => ({ ...prev, [type]: Math.max(0, prev[type] + delta) }))
+    setter(prev => ({ ...prev, [type]: Math.max(0, prev[type] + delta) }))
+  }
+  function startMatch(){ if(period==='PRE-MATCH') setPeriod('FIRST HALF'); setRunning(true) }
+  function halfTime(){ setRunning(false); setPeriod('HALF TIME') }
+  function secondHalf(){ setPeriod('SECOND HALF'); setRunning(true) }
+  function fullTime(){ setRunning(false); setPeriod('FULL TIME') }
+  function resetMatch(){
+    if(!window.confirm('Reset this match and return to match setup?')) return
+    setHome(emptyTeam); setAway(emptyTeam); setSeconds(0); setRunning(false); setPeriod('PRE-MATCH'); setSetupComplete(false); setDisplayMode(false)
   }
 
-  function startMatch() {
-    if (period === 'PRE-MATCH') setPeriod('FIRST HALF')
-    setRunning(true)
-  }
+  if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} onStart={() => setup.opposition.trim() && setSetupComplete(true)} />
 
-  function halfTime() {
-    setRunning(false)
-    setPeriod('HALF TIME')
-  }
-
-  function secondHalf() {
-    setPeriod('SECOND HALF')
-    setRunning(true)
-  }
-
-  function fullTime() {
-    setRunning(false)
-    setPeriod('FULL TIME')
-  }
-
-  function resetMatch() {
-    if (!window.confirm('Reset the entire match?')) return
-    setHome(emptyTeam)
-    setAway(emptyTeam)
-    setSeconds(0)
-    setRunning(false)
-    setPeriod('PRE-MATCH')
-  }
-
-  return (
-    <main className={displayMode ? 'display-page' : ''}>
-      <section className="scoreboard-card">
-        <div className="topbar">
-          <div className="brand-mark">SOH</div>
-          <div className="match-status">{period}</div>
-          <div className="clock">{clock}</div>
-        </div>
-
-        <div className="teams">
-          <TeamPanel name={homeName} setName={setHomeName} team={home} total={total(home)} locked={displayMode} />
-          <div className="divider">V</div>
-          <TeamPanel name={awayName} setName={setAwayName} team={away} total={total(away)} locked={displayMode} />
-        </div>
-
-        {!displayMode && (
-          <div className="admin-grid">
-            <ScoreControls label={homeName} onChange={(type, delta) => changeScore('home', type, delta)} />
-            <ScoreControls label={awayName} onChange={(type, delta) => changeScore('away', type, delta)} />
-          </div>
-        )}
-
-        {!displayMode && (
-          <div className="match-controls">
-            <button onClick={startMatch} className="primary">{running ? 'Running' : period === 'PRE-MATCH' ? 'Start Match' : 'Resume'}</button>
-            <button onClick={() => setRunning(false)}>Pause</button>
-            <button onClick={halfTime}>Half Time</button>
-            <button onClick={secondHalf}>Start 2nd Half</button>
-            <button onClick={fullTime}>Full Time</button>
-            <button onClick={resetMatch} className="danger">Reset</button>
-          </div>
-        )}
-
-        <button className="display-toggle" onClick={() => setDisplayMode((v) => !v)}>
-          {displayMode ? 'Exit Display Mode' : 'Open Display Mode'}
-        </button>
-      </section>
-    </main>
-  )
-}
-
-function TeamPanel({ name, setName, team, total, locked }) {
-  return (
-    <div className="team-panel">
-      {locked ? (
-        <h2>{name}</h2>
-      ) : (
-        <input className="team-name" value={name} onChange={(e) => setName(e.target.value)} aria-label="Team name" />
-      )}
-      <div className="gaa-score">{team.goals}-{String(team.points).padStart(2, '0')}</div>
-      <div className="points-total">{total} pts</div>
-    </div>
-  )
-}
-
-function ScoreControls({ label, onChange }) {
-  return (
-    <div className="control-card">
-      <h3>{label}</h3>
-      <div className="button-row">
-        <button className="score-btn goal" onClick={() => onChange('goals', 1)}>+ Goal</button>
-        <button className="score-btn point" onClick={() => onChange('points', 1)}>+ Point</button>
+  return <main className={displayMode ? 'display-page' : ''}>
+    <section className="scoreboard-card">
+      <div className="topbar">
+        <img className="crest-small" src="/soh-crest.png" alt="SOH crest" />
+        <div className="match-status"><strong>{period}</strong><span>{setup.competition || 'SOH MATCH CENTRE'}</span></div>
+        <div className="clock">{clock}</div>
       </div>
-      <div className="button-row compact">
-        <button onClick={() => onChange('goals', -1)}>- Goal</button>
-        <button onClick={() => onChange('points', -1)}>- Point</button>
+      {(setup.venue || setup.date || setup.throwIn) && <div className="match-meta">{[setup.venue, setup.date, setup.throwIn && `${setup.throwIn} throw-in`].filter(Boolean).join(' • ')}</div>}
+      <div className="teams">
+        <TeamPanel name={homeName} team={home} total={total(home)} soh={homeName==='SOH'} />
+        <div className="divider">V</div>
+        <TeamPanel name={awayName} team={away} total={total(away)} soh={awayName==='SOH'} />
       </div>
-    </div>
-  )
+      {!displayMode && <>
+        <div className="admin-grid">
+          <ScoreControls label={homeName} onChange={(t,d)=>changeScore('home',t,d)} />
+          <ScoreControls label={awayName} onChange={(t,d)=>changeScore('away',t,d)} />
+        </div>
+        <div className="match-controls">
+          <button onClick={startMatch} className="primary">{running?'Running':period==='PRE-MATCH'?'Start Match':'Resume'}</button>
+          <button onClick={()=>setRunning(false)}>Pause</button><button onClick={halfTime}>Half Time</button>
+          <button onClick={secondHalf}>Start 2nd Half</button><button onClick={fullTime}>Full Time</button><button onClick={resetMatch} className="danger">Reset</button>
+        </div>
+      </>}
+      <button className="display-toggle" onClick={()=>setDisplayMode(v=>!v)}>{displayMode?'Exit Display Mode':'Open Display Mode'}</button>
+    </section>
+  </main>
 }
+
+function Setup({setup,setSetup,onStart}){
+  const update = (key,value) => setSetup(s=>({...s,[key]:value}))
+  return <main className="setup-page"><section className="setup-card">
+    <div className="setup-brand"><img src="/soh-crest.png" alt="SOH crest"/><div><p>SEÁN O'HESLIN'S GAA</p><h1>Match Centre</h1></div></div>
+    <div className="setup-heading"><span>NEW MATCH</span><h2>Match Setup</h2><p>Enter the match details before throw-in.</p></div>
+    <div className="form-grid">
+      <label className="field"><span>Opposition *</span><input autoFocus placeholder="e.g. Mohill" value={setup.opposition} onChange={e=>update('opposition',e.target.value)}/></label>
+      <label className="field"><span>Competition</span><input placeholder="e.g. Senior Championship" value={setup.competition} onChange={e=>update('competition',e.target.value)}/></label>
+      <label className="field full"><span>Venue</span><input placeholder="e.g. Pairc Sheáin Uí Eislin" value={setup.venue} onChange={e=>update('venue',e.target.value)}/></label>
+      <label className="field"><span>Date</span><input type="date" value={setup.date} onChange={e=>update('date',e.target.value)}/></label>
+      <label className="field"><span>Throw-in</span><input type="time" value={setup.throwIn} onChange={e=>update('throwIn',e.target.value)}/></label>
+      <label className="field"><span>Half Length</span><select value={setup.halfLength} onChange={e=>update('halfLength',e.target.value)}><option value="30">30 minutes</option><option value="35">35 minutes</option><option value="20">20 minutes</option></select></label>
+      <div className="field"><span>SOH Playing</span><div className="side-picker"><button className={setup.sohSide==='home'?'selected':''} onClick={()=>update('sohSide','home')}>Home</button><button className={setup.sohSide==='away'?'selected':''} onClick={()=>update('sohSide','away')}>Away</button></div></div>
+    </div>
+    <button className="start-setup" disabled={!setup.opposition.trim()} onClick={onStart}>Continue to Scoreboard →</button>
+  </section></main>
+}
+
+function TeamPanel({name,team,total,soh}){return <div className="team-panel">{soh&&<img className="team-crest" src="/soh-crest.png" alt="SOH crest"/>}<h2>{name}</h2><div className="gaa-score">{team.goals}-{String(team.points).padStart(2,'0')}</div><div className="points-total">{total} pts</div></div>}
+function ScoreControls({label,onChange}){return <div className="control-card"><h3>{label}</h3><div className="button-row"><button className="score-btn goal" onClick={()=>onChange('goals',1)}>+ Goal</button><button className="score-btn point" onClick={()=>onChange('points',1)}>+ Point</button></div><div className="button-row compact"><button onClick={()=>onChange('goals',-1)}>- Goal</button><button onClick={()=>onChange('points',-1)}>- Point</button></div></div>}

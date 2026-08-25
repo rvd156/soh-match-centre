@@ -31,6 +31,7 @@ const [oppositionPlayers, setOppositionPlayers] = useState([])
 const [playersLoading, setPlayersLoading] = useState(false)
 const [playersError, setPlayersError] = useState('')
 const [scorerPicker, setScorerPicker] = useState(null)
+const [matchId, setMatchId] = useState(null)
   
   const intervalRef = useRef(null)
 
@@ -154,13 +155,53 @@ useEffect(() => {
     teamName: side === 'home' ? homeName : awayName
   })
 }
-  function startMatch(){ if(period==='PRE-MATCH') setPeriod('FIRST HALF'); setRunning(true) }
+  async function startMatch() {
+  if (period === 'PRE-MATCH' && !matchId) {
+    const homeTeamId =
+      setup.sohSide === 'home' ? 1 : Number(setup.oppositionTeamId)
+
+    const awayTeamId =
+      setup.sohSide === 'away' ? 1 : Number(setup.oppositionTeamId)
+
+    const { data, error } = await supabase
+      .from('matches')
+      .insert({
+        home_team_id: homeTeamId,
+        away_team_id: awayTeamId,
+        competition: setup.competition || null,
+        venue: setup.venue || null,
+        match_date: setup.date || null,
+        throw_in: setup.throwIn || null,
+        half_length: Number(setup.halfLength),
+        status: 'FIRST HALF',
+        home_goals: 0,
+        home_points: 0,
+        away_goals: 0,
+        away_points: 0,
+        clock_seconds: 0
+      })
+      .select('id')
+      .single()
+
+    if (error) {
+      console.error('Error creating match:', error)
+      alert('Could not create match in database.')
+      return
+    }
+
+    console.log('MATCH CREATED:', data)
+    setMatchId(data.id)
+  }
+
+  if (period === 'PRE-MATCH') setPeriod('FIRST HALF')
+  setRunning(true)
+}
   function halfTime(){ setRunning(false); setPeriod('HALF TIME') }
   function secondHalf(){ setPeriod('SECOND HALF'); setRunning(true) }
   function fullTime(){ setRunning(false); setPeriod('FULL TIME') }
   function resetMatch(){
     if(!window.confirm('Reset this match and return to match setup?')) return
-    setHome(emptyTeam); setAway(emptyTeam); setSeconds(0); setRunning(false); setPeriod('PRE-MATCH'); setSetupComplete(false); setDisplayMode(false)
+    setHome(emptyTeam); setAway(emptyTeam); setSeconds(0); setRunning(false); setPeriod('PRE-MATCH'); setSetupComplete(false); setDisplayMode(false); setMatchId(null)
   }
 
   if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} onStart={() => setup.opposition.trim() && setSetupComplete(true)} />

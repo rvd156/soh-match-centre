@@ -25,6 +25,12 @@ export default function Home() {
   const [teams, setTeams] = useState([])
 const [teamsLoading, setTeamsLoading] = useState(true)
 const [teamsError, setTeamsError] = useState('')
+
+const [sohPlayers, setSohPlayers] = useState([])
+const [oppositionPlayers, setOppositionPlayers] = useState([])
+const [playersLoading, setPlayersLoading] = useState(false)
+const [playersError, setPlayersError] = useState('')
+  
   const intervalRef = useRef(null)
 
   useEffect(() => {
@@ -51,6 +57,47 @@ const [teamsError, setTeamsError] = useState('')
   }
 
   loadTeams()
+
+useEffect(() => {
+  async function loadPlayers() {
+    if (!setup.oppositionTeamId) {
+      setSohPlayers([])
+      setOppositionPlayers([])
+      return
+    }
+
+    setPlayersLoading(true)
+    setPlayersError('')
+
+    const { data, error } = await supabase
+      .from('players')
+      .select('id, team_id, name, jersey_number, position, active')
+      .eq('active', true)
+      .in('team_id', [1, Number(setup.oppositionTeamId)])
+      .order('name')
+
+    if (error) {
+      console.error('Error loading players:', error)
+      setPlayersError('Could not load players')
+      setPlayersLoading(false)
+      return
+    }
+
+    const players = data ?? []
+
+    setSohPlayers(players.filter(player => Number(player.team_id) === 1))
+    setOppositionPlayers(
+      players.filter(
+        player => Number(player.team_id) === Number(setup.oppositionTeamId)
+      )
+    )
+
+    setPlayersLoading(false)
+  }
+
+  loadPlayers()
+}, [setup.oppositionTeamId])
+    
 }, [])
   useEffect(() => {
     const saved = localStorage.getItem('soh-match-centre-v2-1')

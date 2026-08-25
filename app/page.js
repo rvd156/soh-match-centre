@@ -264,8 +264,8 @@ const { error } = await supabase
     match_id: matchId,
     team_id: player.team_id,
     player_id: player.id,
-    event_type: 'score',
-    score_type: scorerPicker.type === 'goals' ? 'goal' : 'point',
+    event_type: scorerPicker.type === 'goals' ? 'goal' : 'point',
+score_type: 'play',
     match_minute: Math.floor(seconds / 60),
     clock_seconds: seconds
   })

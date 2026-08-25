@@ -30,6 +30,7 @@ const [sohPlayers, setSohPlayers] = useState([])
 const [oppositionPlayers, setOppositionPlayers] = useState([])
 const [playersLoading, setPlayersLoading] = useState(false)
 const [playersError, setPlayersError] = useState('')
+const [scorerPicker, setScorerPicker] = useState(null)
   
   const intervalRef = useRef(null)
 
@@ -135,6 +136,21 @@ useEffect(() => {
     const setter = side === 'home' ? setHome : setAway
     setter(prev => ({ ...prev, [type]: Math.max(0, prev[type] + delta) }))
   }
+
+  function requestScore(side, type) {
+  const isSoh =
+    (side === 'home' && setup.sohSide === 'home') ||
+    (side === 'away' && setup.sohSide === 'away')
+
+  const players = isSoh ? sohPlayers : oppositionPlayers
+
+  setScorerPicker({
+    side,
+    type,
+    players,
+    teamName: side === 'home' ? homeName : awayName
+  })
+}
   function startMatch(){ if(period==='PRE-MATCH') setPeriod('FIRST HALF'); setRunning(true) }
   function halfTime(){ setRunning(false); setPeriod('HALF TIME') }
   function secondHalf(){ setPeriod('SECOND HALF'); setRunning(true) }
@@ -160,8 +176,15 @@ useEffect(() => {
       </div>
       {!displayMode && <>
         <div className="admin-grid">
-          <ScoreControls label={homeName} onChange={(t,d)=>changeScore('home',t,d)} />
-          <ScoreControls label={awayName} onChange={(t,d)=>changeScore('away',t,d)} />
+          <ScoreControls
+  label={homeName}
+  onChange={(t, d) => d > 0 ? requestScore('home', t) : changeScore('home', t, d)}
+/>
+
+<ScoreControls
+  label={awayName}
+  onChange={(t, d) => d > 0 ? requestScore('away', t) : changeScore('away', t, d)}
+/>
         </div>
         <div className="match-controls">
           <button onClick={startMatch} className="primary">{running?'Running':period==='PRE-MATCH'?'Start Match':'Resume'}</button>
@@ -171,6 +194,40 @@ useEffect(() => {
       </>}
       <button className="display-toggle" onClick={()=>setDisplayMode(v=>!v)}>{displayMode?'Exit Display Mode':'Open Display Mode'}</button>
     </section>
+  {scorerPicker && (
+  <div className="scorer-picker">
+    <div className="scorer-picker-card">
+      <h2>
+        {scorerPicker.type === 'goals' ? 'Goal Scorer' : 'Point Scorer'}
+      </h2>
+
+      <p>{scorerPicker.teamName}</p>
+
+      <select
+        defaultValue=""
+        onChange={(e) => {
+          if (!e.target.value) return
+
+          changeScore(scorerPicker.side, scorerPicker.type, 1)
+          setScorerPicker(null)
+        }}
+      >
+        <option value="" disabled>Select player</option>
+
+        {scorerPicker.players.map(player => (
+          <option key={player.id} value={player.id}>
+            {player.jersey_number ? `${player.jersey_number}. ` : ''}
+            {player.name}
+          </option>
+        ))}
+      </select>
+
+      <button onClick={() => setScorerPicker(null)}>
+        Cancel
+      </button>
+    </div>
+  </div>
+)}
   </main>
 }
 

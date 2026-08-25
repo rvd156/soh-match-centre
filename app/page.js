@@ -173,7 +173,7 @@ useEffect(() => {
         match_date: setup.date || null,
         throw_in: setup.throwIn || null,
         half_length: Number(setup.halfLength),
-        status: 'FIRST HALF',
+        status: 'first_half',
         home_goals: 0,
         home_points: 0,
         away_goals: 0,

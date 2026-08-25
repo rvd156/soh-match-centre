@@ -1,5 +1,8 @@
-# SOH Match Centre V2
+# SOH Match Centre V2.1
 
-V2 adds the official SOH crest and a pre-match setup screen for opposition, competition, venue, date, throw-in time, half length, and home/away selection.
-
-Deploy on Vercel as a Next.js app. No environment variables are required.
+Updates:
+- Irish-style displayed date, e.g. Saturday, 29 August 2026
+- SOH crest has a transparent outer background
+- Opposition crest can be uploaded directly on the New Match screen
+- Opposition crest appears on the scoreboard and respects Home/Away selection
+- Uploaded crest is saved locally in the browser with the current match

@@ -1,0 +1,59 @@
+:root {
+  --bg: #0a0f0d;
+  --card: #101915;
+  --panel: #15221c;
+  --green: #22a45a;
+  --green-dark: #11713b;
+  --text: #f7f7f2;
+  --muted: #aab7af;
+  --danger: #b93c3c;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: radial-gradient(circle at top, #183127 0%, var(--bg) 55%); color: var(--text); min-height: 100vh; }
+button, input { font: inherit; }
+button { cursor: pointer; }
+main { min-height: 100vh; padding: 24px; display: grid; place-items: center; }
+.scoreboard-card { width: min(980px, 100%); background: rgba(16,25,21,.96); border: 1px solid rgba(255,255,255,.08); border-radius: 26px; padding: 22px; box-shadow: 0 24px 80px rgba(0,0,0,.35); }
+.topbar { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: center; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,.08); }
+.brand-mark { width: 58px; height: 58px; border-radius: 50%; background: var(--green); display: grid; place-items: center; font-weight: 900; letter-spacing: .5px; }
+.match-status { font-weight: 800; letter-spacing: 1.5px; color: var(--muted); text-align: center; }
+.clock { justify-self: end; font-size: 2rem; font-weight: 900; font-variant-numeric: tabular-nums; }
+.teams { display: grid; grid-template-columns: 1fr auto 1fr; gap: 18px; align-items: center; padding: 32px 0; }
+.team-panel { text-align: center; min-width: 0; }
+.team-panel h2 { margin: 0 0 12px; font-size: clamp(1.6rem, 5vw, 2.4rem); }
+.team-name { width: 100%; border: 0; outline: none; background: transparent; color: white; text-align: center; font-size: clamp(1.4rem, 4vw, 2rem); font-weight: 800; padding: 8px; border-bottom: 1px solid rgba(255,255,255,.12); }
+.gaa-score { font-size: clamp(3.2rem, 10vw, 6.5rem); line-height: .95; font-weight: 950; letter-spacing: -4px; margin-top: 14px; }
+.points-total { margin-top: 10px; color: var(--muted); font-weight: 700; }
+.divider { font-size: 1.4rem; color: var(--muted); font-weight: 900; }
+.admin-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.control-card { background: var(--panel); border-radius: 18px; padding: 18px; }
+.control-card h3 { margin: 0 0 14px; text-align: center; }
+.button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.button-row.compact { margin-top: 10px; }
+button { border: 0; border-radius: 12px; padding: 14px 16px; background: #23332b; color: white; font-weight: 800; }
+button:hover { filter: brightness(1.08); }
+.score-btn { font-size: 1.05rem; }
+.goal, .primary { background: var(--green); }
+.point { background: var(--green-dark); }
+.match-controls { margin-top: 18px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.danger { background: var(--danger); }
+.display-toggle { width: 100%; margin-top: 16px; background: transparent; border: 1px solid rgba(255,255,255,.15); }
+.display-page { padding: 0; }
+.display-page .scoreboard-card { width: 100%; min-height: 100vh; border-radius: 0; display: flex; flex-direction: column; justify-content: center; }
+.display-page .topbar { position: absolute; top: 20px; left: 24px; right: 24px; }
+.display-page .teams { padding: 80px 20px 20px; }
+.display-page .gaa-score { font-size: clamp(5rem, 16vw, 12rem); }
+.display-page .display-toggle { position: fixed; bottom: 18px; right: 18px; width: auto; opacity: .25; }
+
+@media (max-width: 760px) {
+  main { padding: 10px; }
+  .scoreboard-card { border-radius: 18px; padding: 16px; }
+  .topbar { grid-template-columns: auto 1fr auto; }
+  .brand-mark { width: 44px; height: 44px; }
+  .clock { font-size: 1.4rem; }
+  .match-status { font-size: .75rem; }
+  .teams { gap: 8px; padding: 24px 0; }
+  .admin-grid { grid-template-columns: 1fr; }
+  .match-controls { grid-template-columns: 1fr 1fr; }
+}

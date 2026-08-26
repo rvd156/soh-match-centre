@@ -276,6 +276,9 @@ setRunning(true)
 }
 
 async function secondHalf() {
+  const secondHalfStart = Number(setup.halfLength) * 60
+
+  setSeconds(secondHalfStart)
   setPeriod('SECOND HALF')
   setRunning(true)
 
@@ -283,9 +286,10 @@ async function secondHalf() {
     const { error } = await supabase
       .from('matches')
       .update({
-  status: 'second_half',
-  clock_started_at: new Date().toISOString()
-})
+        status: 'second_half',
+        clock_seconds: secondHalfStart,
+        clock_started_at: new Date().toISOString()
+      })
       .eq('id', matchId)
 
     if (error) console.error('Error updating match status:', error)

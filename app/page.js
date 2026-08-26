@@ -217,9 +217,47 @@ useEffect(() => {
   if (period === 'PRE-MATCH') setPeriod('FIRST HALF')
   setRunning(true)
 }
-  function halfTime(){ setRunning(false); setPeriod('HALF TIME') }
-  function secondHalf(){ setPeriod('SECOND HALF'); setRunning(true) }
-  function fullTime(){ setRunning(false); setPeriod('FULL TIME') }
+  async function halfTime() {
+  setRunning(false)
+  setPeriod('HALF TIME')
+
+  if (matchId) {
+    const { error } = await supabase
+      .from('matches')
+      .update({ status: 'half_time' })
+      .eq('id', matchId)
+
+    if (error) console.error('Error updating match status:', error)
+  }
+}
+
+async function secondHalf() {
+  setPeriod('SECOND HALF')
+  setRunning(true)
+
+  if (matchId) {
+    const { error } = await supabase
+      .from('matches')
+      .update({ status: 'second_half' })
+      .eq('id', matchId)
+
+    if (error) console.error('Error updating match status:', error)
+  }
+}
+
+async function fullTime() {
+  setRunning(false)
+  setPeriod('FULL TIME')
+
+  if (matchId) {
+    const { error } = await supabase
+      .from('matches')
+      .update({ status: 'full_time' })
+      .eq('id', matchId)
+
+    if (error) console.error('Error updating match status:', error)
+  }
+}
   function resetMatch(){
     if(!window.confirm('Reset this match and return to match setup?')) return
     setHome(emptyTeam); setAway(emptyTeam); setSeconds(0); setRunning(false); setPeriod('PRE-MATCH'); setSetupComplete(false); setDisplayMode(false); setMatchId(null)

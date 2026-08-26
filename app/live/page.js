@@ -8,6 +8,7 @@ export default function LiveMatchPage() {
   const [homeTeam, setHomeTeam] = useState(null)
   const [awayTeam, setAwayTeam] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [liveSeconds, setLiveSeconds] = useState(0)
 
   async function loadLatestMatch() {
     const { data: matchData, error: matchError } = await supabase
@@ -35,6 +36,7 @@ export default function LiveMatchPage() {
     }
 
     setMatch(matchData)
+    setLiveSeconds(matchData.clock_seconds || 0)
     setHomeTeam(teams.find(team => team.id === matchData.home_team_id))
     setAwayTeam(teams.find(team => team.id === matchData.away_team_id))
     setLoading(false)

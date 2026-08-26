@@ -137,9 +137,30 @@ useEffect(() => {
   const awayCrest = sohIsHome ? setup.oppositionCrest : '/soh-crest.png'
 
   function changeScore(side, type, delta) {
-    const setter = side === 'home' ? setHome : setAway
-    setter(prev => ({ ...prev, [type]: Math.max(0, prev[type] + delta) }))
-  }
+  const setter = side === 'home' ? setHome : setAway
+
+  setter(prev => {
+    const newValue = Math.max(0, prev[type] + delta)
+
+    if (matchId) {
+      const column = `${side}_${type}`
+
+      supabase
+        .from('matches')
+        .update({ [column]: newValue })
+        .eq('id', matchId)
+        .then(({ error }) => {
+          if (error) {
+            console.error('Error updating match score:', error)
+          } else {
+            console.log('MATCH SCORE UPDATED:', column, newValue)
+          }
+        })
+    }
+
+    return { ...prev, [type]: newValue }
+  })
+}
 
   function requestScore(side, type) {
   const isSoh =

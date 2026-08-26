@@ -42,14 +42,8 @@ export default function LiveMatchPage() {
   }
 
   useEffect(() => {
-    loadLatestMatch()
-
-    const interval = setInterval(() => {
-      loadLatestMatch()
-    }, 5000)
-
-    return () => clearInterval(interval)
-  }, [])
+  loadLatestMatch()
+}, [])
   useEffect(() => {
   if (!match) return
 

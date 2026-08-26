@@ -50,7 +50,7 @@ export default function LiveMatchPage() {
     }, 5000)
 
     return () => clearInterval(interval)
-  }, []
+  }, [])
   useEffect(() => {
   if (!match) return
 

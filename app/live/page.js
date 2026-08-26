@@ -113,7 +113,7 @@ export default function LiveMatchPage() {
           </div>
 
           <div style={styles.clock}>
-            {formatClock(match.clock_seconds)}
+            {formatClock(liveSeconds)}
           </div>
         </div>
 

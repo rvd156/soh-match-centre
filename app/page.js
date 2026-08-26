@@ -127,7 +127,24 @@ useEffect(() => {
     intervalRef.current = setInterval(() => setSeconds(s => s + 1), 1000)
     return () => clearInterval(intervalRef.current)
   }, [running])
+  useEffect(() => {
+  if (!running || !matchId || seconds === 0 || seconds % 10 !== 0) return
 
+  const syncClock = async () => {
+    const { error } = await supabase
+      .from('matches')
+      .update({ clock_seconds: seconds })
+      .eq('id', matchId)
+
+    if (error) {
+      console.error('Error syncing match clock:', error)
+    } else {
+      console.log('MATCH CLOCK SYNCED:', seconds)
+    }
+  }
+
+  syncClock()
+}, [seconds, running, matchId])
   const clock = useMemo(() => `${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`, [seconds])
   const total = t => t.goals * 3 + t.points
   const sohIsHome = setup.sohSide === 'home'

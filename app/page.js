@@ -234,6 +234,18 @@ useEffect(() => {
   if (period === 'PRE-MATCH') setPeriod('FIRST HALF')
   setRunning(true)
 }
+  async function pauseMatch() {
+  setRunning(false)
+
+  if (matchId) {
+    const { error } = await supabase
+      .from('matches')
+      .update({ clock_seconds: seconds })
+      .eq('id', matchId)
+
+    if (error) console.error('Error saving paused match clock:', error)
+  }
+}
   async function halfTime() {
   setRunning(false)
   setPeriod('HALF TIME')
@@ -241,7 +253,10 @@ useEffect(() => {
   if (matchId) {
     const { error } = await supabase
       .from('matches')
-      .update({ status: 'half_time' })
+      .update({
+  status: 'half_time',
+  clock_seconds: seconds
+})
       .eq('id', matchId)
 
     if (error) console.error('Error updating match status:', error)
@@ -269,7 +284,10 @@ async function fullTime() {
   if (matchId) {
     const { error } = await supabase
       .from('matches')
-      .update({ status: 'full_time' })
+      .update({
+  status: 'full_time',
+  clock_seconds: seconds
+})
       .eq('id', matchId)
 
     if (error) console.error('Error updating match status:', error)
@@ -308,7 +326,7 @@ async function fullTime() {
         </div>
         <div className="match-controls">
           <button onClick={startMatch} className="primary">{running?'Running':period==='PRE-MATCH'?'Start Match':'Resume'}</button>
-          <button onClick={()=>setRunning(false)}>Pause</button><button onClick={halfTime}>Half Time</button>
+          <button onClick={pauseMatch}>Pause</button><button onClick={halfTime}>Half Time</button>
           <button onClick={secondHalf}>Start 2nd Half</button><button onClick={fullTime}>Full Time</button><button onClick={resetMatch} className="danger">Reset</button>
         </div>
       </>}

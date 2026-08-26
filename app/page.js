@@ -216,7 +216,8 @@ useEffect(() => {
         home_points: 0,
         away_goals: 0,
         away_points: 0,
-        clock_seconds: 0
+        clock_seconds: 0,
+        clock_started_at: new Date().toISOString()
       })
       .select('id')
       .single()
@@ -232,15 +233,30 @@ useEffect(() => {
   }
 
   if (period === 'PRE-MATCH') setPeriod('FIRST HALF')
-  setRunning(true)
+
+if (matchId) {
+  const { error } = await supabase
+    .from('matches')
+    .update({
+      clock_started_at: new Date().toISOString()
+    })
+    .eq('id', matchId)
+
+  if (error) console.error('Error resuming match clock:', error)
 }
-  async function pauseMatch() {
+
+setRunning(true)
+}
+ async function pauseMatch() {
   setRunning(false)
 
   if (matchId) {
     const { error } = await supabase
       .from('matches')
-      .update({ clock_seconds: seconds })
+      .update({
+        clock_seconds: seconds,
+        clock_started_at: null
+      })
       .eq('id', matchId)
 
     if (error) console.error('Error saving paused match clock:', error)
@@ -253,9 +269,10 @@ useEffect(() => {
   if (matchId) {
     const { error } = await supabase
       .from('matches')
-      .update({
+ .update({
   status: 'half_time',
-  clock_seconds: seconds
+  clock_seconds: seconds,
+  clock_started_at: null
 })
       .eq('id', matchId)
 
@@ -270,7 +287,10 @@ async function secondHalf() {
   if (matchId) {
     const { error } = await supabase
       .from('matches')
-      .update({ status: 'second_half' })
+      .update({
+  status: 'second_half',
+  clock_started_at: new Date().toISOString()
+})
       .eq('id', matchId)
 
     if (error) console.error('Error updating match status:', error)
@@ -284,9 +304,10 @@ async function fullTime() {
   if (matchId) {
     const { error } = await supabase
       .from('matches')
-      .update({
+.update({
   status: 'full_time',
-  clock_seconds: seconds
+  clock_seconds: seconds,
+  clock_started_at: null
 })
       .eq('id', matchId)
 

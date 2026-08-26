@@ -50,7 +50,25 @@ export default function LiveMatchPage() {
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, []
+  useEffect(() => {
+  if (!match) return
+
+  const isRunning =
+    match.status === 'first_half' ||
+    match.status === 'second_half'
+
+  if (!isRunning) {
+    setLiveSeconds(match.clock_seconds || 0)
+    return
+  }
+
+  const interval = setInterval(() => {
+    setLiveSeconds(current => current + 1)
+  }, 1000)
+
+  return () => clearInterval(interval)
+}, [match?.status])
 
   function formatClock(seconds = 0) {
     const mins = Math.floor(seconds / 60)

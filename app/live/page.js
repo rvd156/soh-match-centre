@@ -45,6 +45,30 @@ export default function LiveMatchPage() {
   loadLatestMatch()
 }, [])
   useEffect(() => {
+  if (!match?.id) return
+
+  const channel = supabase
+    .channel(`live-match-${match.id}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'matches',
+        filter: `id=eq.${match.id}`
+      },
+      payload => {
+        console.log('LIVE MATCH UPDATE:', payload.new)
+        setMatch(payload.new)
+      }
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
+  }
+}, [match?.id])
+  useEffect(() => {
   if (!match) return
 
   const updateLiveClock = () => {

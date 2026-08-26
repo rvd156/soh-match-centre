@@ -54,21 +54,29 @@ export default function LiveMatchPage() {
   useEffect(() => {
   if (!match) return
 
-  const isRunning =
-    match.status === 'first_half' ||
-    match.status === 'second_half'
+  const updateLiveClock = () => {
+    const baseSeconds = match.clock_seconds || 0
 
-  if (!isRunning) {
-    setLiveSeconds(match.clock_seconds || 0)
-    return
+    if (!match.clock_started_at) {
+      setLiveSeconds(baseSeconds)
+      return
+    }
+
+    const startedAt = new Date(match.clock_started_at).getTime()
+    const elapsed = Math.max(
+      0,
+      Math.floor((Date.now() - startedAt) / 1000)
+    )
+
+    setLiveSeconds(baseSeconds + elapsed)
   }
 
-  const interval = setInterval(() => {
-    setLiveSeconds(current => current + 1)
-  }, 1000)
+  updateLiveClock()
+
+  const interval = setInterval(updateLiveClock, 1000)
 
   return () => clearInterval(interval)
-}, [match?.status])
+}, [match?.clock_seconds, match?.clock_started_at])
 
   function formatClock(seconds = 0) {
     const mins = Math.floor(seconds / 60)

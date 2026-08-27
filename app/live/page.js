@@ -71,29 +71,43 @@ export default function LiveMatchPage() {
   useEffect(() => {
   if (!match) return
 
-  const updateLiveClock = () => {
-    const baseSeconds = match.clock_seconds || 0
+ const updateLiveClock = () => {
+  const isExtraTime = match.status === 'extra_time'
 
-    if (!match.clock_started_at) {
-      setLiveSeconds(baseSeconds)
-      return
-    }
+  const baseSeconds = isExtraTime
+    ? (match.extra_time_seconds || 0)
+    : (match.clock_seconds || 0)
 
-    const startedAt = new Date(match.clock_started_at).getTime()
-    const elapsed = Math.max(
-      0,
-      Math.floor((Date.now() - startedAt) / 1000)
-    )
+  const clockStartedAt = isExtraTime
+    ? match.extra_time_started_at
+    : match.clock_started_at
 
-    setLiveSeconds(baseSeconds + elapsed)
+  if (!clockStartedAt) {
+    setLiveSeconds(baseSeconds)
+    return
   }
 
+  const startedAt = new Date(clockStartedAt).getTime()
+
+  const elapsed = Math.max(
+    0,
+    Math.floor((Date.now() - startedAt) / 1000)
+  )
+
+  setLiveSeconds(baseSeconds + elapsed)
+}
   updateLiveClock()
 
   const interval = setInterval(updateLiveClock, 1000)
 
   return () => clearInterval(interval)
-}, [match?.clock_seconds, match?.clock_started_at])
+}, [
+  match?.status,
+  match?.clock_seconds,
+  match?.clock_started_at,
+  match?.extra_time_seconds,
+  match?.extra_time_started_at
+])
 
   function formatClock(seconds = 0) {
     const mins = Math.floor(seconds / 60)

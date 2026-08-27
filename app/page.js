@@ -389,6 +389,68 @@ setRunning(true)
   }
 
 }
+  async function extraTimeHalfTime() {
+  setRunning(false)
+  setPeriod('ET HALF TIME')
+
+  if (matchId) {
+    const { error } = await supabase
+      .from('matches')
+      .update({
+        status: 'extra_time_half_time',
+        extra_time_seconds: extraTimeSeconds,
+        extra_time_started_at: null
+      })
+      .eq('id', matchId)
+
+    if (error) {
+      console.error('Error setting ET half time:', error)
+    }
+  }
+}
+
+async function secondHalfExtraTime() {
+  const secondExtraTimeStart = 10 * 60
+
+  setExtraTimeSeconds(secondExtraTimeStart)
+  setPeriod('EXTRA TIME 2ND HALF')
+  setRunning(true)
+
+  if (matchId) {
+    const { error } = await supabase
+      .from('matches')
+      .update({
+        status: 'extra_time_second_half',
+        extra_time_seconds: secondExtraTimeStart,
+        extra_time_started_at: new Date().toISOString()
+      })
+      .eq('id', matchId)
+
+    if (error) {
+      console.error('Error starting ET second half:', error)
+    }
+  }
+}
+
+async function extraTimeFullTime() {
+  setRunning(false)
+  setPeriod('AET')
+
+  if (matchId) {
+    const { error } = await supabase
+      .from('matches')
+      .update({
+        status: 'after_extra_time',
+        extra_time_seconds: extraTimeSeconds,
+        extra_time_started_at: null
+      })
+      .eq('id', matchId)
+
+    if (error) {
+      console.error('Error ending extra time:', error)
+    }
+  }
+}
   function resetMatch(){
     if(!window.confirm('Reset this match and return to match setup?')) return
     setHome(emptyTeam); setAway(emptyTeam); setSeconds(0); setRunning(false); setPeriod('PRE-MATCH'); setSetupComplete(false); setDisplayMode(false); setMatchId(null)
@@ -426,6 +488,9 @@ setRunning(true)
           <button onClick={secondHalf}>Start 2nd Half</button>
 <button onClick={fullTime}>Full Time</button>
 <button onClick={startExtraTime}>Start Extra Time</button>
+<button onClick={extraTimeHalfTime}>ET Half Time</button>
+<button onClick={secondHalfExtraTime}>Start ET 2nd Half</button>
+<button onClick={extraTimeFullTime}>ET Full Time</button>
 <button onClick={resetMatch} className="danger">Reset</button>
         </div>
       </>}

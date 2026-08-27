@@ -43,7 +43,7 @@ const [matchId, setMatchId] = useState(null)
 
     const { data, error } = await supabase
       .from('teams')
-      .select('id, name, short_name')
+      .select('id, name, short_name, crest_url')
       .eq('active', true)
       .neq('id', 1)
       .order('name')

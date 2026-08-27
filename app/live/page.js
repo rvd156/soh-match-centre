@@ -89,7 +89,9 @@ export default function LiveMatchPage() {
   loadUpcomingFixture()
 }
     )
-    .subscribe()
+    .subscribe(status => {
+  console.log('UPCOMING FIXTURE SUBSCRIPTION:', status)
+})
 
   return () => {
     supabase.removeChannel(channel)

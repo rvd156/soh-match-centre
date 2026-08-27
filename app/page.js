@@ -496,10 +496,35 @@ if (deactivateError) {
 
   alert('Upcoming fixture published!')
 }
-  function resetMatch(){
-    if(!window.confirm('Reset this match and return to match setup?')) return
-    setHome(emptyTeam); setAway(emptyTeam); setSeconds(0); setRunning(false); setPeriod('PRE-MATCH'); setSetupComplete(false); setDisplayMode(false); setMatchId(null)
+  async function resetMatch(){
+  if(!window.confirm('Reset this match and return to match setup?')) return
+
+  if (matchId) {
+    const { error } = await supabase
+      .from('matches')
+      .update({
+        active: false,
+        clock_running: false,
+        clock_started_at: null
+      })
+      .eq('id', matchId)
+
+    if (error) {
+      console.error('Error resetting match:', error)
+      alert(`Could not reset match: ${error.message}`)
+      return
+    }
   }
+
+  setHome(emptyTeam)
+  setAway(emptyTeam)
+  setSeconds(0)
+  setRunning(false)
+  setPeriod('PRE-MATCH')
+  setSetupComplete(false)
+  setDisplayMode(false)
+  setMatchId(null)
+}
 
   if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} onStart={() => setup.opposition.trim() && setSetupComplete(true)} onPublishFixture={publishUpcomingFixture} />
   return <main className={displayMode ? 'display-page' : ''}>

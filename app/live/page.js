@@ -169,7 +169,7 @@ function formatStatus(status = '') {
 
         <header style={styles.header}>
           <img
-            src="/soh-crest.png"
+            src="https://fmbvqrjkyiuacymhulql.supabase.co/storage/v1/object/public/club-crests/SOH_Logo.png"
             alt="SOH crest"
             style={styles.mainCrest}
           />

@@ -72,7 +72,12 @@ export default function LiveMatchPage() {
   if (!match) return
 
  const updateLiveClock = () => {
-  const isExtraTime = match.status === 'extra_time'
+  const isExtraTime = [
+  'extra_time',
+  'extra_time_half_time',
+  'extra_time_second_half',
+  'after_extra_time'
+].includes(match.status)
 
   const baseSeconds = isExtraTime
     ? (match.extra_time_seconds || 0)
@@ -115,9 +120,20 @@ export default function LiveMatchPage() {
     return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`
   }
 
-  function formatStatus(status = '') {
-    return status.replaceAll('_', ' ').toUpperCase()
+function formatStatus(status = '') {
+  const labels = {
+    first_half: 'FIRST HALF',
+    half_time: 'HALF TIME',
+    second_half: 'SECOND HALF',
+    full_time: 'FULL TIME',
+    extra_time: 'EXTRA TIME - 1ST HALF',
+    extra_time_half_time: 'ET HALF TIME',
+    extra_time_second_half: 'EXTRA TIME - 2ND HALF',
+    after_extra_time: 'AET'
   }
+
+  return labels[status] || status.replaceAll('_', ' ').toUpperCase()
+}
 
   if (loading) {
     return (

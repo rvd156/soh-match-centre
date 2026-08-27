@@ -156,10 +156,17 @@ useEffect(() => {
   const isExtraTime = period.startsWith('EXTRA TIME')
 
   const syncClock = async () => {
-    const update = isExtraTime
-      ? { extra_time_seconds: extraTimeSeconds }
-      : { clock_seconds: seconds }
+    const now = new Date().toISOString()
 
+const update = isExtraTime
+  ? {
+      extra_time_seconds: extraTimeSeconds,
+      extra_time_started_at: now
+    }
+  : {
+      clock_seconds: seconds,
+      clock_started_at: now
+    }
     const { error } = await supabase
       .from('matches')
       .update(update)

@@ -503,10 +503,9 @@ if (deactivateError) {
     const { data, error } = await supabase
   .from('matches')
   .update({
-    active: false,
-    clock_running: false,
-    clock_started_at: null
-  })
+  active: false,
+  clock_started_at: null
+})
   .eq('id', matchId)
   .select()
 

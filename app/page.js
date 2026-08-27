@@ -464,7 +464,17 @@ async function extraTimeFullTime() {
     alert('Please enter the opposition, date and throw-in time.')
     return
   }
+const { error: deactivateError } = await supabase
+  .from('upcoming_fixtures')
+  .update({ active: false })
+  .eq('active', true)
 
+if (deactivateError) {
+  console.error('Error deactivating previous fixture:', deactivateError)
+  alert(`Could not update previous fixture: ${deactivateError.message}`)
+  return
+}
+    
   const { error } = await supabase
     .from('upcoming_fixtures')
     .insert({

@@ -31,11 +31,12 @@ export default function LiveMatchPage() {
   
   async function loadLatestMatch() {
     const { data: matchData, error: matchError } = await supabase
-      .from('matches')
-      .select('*')
-      .order('id', { ascending: false })
-      .limit(1)
-      .single()
+  .from('matches')
+  .select('*')
+  .eq('active', true)
+  .order('id', { ascending: false })
+  .limit(1)
+  .maybeSingle()
 
     if (matchError) {
       console.error('Error loading live match:', matchError)
@@ -43,6 +44,14 @@ export default function LiveMatchPage() {
       return
     }
 
+    if (!matchData) {
+  setMatch(null)
+  setHomeTeam(null)
+  setAwayTeam(null)
+  setLoading(false)
+  return
+}
+    
     const { data: teams, error: teamsError } = await supabase
       .from('teams')
       .select('*')

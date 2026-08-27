@@ -662,7 +662,7 @@ function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFi
     <div className="setup-brand"><img src="/soh-crest.png" alt="SOH crest"/><div><p>SEÁN O'HESLIN'S GAA</p><h1>Match Centre</h1></div></div>
     <div className="setup-heading"><span>NEW MATCH</span><h2>Match Setup</h2><p>Enter the match details before throw-in.</p></div>
     <div className="team-setup-row">
-     <div className="crest-preview-card soh-crest-card"><span>SOH</span><img src="/soh-crest.png" alt="SOH crest"/></div>
+     <div className="crest-preview-card soh-crest-card"><span>SOH</span><img src="https://fmbvqrjkyiuacymhulql.supabase.co/storage/v1/object/public/club-crests/SOH%20Logo.png" alt="SOH crest"/></div>
       <div className="crest-preview-card"><span>{setup.opposition || 'Opposition'}</span>
         {setup.oppositionCrest ? <img src={setup.oppositionCrest} alt="Opposition crest"/> : <div className="crest-placeholder">?</div>}
         <label className="upload-button">Upload Crest<input type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadCrest}/></label>

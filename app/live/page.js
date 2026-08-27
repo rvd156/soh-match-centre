@@ -84,9 +84,10 @@ export default function LiveMatchPage() {
         schema: 'public',
         table: 'upcoming_fixtures'
       },
-      () => {
-        loadUpcomingFixture()
-      }
+      payload => {
+  console.log('UPCOMING FIXTURE REALTIME:', payload)
+  loadUpcomingFixture()
+}
     )
     .subscribe()
 

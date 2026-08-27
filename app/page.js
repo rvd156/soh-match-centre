@@ -373,14 +373,18 @@ setPeriod('EXTRA TIME')
 setRunning(true)
 
   if (matchId) {
-    const { error } = await supabase
-      .from('matches')
-      .update({
-        status: 'extra_time',
-        extra_time_seconds: 0,
-        extra_time_started_at: new Date().toISOString()
-      })
-      .eq('id', matchId)
+const { data, error } = await supabase
+  .from('matches')
+  .update({
+    status: 'extra_time',
+    extra_time_seconds: 0,
+    extra_time_started_at: new Date().toISOString()
+  })
+  .eq('id', matchId)
+  .select()
+  .single()
+
+console.log('START EXTRA TIME RESULT:', { data, error })
 
     if (error) {
       console.error('Error starting extra time:', error)

@@ -85,14 +85,10 @@ export default function LiveMatchPage() {
         table: 'upcoming_fixtures'
       },
       payload => {
-  console.log('UPCOMING FIXTURE REALTIME:', payload)
   loadUpcomingFixture()
 }
     )
-.subscribe((status, err) => {
-  console.log('UPCOMING FIXTURE SUBSCRIPTION:', status, err)
-  alert(`Realtime status: ${status}`)
-})
+.subscribe()
 
   return () => {
     supabase.removeChannel(channel)

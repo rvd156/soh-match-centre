@@ -182,12 +182,16 @@ function formatStatus(status = '') {
   }
 
   if (!match) {
-    return (
-      <main style={styles.page}>
-        <div style={styles.message}>No match available.</div>
-      </main>
-    )
-  }
+  return (
+    <main style={styles.page}>
+      <div style={styles.message}>
+        {upcomingFixture
+          ? `Upcoming: Ballinamore SOH v ${upcomingFixture.opposition}`
+          : 'No match available.'}
+      </div>
+    </main>
+  )
+}
 
   const homeTotal = match.home_goals * 3 + match.home_points
   const awayTotal = match.away_goals * 3 + match.away_points

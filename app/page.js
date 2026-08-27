@@ -262,6 +262,7 @@ const awayCrest = sohIsHome ? setup.oppositionCrest : sohCrest
         throw_in: setup.throwIn || null,
         half_length: Number(setup.halfLength),
         status: 'first_half',
+        active: true,
         home_goals: 0,
         home_points: 0,
         away_goals: 0,
@@ -361,7 +362,8 @@ async function fullTime() {
 .update({
   status: 'full_time',
   clock_seconds: seconds,
-  clock_started_at: null
+  clock_started_at: null,
+  active: false
 })
       .eq('id', matchId)
 
@@ -445,10 +447,11 @@ async function extraTimeFullTime() {
     const { error } = await supabase
       .from('matches')
       .update({
-        status: 'after_extra_time',
-        extra_time_seconds: extraTimeSeconds,
-        extra_time_started_at: null
-      })
+  status: 'after_extra_time',
+  extra_time_seconds: extraTimeSeconds,
+  extra_time_started_at: null,
+  active: false
+})
       .eq('id', matchId)
 
     if (error) {

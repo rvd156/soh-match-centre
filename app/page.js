@@ -500,14 +500,18 @@ if (deactivateError) {
   if(!window.confirm('Reset this match and return to match setup?')) return
 
   if (matchId) {
-    const { error } = await supabase
-      .from('matches')
-      .update({
-        active: false,
-        clock_running: false,
-        clock_started_at: null
-      })
-      .eq('id', matchId)
+    const { data, error } = await supabase
+  .from('matches')
+  .update({
+    active: false,
+    clock_running: false,
+    clock_started_at: null
+  })
+  .eq('id', matchId)
+  .select()
+
+console.log('RESET MATCH ID:', matchId)
+console.log('RESET RESULT:', data, error)
 
     if (error) {
       console.error('Error resetting match:', error)

@@ -89,8 +89,9 @@ export default function LiveMatchPage() {
   loadUpcomingFixture()
 }
     )
-    .subscribe(status => {
-  console.log('UPCOMING FIXTURE SUBSCRIPTION:', status)
+.subscribe((status, err) => {
+  console.log('UPCOMING FIXTURE SUBSCRIPTION:', status, err)
+  alert(`Realtime status: ${status}`)
 })
 
   return () => {

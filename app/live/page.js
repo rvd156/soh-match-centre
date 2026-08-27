@@ -75,6 +75,26 @@ export default function LiveMatchPage() {
   loadUpcomingFixture()
 }, [])
   useEffect(() => {
+  const channel = supabase
+    .channel('upcoming-fixture-changes')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'upcoming_fixtures'
+      },
+      () => {
+        loadUpcomingFixture()
+      }
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
+  }
+}, [])
+  useEffect(() => {
   if (match?.id) return
 
   const checkForMatch = setInterval(() => {

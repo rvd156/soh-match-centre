@@ -19,6 +19,7 @@ export default function Home() {
   const [home, setHome] = useState(emptyTeam)
   const [away, setAway] = useState(emptyTeam)
   const [seconds, setSeconds] = useState(0)
+  const [extraTimeSeconds, setExtraTimeSeconds] = useState(0)
   const [running, setRunning] = useState(false)
   const [period, setPeriod] = useState('PRE-MATCH')
   const [displayMode, setDisplayMode] = useState(false)
@@ -125,12 +126,22 @@ useEffect(() => {
   useEffect(() => {
   if (!running) return
 
-  const baseSeconds = seconds
+  const isExtraTime = period.startsWith('EXTRA TIME')
+
+  const baseSeconds = isExtraTime
+    ? extraTimeSeconds
+    : seconds
+
   const startedAt = Date.now()
 
   const updateClock = () => {
     const elapsed = Math.floor((Date.now() - startedAt) / 1000)
-    setSeconds(baseSeconds + elapsed)
+
+    if (isExtraTime) {
+      setExtraTimeSeconds(baseSeconds + elapsed)
+    } else {
+      setSeconds(baseSeconds + elapsed)
+    }
   }
 
   updateClock()
@@ -138,9 +149,45 @@ useEffect(() => {
   intervalRef.current = setInterval(updateClock, 1000)
 
   return () => clearInterval(intervalRef.current)
-}, [running])
- 
-  const clock = useMemo(() => `${String(Math.floor(seconds/60)).padStart(2,'0')}:${String(seconds%60).padStart(2,'0')}`, [seconds])
+}, [running, period])
+ useEffect(() => {
+  if (!running || !matchId) return
+
+  const isExtraTime = period.startsWith('EXTRA TIME')
+
+  const syncClock = async () => {
+    const update = isExtraTime
+      ? { extra_time_seconds: extraTimeSeconds }
+      : { clock_seconds: seconds }
+
+    const { error } = await supabase
+      .from('matches')
+      .update(update)
+      .eq('id', matchId)
+
+    if (error) {
+      console.error('Error syncing match clock:', error)
+    }
+  }
+  if (isExtraTime) {
+    if (extraTimeSeconds > 0 && extraTimeSeconds % 10 === 0) {
+      syncClock()
+    }
+  } else {
+    if (seconds > 0 && seconds % 10 === 0) {
+      syncClock()
+    }
+  }
+}, [seconds, extraTimeSeconds, running, period, matchId])
+
+  const displaySeconds = period.startsWith('EXTRA TIME')
+  ? extraTimeSeconds
+  : seconds
+
+const clock = useMemo(
+  () => `${String(Math.floor(displaySeconds / 60)).padStart(2, '0')}:${String(displaySeconds % 60).padStart(2, '0')}`,
+  [displaySeconds]
+)
   const total = t => t.goals * 3 + t.points
   const sohIsHome = setup.sohSide === 'home'
   const homeName = sohIsHome ? 'SOH' : (setup.opposition || 'Opposition')
@@ -313,6 +360,28 @@ async function fullTime() {
     if (error) console.error('Error updating match status:', error)
   }
 }
+  async function startExtraTime() {
+  setExtraTimeSeconds(0)
+setPeriod('EXTRA TIME')
+setRunning(true)
+
+  if (matchId) {
+    const { error } = await supabase
+      .from('matches')
+      .update({
+        status: 'extra_time',
+        extra_time_seconds: 0,
+        extra_time_started_at: new Date().toISOString()
+      })
+      .eq('id', matchId)
+
+    if (error) {
+      console.error('Error starting extra time:', error)
+      return
+    }
+  }
+
+}
   function resetMatch(){
     if(!window.confirm('Reset this match and return to match setup?')) return
     setHome(emptyTeam); setAway(emptyTeam); setSeconds(0); setRunning(false); setPeriod('PRE-MATCH'); setSetupComplete(false); setDisplayMode(false); setMatchId(null)
@@ -347,7 +416,10 @@ async function fullTime() {
         <div className="match-controls">
           <button onClick={startMatch} className="primary">{running?'Running':period==='PRE-MATCH'?'Start Match':'Resume'}</button>
           <button onClick={pauseMatch}>Pause</button><button onClick={halfTime}>Half Time</button>
-          <button onClick={secondHalf}>Start 2nd Half</button><button onClick={fullTime}>Full Time</button><button onClick={resetMatch} className="danger">Reset</button>
+          <button onClick={secondHalf}>Start 2nd Half</button>
+<button onClick={fullTime}>Full Time</button>
+<button onClick={startExtraTime}>Start Extra Time</button>
+<button onClick={resetMatch} className="danger">Reset</button>
         </div>
       </>}
       <button className="display-toggle" onClick={()=>setDisplayMode(v=>!v)}>{displayMode?'Exit Display Mode':'Open Display Mode'}</button>

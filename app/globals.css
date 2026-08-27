@@ -110,6 +110,10 @@ button:hover { filter: brightness(1.08); }
   object-fit: contain;
   background: transparent;
 }
+.soh-crest-card img {
+  width: min(300px, 90%);
+  height: 260px;
+}
 .team-crest {
   width: 150px;
   height: 150px;

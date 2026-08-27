@@ -15,16 +15,12 @@ export default function LiveMatchPage() {
   const { data, error } = await supabase
     .from('upcoming_fixtures')
     .select('*')
-    .eq('active', true)
-    .order('match_date', { ascending: true })
-    .order('throw_in', { ascending: true })
-    .limit(1)
-    .maybeSingle()
 
   if (error) {
     console.error('Error loading upcoming fixture:', error)
     return
   }
+
   console.log('UPCOMING FIXTURE:', data)
   setUpcomingFixture(data)
 }

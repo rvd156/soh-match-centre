@@ -117,9 +117,18 @@ export default function LiveMatchPage() {
         filter: `id=eq.${match.id}`
       },
       payload => {
-        console.log('LIVE MATCH UPDATE:', payload.new)
-        setMatch(payload.new)
-      }
+  console.log('LIVE MATCH UPDATE:', payload.new)
+
+  if (payload.new.active === false) {
+    setMatch(null)
+    setHomeTeam(null)
+    setAwayTeam(null)
+    loadUpcomingFixture()
+    return
+  }
+
+  setMatch(payload.new)
+}
     )
     .subscribe()
 

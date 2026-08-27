@@ -455,12 +455,39 @@ async function extraTimeFullTime() {
     }
   }
 }
+  async function publishUpcomingFixture() {
+  if (!setup.opposition.trim() || !setup.date || !setup.throwIn) {
+    alert('Please enter the opposition, date and throw-in time.')
+    return
+  }
+
+  const { error } = await supabase
+    .from('upcoming_fixtures')
+    .insert({
+      opposition: setup.opposition,
+      opposition_team_id: setup.oppositionTeamId || null,
+      competition: setup.competition || null,
+      venue: setup.venue || null,
+      match_date: setup.date,
+      throw_in: setup.throwIn,
+      soh_side: setup.sohSide,
+      opposition_crest: setup.oppositionCrest || null
+    })
+
+  if (error) {
+    console.error('Error publishing upcoming fixture:', error)
+    alert('Could not publish fixture.')
+    return
+  }
+
+  alert('Upcoming fixture published!')
+}
   function resetMatch(){
     if(!window.confirm('Reset this match and return to match setup?')) return
     setHome(emptyTeam); setAway(emptyTeam); setSeconds(0); setRunning(false); setPeriod('PRE-MATCH'); setSetupComplete(false); setDisplayMode(false); setMatchId(null)
   }
 
-  if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} onStart={() => setup.opposition.trim() && setSetupComplete(true)} />
+  if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} onStart={() => setup.opposition.trim() && setSetupComplete(true)} onPublishFixture={publishUpcomingFixture} />
   return <main className={displayMode ? 'display-page' : ''}>
     <section className="scoreboard-card">
       <div className="topbar">
@@ -563,7 +590,7 @@ setScorerPicker(null)
   </main>
 }
 
-function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart}){
+function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFixture}){
   const update = (key,value) => setSetup(s=>({...s,[key]:value}))
   function uploadCrest(event) {
     const file = event.target.files?.[0]
@@ -649,12 +676,14 @@ function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart}){
   <select
     autoFocus
     value={setup.opposition}
-    onChange={e => {
+onChange={e => {
   const team = teams.find(t => t.name === e.target.value)
+
   setSetup(s => ({
     ...s,
     opposition: e.target.value,
-    oppositionTeamId: team ? team.id : ''
+    oppositionTeamId: team ? team.id : '',
+    oppositionCrest: team?.crest_url || ''
   }))
 }}
     disabled={teamsLoading}
@@ -677,6 +706,13 @@ function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart}){
       <label className="field"><span>Half Length</span><select value={setup.halfLength} onChange={e=>update('halfLength',e.target.value)}><option value="30">30 minutes</option><option value="35">35 minutes</option><option value="20">20 minutes</option></select></label>
       <div className="field"><span>SOH Playing</span><div className="side-picker"><button className={setup.sohSide==='home'?'selected':''} onClick={()=>update('sohSide','home')}>Home</button><button className={setup.sohSide==='away'?'selected':''} onClick={()=>update('sohSide','away')}>Away</button></div></div>
     </div>
+    <button
+  className="start-setup"
+  disabled={!setup.opposition.trim() || !setup.date || !setup.throwIn}
+  onClick={onPublishFixture}
+>
+  Publish Upcoming Fixture
+</button>
     <button className="start-setup" disabled={!setup.opposition.trim()} onClick={onStart}>Continue to Scoreboard →</button>
   </section></main>
 }

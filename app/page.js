@@ -250,7 +250,17 @@ const awayCrest = sohIsHome ? setup.oppositionCrest : sohCrest
 
     const awayTeamId =
       setup.sohSide === 'away' ? 1 : Number(setup.oppositionTeamId)
+// Make sure no previous match is still marked as live
+const { error: deactivateError } = await supabase
+  .from('matches')
+  .update({ active: false })
+  .eq('active', true)
 
+if (deactivateError) {
+  console.error('Error deactivating previous match:', deactivateError)
+  alert('Could not clear the previous live match.')
+  return
+}
     const { data, error } = await supabase
       .from('matches')
       .insert({

@@ -477,7 +477,7 @@ async function extraTimeFullTime() {
 
   if (error) {
     console.error('Error publishing upcoming fixture:', error)
-    alert('Could not publish fixture.')
+   alert(`Could not publish fixture: ${error.message}`)
     return
   }
 

@@ -45,6 +45,15 @@ export default function LiveMatchPage() {
   loadLatestMatch()
 }, [])
   useEffect(() => {
+  if (match?.id) return
+
+  const checkForMatch = setInterval(() => {
+    loadLatestMatch()
+  }, 5000)
+
+  return () => clearInterval(checkForMatch)
+}, [match?.id])
+  useEffect(() => {
   if (!match?.id) return
 
   const channel = supabase

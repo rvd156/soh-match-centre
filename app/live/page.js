@@ -9,7 +9,26 @@ export default function LiveMatchPage() {
   const [awayTeam, setAwayTeam] = useState(null)
   const [loading, setLoading] = useState(true)
   const [liveSeconds, setLiveSeconds] = useState(0)
+  const [upcomingFixture, setUpcomingFixture] = useState(null)
 
+  async function loadUpcomingFixture() {
+  const { data, error } = await supabase
+    .from('upcoming_fixtures')
+    .select('*')
+    .eq('active', true)
+    .order('match_date', { ascending: true })
+    .order('throw_in', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Error loading upcoming fixture:', error)
+    return
+  }
+  console.log('UPCOMING FIXTURE:', data)
+  setUpcomingFixture(data)
+}
+  
   async function loadLatestMatch() {
     const { data: matchData, error: matchError } = await supabase
       .from('matches')
@@ -43,6 +62,7 @@ export default function LiveMatchPage() {
 
   useEffect(() => {
   loadLatestMatch()
+  loadUpcomingFixture()
 }, [])
   useEffect(() => {
   if (match?.id) return

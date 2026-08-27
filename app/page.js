@@ -483,6 +483,7 @@ if (deactivateError) {
       opposition_team_id: setup.oppositionTeamId || null,
       competition: setup.competition || null,
       venue: setup.venue || null,
+      referee: setup.referee || null,
       match_date: setup.date,
       throw_in: setup.throwIn,
       soh_side: setup.sohSide,

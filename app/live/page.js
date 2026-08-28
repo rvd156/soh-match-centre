@@ -184,7 +184,9 @@ setLoading(false)
         loadMatchEvents(match.id)
       }
     )
-    .subscribe()
+    .subscribe(status => {
+  console.log('MATCH EVENTS REALTIME:', status)
+})
 
   return () => {
     supabase.removeChannel(eventsChannel)

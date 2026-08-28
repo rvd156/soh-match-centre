@@ -528,8 +528,8 @@ console.log('SCORER SPLIT:', {
   <section style={styles.scorers}>
     <div style={styles.scorerColumn}>
       <div style={styles.scorersTeamName}>
-        {homeTeam?.name || 'Home'}
-      </div>
+  TEST HOME - {homeTeam?.name || 'Home'}
+</div>
 
       <div style={styles.scorersTitle}>SCORERS</div>
 

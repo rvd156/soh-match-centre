@@ -288,9 +288,6 @@ const awayCrest = sohIsHome ? setup.oppositionCrest : sohCrest
   }
 
   console.log('NEW PLAYER ADDED:', data)
-}
-
-  console.log('NEW PLAYER ADDED:', data)
 
 const { error: eventError } = await supabase
   .from('match_events')

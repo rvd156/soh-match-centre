@@ -260,7 +260,31 @@ async function loadMatchEvents(currentMatchId) {
     setMatchEvents([])
     return
   }
+  const { data, error } = await supabase
+    .from('match_events')
+    .select(`
+      id,
+      match_id,
+      team_id,
+      player_id,
+      event_type,
+      match_minute,
+      clock_seconds,
+      players (
+        name
+      )
+    `)
+    .eq('match_id', currentMatchId)
+    .order('created_at', { ascending: false })
 
+  if (error) {
+    console.error('Error loading match events:', error)
+    return
+  }
+
+  setMatchEvents(data || [])
+}
+}
   async function removeCardEvent(event) {
   if (
     event.event_type !== 'yellow_card' &&
@@ -294,31 +318,6 @@ async function loadMatchEvents(currentMatchId) {
   }
 
   loadMatchEvents(matchId)
-}
-
-  const { data, error } = await supabase
-    .from('match_events')
-    .select(`
-      id,
-      match_id,
-      team_id,
-      player_id,
-      event_type,
-      match_minute,
-      clock_seconds,
-      players (
-        name
-      )
-    `)
-    .eq('match_id', currentMatchId)
-    .order('created_at', { ascending: false })
-
-  if (error) {
-    console.error('Error loading match events:', error)
-    return
-  }
-
-  setMatchEvents(data || [])
 }
   
   async function checkForExistingMatch() {

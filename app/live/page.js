@@ -11,6 +11,7 @@ export default function LiveMatchPage() {
   const [liveSeconds, setLiveSeconds] = useState(0)
   const [upcomingFixture, setUpcomingFixture] = useState(null)
   const [matchEvents, setMatchEvents] = useState([])
+  const [showGoalCelebration, setShowGoalCelebration] = useState(false)
 
 async function loadMatchEvents(matchId) {
   if (!matchId) {
@@ -179,9 +180,20 @@ setLoading(false)
   schema: 'public',
   table: 'match_events'
 },
-      () => {
-        loadMatchEvents(match.id)
-      }
+      (payload) => {
+  loadMatchEvents(match.id)
+
+  if (
+    payload.eventType === 'INSERT' &&
+    payload.new?.event_type === 'goal'
+  ) {
+    setShowGoalCelebration(true)
+
+    setTimeout(() => {
+      setShowGoalCelebration(false)
+    }, 3000)
+  }
+}
     )
     .subscribe(status => {
   console.log('MATCH EVENTS REALTIME:', status)
@@ -515,6 +527,33 @@ const sohWon =
           </div>
 
         </section>
+{showGoalCelebration && (
+  <>
+    <style>{`
+      @keyframes goalFlash {
+        0%, 100% {
+          opacity: 1;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 0.25;
+          transform: scale(1.08);
+        }
+      }
+    `}</style>
+
+    <div style={styles.goalCelebration}>
+      <div
+        style={{
+          ...styles.goalCelebrationText,
+          animation: 'goalFlash 0.7s ease-in-out infinite'
+        }}
+      >
+        🥅 GOOOOOOOOAL! 🥅
+      </div>
+    </div>
+  </>
+)}
 {sohWon && (
   <div style={styles.winBanner}>
     BALLINAMORE SOH WIN
@@ -577,16 +616,39 @@ const sohWon =
       <div style={styles.scorersTitle}>MATCH EVENTS</div>
 
       {matchEvents
-        .filter(event =>
-          event.event_type === 'yellow_card' ||
-          event.event_type === 'red_card'
-        )
+       .filter(event =>
+  event.event_type === 'goal' ||
+  event.event_type === 'point' ||
+  event.event_type === 'two_pointer' ||
+  event.event_type === 'yellow_card' ||
+  event.event_type === 'red_card'
+)
         .map(event => (
-          <div key={event.id} style={styles.scorerRow}>
-            {event.match_minute}'{' '}
-            {event.event_type === 'yellow_card' ? '🟨' : '🟥'}{' '}
-            {event.players?.name || 'Unknown Player'}
-          </div>
+          <<div key={event.id} style={styles.scorerRow}>
+  {event.match_minute}'{' '}
+
+  {event.event_type === 'goal'
+    ? '🥅'
+    : event.event_type === 'point'
+      ? '⚪'
+      : event.event_type === 'two_pointer'
+        ? '🟧'
+        : event.event_type === 'yellow_card'
+          ? '🟨'
+          : '🟥'}{' '}
+
+  {event.players?.name || 'Unknown Player'} ·{' '}
+
+  {event.event_type === 'goal'
+   ? <span style={styles.goalEvent}>GOAL</span>
+    : event.event_type === 'point'
+      ? 'Point'
+      : event.event_type === 'two_pointer'
+        ? '2PT'
+        : event.event_type === 'yellow_card'
+          ? 'Yellow Card'
+          : 'Red Card'}
+</div>
         ))}
     </div>
   </section>
@@ -876,6 +938,30 @@ scorerRow: {
   textAlign: 'center',
   fontSize: '16px',
   fontWeight: '600'
+},
+
+goalEvent: {
+  fontSize: '20px',
+  fontWeight: '900',
+  letterSpacing: '2px'
+},
+
+  goalCelebration: {
+  position: 'fixed',
+  inset: 0,
+  zIndex: 9999,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  background: 'rgba(0, 0, 0, 0.88)'
+},
+
+goalCelebrationText: {
+  fontSize: 'clamp(48px, 10vw, 140px)',
+  fontWeight: '900',
+  letterSpacing: '4px',
+  textAlign: 'center',
+  padding: '30px'
 },
 
   footer: {

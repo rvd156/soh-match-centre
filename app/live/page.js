@@ -964,6 +964,7 @@ goalCelebrationText: {
   padding: '20px',
   maxWidth: '100%',
   boxSizing: 'border-box'
+  whiteSpace: 'nowrap'
 },
 
   footer: {

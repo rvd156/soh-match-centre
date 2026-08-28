@@ -283,7 +283,32 @@ function formatStatus(status = '') {
   </div>
 
 </div>
-  </>
+<div style={styles.upcomingDetails}>
+  <div style={styles.upcomingDate}>
+    {new Date(`${upcomingFixture.match_date}T12:00:00`).toLocaleDateString('en-IE', {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+    })}
+  </div>
+
+  <div style={styles.upcomingTime}>
+    Throw-in: {upcomingFixture.throw_in?.slice(0, 5)}
+  </div>
+    {upcomingFixture.venue && (
+  <div style={styles.upcomingMeta}>
+    📍 {upcomingFixture.venue}
+  </div>
+)}
+
+{upcomingFixture.referee && (
+  <div style={styles.upcomingMeta}>
+    Referee: {upcomingFixture.referee}
+  </div>
+)}
+</div>
+</>
 ) : (
   <div style={styles.message}>No match available.</div>
 )}
@@ -530,6 +555,31 @@ upcomingVs: {
   fontWeight: '900',
   fontSize: '22px',
   letterSpacing: '1px'
+},
+
+  upcomingDetails: {
+  textAlign: 'center',
+  marginTop: '24px'
+},
+
+upcomingDate: {
+  color: '#ffffff',
+  fontSize: '22px',
+  fontWeight: '800',
+  marginBottom: '8px'
+},
+
+upcomingTime: {
+  color: '#f4c430',
+  fontSize: '18px',
+  fontWeight: '800'
+},
+
+  upcomingMeta: {
+  color: '#aebdb4',
+  fontSize: '16px',
+  fontWeight: '600',
+  marginTop: '10px'
 },
   
   liveDot: {

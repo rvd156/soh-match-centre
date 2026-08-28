@@ -235,9 +235,47 @@ function formatStatus(status = '') {
       UPCOMING FIXTURE
     </div>
 
-    <div style={styles.message}>
-      Ballinamore SOH v {upcomingFixture.opposition}
+   <div style={styles.upcomingTeams}>
+
+  <div style={styles.upcomingTeam}>
+    <img
+      src={
+        upcomingFixture.soh_side === 'home'
+          ? 'https://fmbvqrjkyiuacymhulql.supabase.co/storage/v1/object/public/club-crests/SOH_Logo.png?v=2'
+          : upcomingFixture.opposition_crest
+      }
+      alt="Home team crest"
+      style={styles.upcomingCrest}
+    />
+
+    <div style={styles.upcomingTeamName}>
+      {upcomingFixture.soh_side === 'home'
+        ? 'Ballinamore SOH'
+        : upcomingFixture.opposition}
     </div>
+  </div>
+
+  <div style={styles.upcomingVs}>VS</div>
+
+  <div style={styles.upcomingTeam}>
+    <img
+      src={
+        upcomingFixture.soh_side === 'away'
+          ? 'https://fmbvqrjkyiuacymhulql.supabase.co/storage/v1/object/public/club-crests/SOH_Logo.png?v=2'
+          : upcomingFixture.opposition_crest
+      }
+      alt="Away team crest"
+      style={styles.upcomingCrest}
+    />
+
+    <div style={styles.upcomingTeamName}>
+      {upcomingFixture.soh_side === 'away'
+        ? 'Ballinamore SOH'
+        : upcomingFixture.opposition}
+    </div>
+  </div>
+
+</div>
   </>
 ) : (
   <div style={styles.message}>No match available.</div>
@@ -436,6 +474,45 @@ const styles = {
   fontWeight: '900',
   letterSpacing: '1.5px',
   fontSize: '13px'
+},
+  upcomingTeams: {
+  display: 'grid',
+  gridTemplateColumns: '1fr auto 1fr',
+  alignItems: 'center',
+  gap: '20px',
+  background: '#0d2419',
+  border: '1px solid #1c4932',
+  borderRadius: '24px',
+  padding: '36px 20px',
+  marginBottom: '24px'
+},
+
+upcomingTeam: {
+  textAlign: 'center',
+  minWidth: 0
+},
+
+upcomingCrest: {
+  width: '110px',
+  height: '110px',
+  objectFit: 'contain',
+  marginBottom: '16px'
+},
+
+upcomingTeamName: {
+  fontSize: 'clamp(18px, 4vw, 28px)',
+  fontWeight: '800',
+  minHeight: '60px',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center'
+},
+
+upcomingVs: {
+  color: '#f4c430',
+  fontWeight: '900',
+  fontSize: '22px',
+  letterSpacing: '1px'
 },
   
   liveDot: {

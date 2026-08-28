@@ -377,6 +377,14 @@ function formatStatus(status = '') {
   const homeTotal = match.home_goals * 3 + match.home_points
   const awayTotal = match.away_goals * 3 + match.away_points
 
+const homeEvents = matchEvents.filter(
+  event => event.team_id === match.home_team_id
+)
+
+const awayEvents = matchEvents.filter(
+  event => event.team_id === match.away_team_id
+)
+
 const matchFinished =
   match.status === 'full_time' ||
   match.status === 'after_extra_time'
@@ -510,21 +518,49 @@ const sohWon =
 
 {matchEvents.length > 0 && (
   <section style={styles.scorers}>
-    <div style={styles.scorersTitle}>SCORERS</div>
-
-    {matchEvents.map(event => (
-      <div key={event.id} style={styles.scorerRow}>
-        {event.players?.name || 'Unknown Player'}
-        {' '}
-        {event.event_type === 'goal'
-          ? '1-00'
-          : event.event_type === 'two_pointer'
-            ? '2PT'
-            : '0-01'}
-        {' · '}
-        {event.match_minute}'
+    <div style={styles.scorerColumn}>
+      <div style={styles.scorersTeamName}>
+        {homeTeam?.name || 'Home'}
       </div>
-    ))}
+
+      <div style={styles.scorersTitle}>SCORERS</div>
+
+      {homeEvents.map(event => (
+        <div key={event.id} style={styles.scorerRow}>
+          {event.players?.name || 'Unknown Player'}
+          {' '}
+          {event.event_type === 'goal'
+            ? '1-00'
+            : event.event_type === 'two_pointer'
+              ? '2PT'
+              : '0-01'}
+          {' · '}
+          {event.match_minute}'
+        </div>
+      ))}
+    </div>
+
+    <div style={styles.scorerColumn}>
+      <div style={styles.scorersTeamName}>
+        {awayTeam?.name || 'Away'}
+      </div>
+
+      <div style={styles.scorersTitle}>SCORERS</div>
+
+      {awayEvents.map(event => (
+        <div key={event.id} style={styles.scorerRow}>
+          {event.players?.name || 'Unknown Player'}
+          {' '}
+          {event.event_type === 'goal'
+            ? '1-00'
+            : event.event_type === 'two_pointer'
+              ? '2PT'
+              : '0-01'}
+          {' · '}
+          {event.match_minute}'
+        </div>
+      ))}
+    </div>
   </section>
 )}
         <footer style={styles.footer}>
@@ -775,12 +811,26 @@ upcomingTime: {
   textAlign: 'center'
 },
 
-  scorers: {
+ scorers: {
   marginTop: '24px',
   background: '#0d2419',
   border: '1px solid #1c4932',
   borderRadius: '18px',
-  padding: '20px'
+  padding: '20px',
+  display: 'grid',
+  gridTemplateColumns: '1fr 1fr',
+  gap: '24px'
+},
+
+scorerColumn: {
+  minWidth: 0,
+  textAlign: 'center'
+},
+
+scorersTeamName: {
+  fontSize: '16px',
+  fontWeight: '800',
+  marginBottom: '4px'
 },
 
 scorersTitle: {

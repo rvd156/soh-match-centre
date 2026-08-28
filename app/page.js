@@ -373,8 +373,7 @@ async function fullTime() {
 .update({
   status: 'full_time',
   clock_seconds: seconds,
-  clock_started_at: null,
-  active: false
+  clock_started_at: null
 })
       .eq('id', matchId)
 
@@ -460,8 +459,7 @@ async function extraTimeFullTime() {
       .update({
   status: 'after_extra_time',
   extra_time_seconds: extraTimeSeconds,
-  extra_time_started_at: null,
-  active: false
+  extra_time_started_at: null
 })
       .eq('id', matchId)
 

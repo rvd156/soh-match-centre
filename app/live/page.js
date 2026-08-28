@@ -624,7 +624,7 @@ const sohWon =
   event.event_type === 'red_card'
 )
         .map(event => (
-          <<div key={event.id} style={styles.scorerRow}>
+          <div key={event.id} style={styles.scorerRow}>
   {event.match_minute}'{' '}
 
   {event.event_type === 'goal'

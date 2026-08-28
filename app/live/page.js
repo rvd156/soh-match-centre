@@ -29,7 +29,7 @@ async function loadMatchEvents(matchId) {
       )
     `)
     .eq('match_id', matchId)
-    .in('event_type', ['goal', 'point', 'two_pointer'])
+    .in('event_type', ['goal', 'point', 'two_pointer', 'yellow_card', 'red_card'])
     .order('clock_seconds', { ascending: true })
 
   if (error) {
@@ -377,12 +377,18 @@ function formatStatus(status = '') {
   const homeTotal = match.home_goals * 3 + match.home_points
   const awayTotal = match.away_goals * 3 + match.away_points
 
+const scoringEventTypes = ['goal', 'point', 'two_pointer']
+
 const homeEvents = matchEvents.filter(
-  event => event.team_id === match.home_team_id
+  event =>
+    event.team_id === match.home_team_id &&
+    scoringEventTypes.includes(event.event_type)
 )
 
 const awayEvents = matchEvents.filter(
-  event => event.team_id === match.away_team_id
+  event =>
+    event.team_id === match.away_team_id &&
+    scoringEventTypes.includes(event.event_type)
 )
 
 const matchFinished =
@@ -560,6 +566,29 @@ const sohWon =
           {event.match_minute}'
         </div>
       ))}
+    </div>
+  </section>
+)}
+  {matchEvents.some(event =>
+  event.event_type === 'yellow_card' ||
+  event.event_type === 'red_card'
+) && (
+  <section style={styles.scorersSection}>
+    <div style={{ width: '100%' }}>
+      <div style={styles.scorersTitle}>MATCH EVENTS</div>
+
+      {matchEvents
+        .filter(event =>
+          event.event_type === 'yellow_card' ||
+          event.event_type === 'red_card'
+        )
+        .map(event => (
+          <div key={event.id} style={styles.scorerRow}>
+            {event.match_minute}'{' '}
+            {event.event_type === 'yellow_card' ? '🟨' : '🟥'}{' '}
+            {event.players?.name || 'Unknown Player'}
+          </div>
+        ))}
     </div>
   </section>
 )}

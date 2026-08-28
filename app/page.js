@@ -583,7 +583,11 @@ console.log('RESET RESULT:', data, error)
   <div className="scorer-picker">
     <div className="scorer-picker-card">
       <h2>
-        {scorerPicker.type === 'goals' ? 'Goal Scorer' : 'Point Scorer'}
+        {scorerPicker.type === 'goals'
+  ? 'Goal Scorer'
+  : scorerPicker.type === 'two_pointer'
+    ? '2-Point Scorer'
+    : 'Point Scorer'}
       </h2>
 
       <p>{scorerPicker.teamName}</p>
@@ -605,7 +609,12 @@ const { error } = await supabase
     match_id: matchId,
     team_id: player.team_id,
     player_id: player.id,
-    event_type: scorerPicker.type === 'goals' ? 'goal' : 'point',
+    event_type:
+  scorerPicker.type === 'goals'
+    ? 'goal'
+    : scorerPicker.type === 'two_pointer'
+      ? 'two_pointer'
+      : 'point',
 score_type: 'play',
     match_minute: Math.floor(seconds / 60),
     clock_seconds: seconds
@@ -619,7 +628,11 @@ if (error) {
 
 console.log('SCORE EVENT SAVED')
 
-changeScore(scorerPicker.side, scorerPicker.type, 1)
+changeScore(
+  scorerPicker.side,
+  scorerPicker.type === 'two_pointer' ? 'points' : scorerPicker.type,
+  scorerPicker.type === 'two_pointer' ? 2 : 1
+)
 setScorerPicker(null)
         }}
       >
@@ -723,4 +736,43 @@ onChange={e => {
 }
 
 function TeamPanel({name,team,total,crest}){return <div className="team-panel">{crest&&<img className="team-crest" src={crest} alt={`${name} crest`}/>}<h2>{name}</h2><div className="gaa-score">{team.goals}-{String(team.points).padStart(2,'0')}</div><div className="points-total">{total} pts</div></div>}
-function ScoreControls({label,onChange}){return <div className="control-card"><h3>{label}</h3><div className="button-row"><button className="score-btn goal" onClick={()=>onChange('goals',1)}>+ Goal</button><button className="score-btn point" onClick={()=>onChange('points',1)}>+ Point</button></div><div className="button-row compact"><button onClick={()=>onChange('goals',-1)}>- Goal</button><button onClick={()=>onChange('points',-1)}>- Point</button></div></div>}
+function ScoreControls({label,onChange}){
+  return (
+    <div className="control-card">
+      <h3>{label}</h3>
+
+      <div className="button-row">
+        <button
+          className="score-btn goal"
+          onClick={() => onChange('goals', 1)}
+        >
+          + Goal
+        </button>
+
+        <button
+          className="score-btn point"
+          onClick={() => onChange('points', 1)}
+        >
+          + Point
+        </button>
+
+        <button
+          className="score-btn point"
+          onClick={() => onChange('two_pointer', 1)}
+        >
+          + 2 PT
+        </button>
+      </div>
+
+      <div className="button-row compact">
+        <button onClick={() => onChange('goals', -1)}>
+          - Goal
+        </button>
+
+        <button onClick={() => onChange('points', -1)}>
+          - Point
+        </button>
+      </div>
+    </div>
+  )
+}

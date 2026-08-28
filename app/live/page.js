@@ -531,7 +531,7 @@ console.log('SCORER SPLIT:', {
   TEST HOME - {homeTeam?.name || 'Home'}
 </div>
 
-      <div style={styles.scorersTitle}>SCORERS</div>
+      <div style={styles.scorersTitle}>HOME SCORERS TEST</div>
 
       {homeEvents.map(event => (
         <div key={event.id} style={styles.scorerRow}>

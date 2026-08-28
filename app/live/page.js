@@ -175,7 +175,7 @@ setLoading(false)
     .on(
       'postgres_changes',
       {
-        event: 'INSERT',
+        event: '*',
         schema: 'public',
         table: 'match_events',
         filter: `match_id=eq.${match.id}`

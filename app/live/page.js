@@ -235,8 +235,15 @@ function formatStatus(status = '') {
       UPCOMING FIXTURE
     </div>
 
-   <div style={styles.upcomingTeams}>
 
+{upcomingFixture.competition && (
+  <div style={styles.upcomingCompetition}>
+    {upcomingFixture.competition}
+  </div>
+)}
+
+<div style={styles.upcomingTeams}>
+      
   <div style={styles.upcomingTeam}>
     <img
       src={
@@ -475,6 +482,16 @@ const styles = {
   letterSpacing: '1.5px',
   fontSize: '13px'
 },
+
+  upcomingCompetition: {
+  textAlign: 'center',
+  color: '#ffffff',
+  fontSize: '20px',
+  fontWeight: '800',
+  marginBottom: '20px',
+  letterSpacing: '0.5px'
+},
+  
   upcomingTeams: {
   display: 'grid',
   gridTemplateColumns: '1fr auto 1fr',

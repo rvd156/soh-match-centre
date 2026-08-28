@@ -321,6 +321,19 @@ function formatStatus(status = '') {
   const homeTotal = match.home_goals * 3 + match.home_points
   const awayTotal = match.away_goals * 3 + match.away_points
 
+const matchFinished =
+  match.status === 'full_time' ||
+  match.status === 'after_extra_time'
+
+const sohIsHome = match.home_team_id === 1
+
+const sohWon =
+  matchFinished &&
+  (
+    (sohIsHome && homeTotal > awayTotal) ||
+    (!sohIsHome && awayTotal > homeTotal)
+  )
+
   return (
     <main style={styles.page}>
     <style>{`
@@ -363,7 +376,11 @@ function formatStatus(status = '') {
 
         <div style={styles.liveBar}>
          <span className="live-pulse" style={styles.liveDot}></span>
-          {match.status === 'full_time' ? 'FULL TIME' : 'LIVE'}
+          {match.status === 'full_time'
+  ? 'FULL TIME'
+  : match.status === 'after_extra_time'
+    ? 'FULL TIME - AET'
+    : 'LIVE'}
         </div>
 
         <div style={styles.matchInfo}>
@@ -429,7 +446,11 @@ function formatStatus(status = '') {
           </div>
 
         </section>
-
+{sohWon && (
+  <div style={styles.winBanner}>
+    BALLINAMORE SOH WIN
+  </div>
+)}
         <footer style={styles.footer}>
           {match.venue && <span>{match.venue}</span>}
           {match.match_date && <span>{match.match_date}</span>}
@@ -664,6 +685,19 @@ upcomingTime: {
     fontWeight: '900',
     fontSize: '20px'
   },
+
+  winBanner: {
+  margin: '24px auto 0',
+  width: 'fit-content',
+  padding: '12px 24px',
+  borderRadius: '999px',
+  background: '#f4c430',
+  color: '#071a12',
+  fontSize: '20px',
+  fontWeight: '900',
+  letterSpacing: '1px',
+  textAlign: 'center'
+},
 
   footer: {
     marginTop: '24px',

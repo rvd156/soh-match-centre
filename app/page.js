@@ -284,27 +284,36 @@ async function loadMatchEvents(currentMatchId) {
 
   setMatchEvents(data || [])
 }
-  async function removeCardEvent(event) {
-  if (
-    event.event_type !== 'yellow_card' &&
-    event.event_type !== 'red_card'
-  ) {
-    return
-  }
-
-  const cardName =
-    event.event_type === 'yellow_card'
-      ? 'yellow card'
-      : 'red card'
+  async function removeMatchEvent(event) {
+  const eventName =
+  event.event_type === 'goal'
+    ? 'goal'
+    : event.event_type === 'point'
+      ? 'point'
+      : event.event_type === 'two_pointer'
+        ? '2-pointer'
+        : event.event_type === 'yellow_card'
+          ? 'yellow card'
+          : 'red card'
 
   if (
     !window.confirm(
-      `Remove this ${cardName} for ${event.players?.name || 'this player'}?`
+      `Remove this ${eventName} for ${event.players?.name || 'this player'}?`
     )
   ) {
     return
   }
 
+  const isScoreEvent =
+  event.event_type === 'goal' ||
+  event.event_type === 'point' ||
+  event.event_type === 'two_pointer' 
+
+  const eventSide =
+  event.team_id === (setup.sohSide === 'home' ? 1 : Number(setup.oppositionTeamId))
+    ? 'home'
+    : 'away'  
+    
   const { error } = await supabase
     .from('match_events')
     .delete()
@@ -315,7 +324,15 @@ async function loadMatchEvents(currentMatchId) {
     alert('Could not remove the card.')
     return
   }
+if (isScoreEvent) {
+  const scoreType =
+    event.event_type === 'goal' ? 'goals' : 'points'
 
+  const scoreAmount =
+    event.event_type === 'two_pointer' ? -2 : -1
+
+  changeScore(eventSide, scoreType, scoreAmount)
+}
   loadMatchEvents(matchId)
 }
   
@@ -787,29 +804,42 @@ console.log('RESET RESULT:', data, error)
 <button onClick={extraTimeFullTime}>ET Full Time</button>
 <button onClick={resetMatch} className="danger">Reset</button>
         </div>
-      {matchEvents.some(event =>
-  event.event_type === 'yellow_card' ||
-  event.event_type === 'red_card'
-) && (
+  {matchEvents.length > 0 && (
   <div className="control-card">
     <h3>Recent Events</h3>
 
-    {matchEvents
-      .filter(event =>
-        event.event_type === 'yellow_card' ||
-        event.event_type === 'red_card'
-      )
-      .map(event => (
-        <div key={event.id} className="button-row compact">
-          <span>
-            {event.event_type === 'yellow_card' ? '🟨' : '🟥'}{' '}
-            {event.players?.name || 'Unknown Player'} · {event.match_minute}'
-          </span>
+    {matchEvents.map(event => (
+       <div key={event.id} className="button-row compact">
+  <span>
+    {event.event_type === 'goal'
+      ? '🥅'
+      : event.event_type === 'point'
+        ? '⚪'
+        : event.event_type === 'two_pointer'
+          ? '🟧'
+          : event.event_type === 'yellow_card'
+            ? '🟨'
+            : '🟥'}{' '}
 
-          <button onClick={() => removeCardEvent(event)}>
-            Remove
-          </button>
-        </div>
+    {event.players?.name || 'Unknown Player'} ·{' '}
+
+    {event.event_type === 'goal'
+      ? 'Goal'
+      : event.event_type === 'point'
+        ? 'Point'
+        : event.event_type === 'two_pointer'
+          ? '2PT'
+          : event.event_type === 'yellow_card'
+            ? 'Yellow Card'
+            : 'Red Card'}{' '}
+
+    · {event.match_minute}'
+  </span>
+
+  <button onClick={() => removeMatchEvent(event)}>
+    Remove
+  </button>
+</div>
       ))}
   </div>
 )}

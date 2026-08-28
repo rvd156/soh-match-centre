@@ -398,14 +398,6 @@ const sohWon =
     (!sohIsHome && awayTotal > homeTotal)
   )
 
-console.log('SCORER SPLIT:', {
-  matchEvents: matchEvents.length,
-  homeEvents: homeEvents.length,
-  awayEvents: awayEvents.length,
-  homeTeam: homeTeam?.name,
-  awayTeam: awayTeam?.name
-})
-
   return (
     <main style={styles.page}>
     <style>{`
@@ -528,10 +520,10 @@ console.log('SCORER SPLIT:', {
   <section style={styles.scorers}>
     <div style={styles.scorerColumn}>
       <div style={styles.scorersTeamName}>
-  TEST HOME - {homeTeam?.name || 'Home'}
+  {homeTeam?.name || 'Home'}
 </div>
 
-      <div style={styles.scorersTitle}>HOME SCORERS TEST</div>
+      <div style={styles.scorersTitle}>SCORERS</div>
 
       {homeEvents.map(event => (
         <div key={event.id} style={styles.scorerRow}>

@@ -852,7 +852,6 @@ const { error } = await supabase
     match_id: matchId,
     team_id: player.team_id,
     player_id: player.id,
-    event_type:
   event_type:
   scorerPicker.type === 'goals'
     ? 'goal'

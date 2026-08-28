@@ -33,6 +33,7 @@ const [playersLoading, setPlayersLoading] = useState(false)
 const [playersError, setPlayersError] = useState('')
 const [scorerPicker, setScorerPicker] = useState(null)
 const [matchId, setMatchId] = useState(null)
+const [existingMatch, setExistingMatch] = useState(null)
   
   const intervalRef = useRef(null)
 
@@ -60,6 +61,7 @@ const [matchId, setMatchId] = useState(null)
   }
 
   loadTeams()
+checkForExistingMatch()
 }, [])
 useEffect(() => {
   async function loadPlayers() {
@@ -243,6 +245,25 @@ const awayCrest = sohIsHome ? setup.oppositionCrest : sohCrest
     teamName: side === 'home' ? homeName : awayName
   })
 }
+
+  async function checkForExistingMatch() {
+  const { data, error } = await supabase
+    .from('matches')
+    .select('*')
+    .eq('active', true)
+    .order('id', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Error checking for existing match:', error)
+    return
+  }
+
+  console.log('EXISTING ACTIVE MATCH:', data)
+  setExistingMatch(data)
+}
+  
   async function startMatch() {
   if (period === 'PRE-MATCH' && !matchId) {
     const homeTeamId =

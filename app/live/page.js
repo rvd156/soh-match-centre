@@ -10,7 +10,36 @@ export default function LiveMatchPage() {
   const [loading, setLoading] = useState(true)
   const [liveSeconds, setLiveSeconds] = useState(0)
   const [upcomingFixture, setUpcomingFixture] = useState(null)
+  const [matchEvents, setMatchEvents] = useState([])
 
+async function loadMatchEvents(matchId) {
+  if (!matchId) {
+    setMatchEvents([])
+    return
+  }
+
+  const { data, error } = await supabase
+    .from('match_events')
+    .select(`
+      *,
+      players (
+        id,
+        name,
+        jersey_number
+      )
+    `)
+    .eq('match_id', matchId)
+    .in('event_type', ['goal', 'point', 'two_pointer'])
+    .order('clock_seconds', { ascending: true })
+
+  if (error) {
+    console.error('Error loading match events:', error)
+    return
+  }
+
+  setMatchEvents(data || [])
+}
+  
   async function loadUpcomingFixture() {
   const { data, error } = await supabase
   .from('upcoming_fixtures')
@@ -49,6 +78,7 @@ export default function LiveMatchPage() {
   setMatch(null)
   setHomeTeam(null)
   setAwayTeam(null)
+  setMatchEvents([])
   setLoading(false)
   return
 }
@@ -65,9 +95,10 @@ export default function LiveMatchPage() {
     }
 
     setMatch(matchData)
-    setHomeTeam(teams.find(team => team.id === matchData.home_team_id))
-    setAwayTeam(teams.find(team => team.id === matchData.away_team_id))
-    setLoading(false)
+setHomeTeam(teams.find(team => team.id === matchData.home_team_id))
+setAwayTeam(teams.find(team => team.id === matchData.away_team_id))
+loadMatchEvents(matchData.id)
+setLoading(false)
   }
 
   useEffect(() => {
@@ -134,6 +165,29 @@ export default function LiveMatchPage() {
 
   return () => {
     supabase.removeChannel(channel)
+  }
+}, [match?.id])
+  useEffect(() => {
+  if (!match?.id) return
+
+  const eventsChannel = supabase
+    .channel(`match-events-${match.id}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'match_events',
+        filter: `match_id=eq.${match.id}`
+      },
+      () => {
+        loadMatchEvents(match.id)
+      }
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(eventsChannel)
   }
 }, [match?.id])
   useEffect(() => {
@@ -451,6 +505,26 @@ const sohWon =
     BALLINAMORE SOH WIN
   </div>
 )}
+
+{matchEvents.length > 0 && (
+  <section style={styles.scorers}>
+    <div style={styles.scorersTitle}>SCORERS</div>
+
+    {matchEvents.map(event => (
+      <div key={event.id} style={styles.scorerRow}>
+        {event.players?.name || 'Unknown Player'}
+        {' '}
+        {event.event_type === 'goal'
+          ? '1-00'
+          : event.event_type === 'two_pointer'
+            ? '2PT'
+            : '0-01'}
+        {' · '}
+        {event.match_minute}'
+      </div>
+    ))}
+  </section>
+)}
         <footer style={styles.footer}>
           {match.venue && <span>{match.venue}</span>}
           {match.match_date && <span>{match.match_date}</span>}
@@ -697,6 +771,31 @@ upcomingTime: {
   fontWeight: '900',
   letterSpacing: '1px',
   textAlign: 'center'
+},
+
+  scorers: {
+  marginTop: '24px',
+  background: '#0d2419',
+  border: '1px solid #1c4932',
+  borderRadius: '18px',
+  padding: '20px'
+},
+
+scorersTitle: {
+  color: '#f4c430',
+  fontSize: '14px',
+  fontWeight: '900',
+  letterSpacing: '1.5px',
+  marginBottom: '14px',
+  textAlign: 'center'
+},
+
+scorerRow: {
+  padding: '10px 0',
+  borderBottom: '1px solid #1c4932',
+  textAlign: 'center',
+  fontSize: '16px',
+  fontWeight: '600'
 },
 
   footer: {

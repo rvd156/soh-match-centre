@@ -957,11 +957,13 @@ goalEvent: {
 },
 
 goalCelebrationText: {
-  fontSize: 'clamp(48px, 10vw, 140px)',
+  fontSize: 'clamp(32px, 8vw, 140px)',
   fontWeight: '900',
-  letterSpacing: '4px',
+  letterSpacing: '2px',
   textAlign: 'center',
-  padding: '30px'
+  padding: '20px',
+  maxWidth: '100%',
+  boxSizing: 'border-box'
 },
 
   footer: {

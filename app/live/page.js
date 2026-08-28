@@ -963,7 +963,7 @@ goalCelebrationText: {
   textAlign: 'center',
   padding: '20px',
   maxWidth: '100%',
-  boxSizing: 'border-box'
+  boxSizing: 'border-box',
   whiteSpace: 'nowrap'
 },
 

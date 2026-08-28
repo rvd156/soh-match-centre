@@ -607,10 +607,7 @@ const sohWon =
     </div>
   </section>
 )}
-  {matchEvents.some(event =>
-  event.event_type === 'yellow_card' ||
-  event.event_type === 'red_card'
-) && (
+  {matchEvents.length > 0 && (
   <section style={styles.scorersSection}>
     <div style={{ width: '100%' }}>
       <div style={styles.scorersTitle}>MATCH EVENTS</div>
@@ -628,14 +625,14 @@ const sohWon =
   {event.match_minute}'{' '}
 
   {event.event_type === 'goal'
-    ? '🥅'
-    : event.event_type === 'point'
-      ? '⚪'
-      : event.event_type === 'two_pointer'
-        ? '🟧'
-        : event.event_type === 'yellow_card'
-          ? '🟨'
-          : '🟥'}{' '}
+  ? <span style={styles.greenFlag}></span>
+  : event.event_type === 'point'
+    : <span style={styles.whiteFlag}></span>
+    : event.event_type === 'two_pointer'
+     ? <span style={styles.orangeFlag}></span>
+      : event.event_type === 'yellow_card'
+        ? '🟨'
+        : '🟥'}{' '}
 
   {event.players?.name || 'Unknown Player'} ·{' '}
 
@@ -946,7 +943,39 @@ goalEvent: {
   letterSpacing: '2px'
 },
 
-  goalCelebration: {
+  greenFlag: {
+  display: 'inline-block',
+  width: '30px',
+  height: '22px',
+  background: '#00843D',
+  verticalAlign: 'middle',
+  marginRight: '6px',
+  clipPath: 'polygon(0 0, 100% 0, 78% 50%, 100% 100%, 0 100%)'
+},
+
+whiteFlag: {
+  display: 'inline-block',
+  width: '30px',
+  height: '22px',
+  background: '#ffffff',
+  verticalAlign: 'middle',
+  marginRight: '6px',
+  border: '1px solid #bfc8c3',
+  boxSizing: 'border-box',
+  clipPath: 'polygon(0 0, 100% 0, 78% 50%, 100% 100%, 0 100%)'
+},
+
+orangeFlag: {
+  display: 'inline-block',
+  width: '30px',
+  height: '22px',
+  background: '#F58220',
+  verticalAlign: 'middle',
+  marginRight: '6px',
+  clipPath: 'polygon(0 0, 100% 0, 78% 50%, 100% 100%, 0 100%)'
+},
+
+goalCelebration: {
   position: 'fixed',
   inset: 0,
   zIndex: 9999,

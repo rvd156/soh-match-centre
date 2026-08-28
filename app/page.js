@@ -255,14 +255,108 @@ const awayCrest = sohIsHome ? setup.oppositionCrest : sohCrest
     .limit(1)
     .maybeSingle()
 
-  if (error) {
+    if (error) {
     console.error('Error checking for existing match:', error)
     return
   }
-
-  console.log('EXISTING ACTIVE MATCH:', data)
-  setExistingMatch(data)
+    console.log('EXISTING ACTIVE MATCH:', data)
+setExistingMatch(data)
 }
+  
+  function resumeMatch() {
+  if (!existingMatch) return
+
+  const sohSide =
+    existingMatch.home_team_id === 1 ? 'home' : 'away'
+
+  const oppositionTeamId =
+    sohSide === 'home'
+      ? existingMatch.away_team_id
+      : existingMatch.home_team_id
+
+  const oppositionTeam = teams.find(
+    team => Number(team.id) === Number(oppositionTeamId)
+  )
+
+  const periodMap = {
+    first_half: 'FIRST HALF',
+    half_time: 'HALF TIME',
+    second_half: 'SECOND HALF',
+    full_time: 'FULL TIME',
+    extra_time: 'EXTRA TIME',
+    extra_time_half_time: 'ET HALF TIME',
+    extra_time_second_half: 'EXTRA TIME 2ND HALF',
+    after_extra_time: 'AET'
+  }
+
+  const isExtraTime = [
+    'extra_time',
+    'extra_time_half_time',
+    'extra_time_second_half',
+    'after_extra_time'
+  ].includes(existingMatch.status)
+
+  const startedAt = isExtraTime
+    ? existingMatch.extra_time_started_at
+    : existingMatch.clock_started_at
+
+  const baseSeconds = isExtraTime
+    ? (existingMatch.extra_time_seconds || 0)
+    : (existingMatch.clock_seconds || 0)
+
+  let restoredSeconds = baseSeconds
+
+  if (startedAt) {
+    const elapsed = Math.max(
+      0,
+      Math.floor(
+        (Date.now() - new Date(startedAt).getTime()) / 1000
+      )
+    )
+
+    restoredSeconds += elapsed
+  }
+
+  setMatchId(existingMatch.id)
+
+  setHome({
+    goals: existingMatch.home_goals || 0,
+    points: existingMatch.home_points || 0
+  })
+
+  setAway({
+    goals: existingMatch.away_goals || 0,
+    points: existingMatch.away_points || 0
+  })
+
+  setSetup(s => ({
+    ...s,
+    opposition: oppositionTeam?.name || 'Opposition',
+    oppositionTeamId,
+    oppositionCrest: oppositionTeam?.crest_url || '',
+    competition: existingMatch.competition || '',
+    venue: existingMatch.venue || '',
+    referee: existingMatch.referee || '',
+    date: existingMatch.match_date || '',
+    throwIn: existingMatch.throw_in?.slice(0, 5) || '',
+    halfLength: String(existingMatch.half_length || 30),
+    sohSide
+  }))
+
+  setPeriod(periodMap[existingMatch.status] || 'PRE-MATCH')
+
+  if (isExtraTime) {
+    setExtraTimeSeconds(restoredSeconds)
+  } else {
+    setSeconds(restoredSeconds)
+  }
+
+  setRunning(Boolean(startedAt))
+  setDisplayMode(false)
+  setSetupComplete(true)
+  setExistingMatch(null)
+}  
+
   
   async function startMatch() {
   if (period === 'PRE-MATCH' && !matchId) {
@@ -560,7 +654,7 @@ console.log('RESET RESULT:', data, error)
   setMatchId(null)
 }
 
-  if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} existingMatch={existingMatch} onStart={() => setup.opposition.trim() && setSetupComplete(true)} onPublishFixture={publishUpcomingFixture} />
+  if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} existingMatch={existingMatch} onResumeMatch={resumeMatch} onStart={() => setup.opposition.trim() && setSetupComplete(true)} onPublishFixture={publishUpcomingFixture} />
   return <main className={displayMode ? 'display-page' : ''}>
     <section className="scoreboard-card">
       <div className="topbar">
@@ -675,7 +769,7 @@ setScorerPicker(null)
 )}
   </main>
 }
-function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFixture,existingMatch}){
+function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFixture,existingMatch,onResumeMatch}){
   const update = (key,value) => setSetup(s=>({...s,[key]:value}))
   function uploadCrest(event) {
   const file = event.target.files?.[0]
@@ -707,9 +801,9 @@ function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFi
           <p>A match is already running and can be resumed.</p>
         </div>
 
-        <button className="start-setup">
-          Resume Match
-        </button>
+        <button className="start-setup" onClick={onResumeMatch}>
+  Resume Match
+</button>
 
       </section>
     </main>

@@ -560,7 +560,7 @@ console.log('RESET RESULT:', data, error)
   setMatchId(null)
 }
 
-  if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} onStart={() => setup.opposition.trim() && setSetupComplete(true)} onPublishFixture={publishUpcomingFixture} />
+  if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} existingMatch={existingMatch} onStart={() => setup.opposition.trim() && setSetupComplete(true)} onPublishFixture={publishUpcomingFixture} />
   return <main className={displayMode ? 'display-page' : ''}>
     <section className="scoreboard-card">
       <div className="topbar">
@@ -675,8 +675,7 @@ setScorerPicker(null)
 )}
   </main>
 }
-
-function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFixture}){
+function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFixture,existingMatch}){
   const update = (key,value) => setSetup(s=>({...s,[key]:value}))
   function uploadCrest(event) {
   const file = event.target.files?.[0]

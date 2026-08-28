@@ -689,6 +689,33 @@ function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFi
   }
   reader.readAsDataURL(file)
 }
+  if (existingMatch) {
+  return (
+    <main className="setup-page">
+      <section className="setup-card">
+
+        <div className="setup-brand">
+          <img src="/soh-crest.png" alt="SOH crest"/>
+          <div>
+            <p>SEÁN O'HESLIN'S GAA</p>
+            <h1>Match Centre</h1>
+          </div>
+        </div>
+
+        <div className="setup-heading">
+          <span>MATCH IN PROGRESS</span>
+          <h2>Active Match Found</h2>
+          <p>A match is already running and can be resumed.</p>
+        </div>
+
+        <button className="start-setup">
+          Resume Match
+        </button>
+
+      </section>
+    </main>
+  )
+}
   return <main className="setup-page"><section className="setup-card">
     <div className="setup-brand"><img src="/soh-crest.png" alt="SOH crest"/><div><p>SEÁN O'HESLIN'S GAA</p><h1>Match Centre</h1></div></div>
     <div className="setup-heading"><span>NEW MATCH</span><h2>Match Setup</h2><p>Enter the match details before throw-in.</p></div>

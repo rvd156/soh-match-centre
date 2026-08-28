@@ -32,6 +32,9 @@ const [oppositionPlayers, setOppositionPlayers] = useState([])
 const [playersLoading, setPlayersLoading] = useState(false)
 const [playersError, setPlayersError] = useState('')
 const [scorerPicker, setScorerPicker] = useState(null)
+const [addingPlayer, setAddingPlayer] = useState(false)
+const [newPlayerName, setNewPlayerName] = useState('')
+const [newPlayerNumber, setNewPlayerNumber] = useState('')  
 const [matchId, setMatchId] = useState(null)
 const [existingMatch, setExistingMatch] = useState(null)
 const [matchEvents, setMatchEvents] = useState([])
@@ -255,11 +258,92 @@ const awayCrest = sohIsHome ? setup.oppositionCrest : sohCrest
     teamName: side === 'home' ? homeName : awayName
   })
 }
-async function loadMatchEvents(currentMatchId) {
-  if (!currentMatchId) {
-    setMatchEvents([])
+
+  async function addNewPlayer() {
+  const name = newPlayerName.trim()
+
+  if (!name || !scorerPicker) return
+
+  const teamId =
+    scorerPicker.side === 'home'
+      ? (setup.sohSide === 'home' ? 1 : Number(setup.oppositionTeamId))
+      : (setup.sohSide === 'away' ? 1 : Number(setup.oppositionTeamId))
+
+  const { data, error } = await supabase
+    .from('players')
+    .insert({
+      name,
+      team_id: teamId,
+      jersey_number: newPlayerNumber
+        ? Number(newPlayerNumber)
+        : null
+    })
+    .select()
+    .single()
+
+  if (error) {
+    console.error('Error adding player:', error)
+    alert('Could not add the player.')
     return
   }
+
+  console.log('NEW PLAYER ADDED:', data)
+}
+
+  console.log('NEW PLAYER ADDED:', data)
+
+const { error: eventError } = await supabase
+  .from('match_events')
+  .insert({
+    match_id: matchId,
+    team_id: data.team_id,
+    player_id: data.id,
+    event_type:
+      scorerPicker.type === 'goals'
+        ? 'goal'
+        : scorerPicker.type === 'two_pointer'
+          ? 'two_pointer'
+          : scorerPicker.type === 'yellow_card'
+            ? 'yellow_card'
+            : scorerPicker.type === 'red_card'
+              ? 'red_card'
+              : 'point',
+    score_type: 'play',
+    match_minute: Math.floor(displaySeconds / 60),
+    clock_seconds: displaySeconds
+  })
+
+if (eventError) {
+  console.error('Error saving new player event:', eventError)
+  alert('Player was added, but the match event could not be saved.')
+  return
+}
+
+    if (
+  scorerPicker.type !== 'yellow_card' &&
+  scorerPicker.type !== 'red_card'
+) {
+  changeScore(
+    scorerPicker.side,
+    scorerPicker.type === 'two_pointer' ? 'points' : scorerPicker.type,
+    scorerPicker.type === 'two_pointer' ? 2 : 1
+  )
+}
+    loadMatchEvents(matchId)
+
+if (data.team_id === 1) {
+  setSohPlayers(prev => [...prev, data])
+} else {
+  setOppositionPlayers(prev => [...prev, data])
+}
+
+setAddingPlayer(false)
+setNewPlayerName('')
+setNewPlayerNumber('')
+setScorerPicker(null)
+}
+
+async function loadMatchEvents(currentMatchId) {
   const { data, error } = await supabase
     .from('match_events')
     .select(`
@@ -867,6 +951,12 @@ console.log('RESET RESULT:', data, error)
         defaultValue=""
         onChange={async (e) => {
           if (!e.target.value) return
+          if (e.target.value === 'add-new-player') {
+  setAddingPlayer(true)
+  setNewPlayerName('')
+  setNewPlayerNumber('')
+  return
+}
 
           const player = scorerPicker.players.find(
   p => String(p.id) === String(e.target.value)
@@ -926,7 +1016,32 @@ setScorerPicker(null)
             {player.name}
           </option>
         ))}
+<option value="add-new-player">
+  ➕ Add New Player
+</option>
       </select>
+
+  {addingPlayer && (
+  <div>
+    <input
+      type="text"
+      placeholder="Player name"
+      value={newPlayerName}
+      onChange={(e) => setNewPlayerName(e.target.value)}
+    />
+
+    <input
+      type="number"
+      placeholder="Jersey number (optional)"
+      value={newPlayerNumber}
+      onChange={(e) => setNewPlayerNumber(e.target.value)}
+    />
+
+    <button type="button" onClick={addNewPlayer}>
+  Add Player
+</button>
+  </div>
+)}
 
       <button onClick={() => setScorerPicker(null)}>
         Cancel

@@ -356,7 +356,30 @@ setExistingMatch(data)
   setSetupComplete(true)
   setExistingMatch(null)
 }  
+async function resetExistingMatch() {
+  if (!existingMatch) return
 
+  if (!window.confirm('Reset this active match and return to match setup?')) {
+    return
+  }
+
+  const { error } = await supabase
+    .from('matches')
+    .update({
+      active: false,
+      clock_started_at: null,
+      extra_time_started_at: null
+    })
+    .eq('id', existingMatch.id)
+
+  if (error) {
+    console.error('Error resetting existing match:', error)
+    alert('Could not reset the active match.')
+    return
+  }
+
+  setExistingMatch(null)
+}
   
   async function startMatch() {
   if (period === 'PRE-MATCH' && !matchId) {
@@ -654,7 +677,7 @@ console.log('RESET RESULT:', data, error)
   setMatchId(null)
 }
 
-  if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} existingMatch={existingMatch} onResumeMatch={resumeMatch} onStart={() => setup.opposition.trim() && setSetupComplete(true)} onPublishFixture={publishUpcomingFixture} />
+  if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} existingMatch={existingMatch} onResumeMatch={resumeMatch} onResetExistingMatch={resetExistingMatch} onStart={() => setup.opposition.trim() && setSetupComplete(true)} onPublishFixture={publishUpcomingFixture} />
   return <main className={displayMode ? 'display-page' : ''}>
     <section className="scoreboard-card">
       <div className="topbar">
@@ -769,7 +792,7 @@ setScorerPicker(null)
 )}
   </main>
 }
-function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFixture,existingMatch,onResumeMatch}){
+function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFixture,existingMatch,onResumeMatch,onResetExistingMatch}){
   const update = (key,value) => setSetup(s=>({...s,[key]:value}))
   function uploadCrest(event) {
   const file = event.target.files?.[0]
@@ -803,6 +826,14 @@ function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFi
 
         <button className="start-setup" onClick={onResumeMatch}>
   Resume Match
+</button>
+
+    <button
+  className="start-setup"
+  onClick={onResetExistingMatch}
+  style={{ marginTop: '12px', background: '#8b1e1e' }}
+>
+  Reset Match
 </button>
 
       </section>

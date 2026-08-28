@@ -175,11 +175,10 @@ setLoading(false)
     .on(
       'postgres_changes',
       {
-        event: '*',
-        schema: 'public',
-        table: 'match_events',
-        filter: `match_id=eq.${match.id}`
-      },
+  event: '*',
+  schema: 'public',
+  table: 'match_events'
+},
       () => {
         loadMatchEvents(match.id)
       }

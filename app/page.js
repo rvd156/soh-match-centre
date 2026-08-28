@@ -1080,15 +1080,6 @@ function ScoreControls({label,onChange}){
         </button>
       </div>
 
-      <div className="button-row compact">
-        <button onClick={() => onChange('goals', -1)}>
-          - Goal
-        </button>
-
-        <button onClick={() => onChange('points', -1)}>
-          - Point
-        </button>
-      </div>
     <div className="button-row compact">
   <button onClick={() => onChange('yellow_card', 1)}>
     🟨 Yellow Card

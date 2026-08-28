@@ -284,7 +284,6 @@ async function loadMatchEvents(currentMatchId) {
 
   setMatchEvents(data || [])
 }
-}
   async function removeCardEvent(event) {
   if (
     event.event_type !== 'yellow_card' &&

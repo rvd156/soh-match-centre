@@ -34,6 +34,7 @@ const [playersError, setPlayersError] = useState('')
 const [scorerPicker, setScorerPicker] = useState(null)
 const [matchId, setMatchId] = useState(null)
 const [existingMatch, setExistingMatch] = useState(null)
+const [matchEvents, setMatchEvents] = useState([])
   
   const intervalRef = useRef(null)
 
@@ -105,7 +106,16 @@ useEffect(() => {
 
   loadPlayers()
 }, [setup.oppositionTeamId])
-    
+
+useEffect(() => {
+  if (!matchId) {
+    setMatchEvents([])
+    return
+  }
+
+  loadMatchEvents(matchId)
+}, [matchId])
+  
   useEffect(() => {
     const saved = localStorage.getItem('soh-match-centre-v2-1')
     if (!saved) return
@@ -245,7 +255,72 @@ const awayCrest = sohIsHome ? setup.oppositionCrest : sohCrest
     teamName: side === 'home' ? homeName : awayName
   })
 }
+async function loadMatchEvents(currentMatchId) {
+  if (!currentMatchId) {
+    setMatchEvents([])
+    return
+  }
 
+  async function removeCardEvent(event) {
+  if (
+    event.event_type !== 'yellow_card' &&
+    event.event_type !== 'red_card'
+  ) {
+    return
+  }
+
+  const cardName =
+    event.event_type === 'yellow_card'
+      ? 'yellow card'
+      : 'red card'
+
+  if (
+    !window.confirm(
+      `Remove this ${cardName} for ${event.players?.name || 'this player'}?`
+    )
+  ) {
+    return
+  }
+
+  const { error } = await supabase
+    .from('match_events')
+    .delete()
+    .eq('id', event.id)
+
+  if (error) {
+    console.error('Error removing card event:', error)
+    alert('Could not remove the card.')
+    return
+  }
+
+  loadMatchEvents(matchId)
+}
+
+  const { data, error } = await supabase
+    .from('match_events')
+    .select(`
+      id,
+      match_id,
+      team_id,
+      player_id,
+      event_type,
+      match_minute,
+      clock_seconds,
+      players (
+        name
+      )
+    `)
+    .eq('match_id', currentMatchId)
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    console.error('Error loading match events:', error)
+    return
+  }
+
+  setMatchEvents(data || [])
+}
+  
   async function checkForExistingMatch() {
   const { data, error } = await supabase
     .from('matches')
@@ -714,7 +789,33 @@ console.log('RESET RESULT:', data, error)
 <button onClick={extraTimeFullTime}>ET Full Time</button>
 <button onClick={resetMatch} className="danger">Reset</button>
         </div>
-      </>}
+      {matchEvents.some(event =>
+  event.event_type === 'yellow_card' ||
+  event.event_type === 'red_card'
+) && (
+  <div className="control-card">
+    <h3>Recent Events</h3>
+
+    {matchEvents
+      .filter(event =>
+        event.event_type === 'yellow_card' ||
+        event.event_type === 'red_card'
+      )
+      .map(event => (
+        <div key={event.id} className="button-row compact">
+          <span>
+            {event.event_type === 'yellow_card' ? '🟨' : '🟥'}{' '}
+            {event.players?.name || 'Unknown Player'} · {event.match_minute}'
+          </span>
+
+          <button onClick={() => removeCardEvent(event)}>
+            Remove
+          </button>
+        </div>
+      ))}
+  </div>
+)}
+  </>}
       <button className="display-toggle" onClick={()=>setDisplayMode(v=>!v)}>{displayMode?'Exit Display Mode':'Open Display Mode'}</button>
     </section>
   {scorerPicker && (
@@ -725,7 +826,11 @@ console.log('RESET RESULT:', data, error)
   ? 'Goal Scorer'
   : scorerPicker.type === 'two_pointer'
     ? '2-Point Scorer'
-    : 'Point Scorer'}
+    : scorerPicker.type === 'yellow_card'
+      ? 'Yellow Card'
+      : scorerPicker.type === 'red_card'
+        ? 'Red Card'
+        : 'Point Scorer'}
       </h2>
 
       <p>{scorerPicker.teamName}</p>
@@ -748,14 +853,19 @@ const { error } = await supabase
     team_id: player.team_id,
     player_id: player.id,
     event_type:
+  event_type:
   scorerPicker.type === 'goals'
     ? 'goal'
     : scorerPicker.type === 'two_pointer'
       ? 'two_pointer'
-      : 'point',
+      : scorerPicker.type === 'yellow_card'
+        ? 'yellow_card'
+        : scorerPicker.type === 'red_card'
+          ? 'red_card'
+          : 'point',
 score_type: 'play',
-    match_minute: Math.floor(seconds / 60),
-    clock_seconds: seconds
+   match_minute: Math.floor(displaySeconds / 60),
+clock_seconds: displaySeconds
   })
 
 if (error) {
@@ -765,7 +875,14 @@ if (error) {
 }
 
 console.log('SCORE EVENT SAVED')
-
+loadMatchEvents(matchId)
+if (
+  scorerPicker.type === 'yellow_card' ||
+  scorerPicker.type === 'red_card'
+) {
+  setScorerPicker(null)
+  return
+}
 changeScore(
   scorerPicker.side,
   scorerPicker.type === 'two_pointer' ? 'points' : scorerPicker.type,
@@ -945,6 +1062,15 @@ function ScoreControls({label,onChange}){
           - Point
         </button>
       </div>
+    <div className="button-row compact">
+  <button onClick={() => onChange('yellow_card', 1)}>
+    🟨 Yellow Card
+  </button>
+
+  <button onClick={() => onChange('red_card', 1)}>
+    🟥 Red Card
+  </button>
+</div>
     </div>
   )
 }

@@ -627,7 +627,7 @@ const sohWon =
   {event.event_type === 'goal'
   ? <span style={styles.greenFlag}></span>
   : event.event_type === 'point'
-    : <span style={styles.whiteFlag}></span>
+    ? <span style={styles.whiteFlag}></span>
     : event.event_type === 'two_pointer'
      ? <span style={styles.orangeFlag}></span>
       : event.event_type === 'yellow_card'

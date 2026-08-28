@@ -398,6 +398,14 @@ const sohWon =
     (!sohIsHome && awayTotal > homeTotal)
   )
 
+console.log('SCORER SPLIT:', {
+  matchEvents: matchEvents.length,
+  homeEvents: homeEvents.length,
+  awayEvents: awayEvents.length,
+  homeTeam: homeTeam?.name,
+  awayTeam: awayTeam?.name
+})
+
   return (
     <main style={styles.page}>
     <style>{`

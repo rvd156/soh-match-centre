@@ -214,10 +214,35 @@ function formatStatus(status = '') {
   if (!match) {
   return (
     <main style={styles.page}>
-      <div style={styles.message}>
-        {upcomingFixture
-          ? `Upcoming: Ballinamore SOH v ${upcomingFixture.opposition}`
-          : 'No match available.'}
+      <div style={styles.container}>
+
+        <header style={styles.header}>
+          <img
+            src="/soh-crest.png"
+            alt="SOH crest"
+            style={styles.mainCrest}
+          />
+
+          <div>
+            <div style={styles.club}>SEÁN O'HESLIN'S</div>
+            <h1 style={styles.title}>MATCH CENTRE</h1>
+          </div>
+        </header>
+
+      {upcomingFixture ? (
+  <>
+    <div style={styles.upcomingBar}>
+      UPCOMING FIXTURE
+    </div>
+
+    <div style={styles.message}>
+      Ballinamore SOH v {upcomingFixture.opposition}
+    </div>
+  </>
+) : (
+  <div style={styles.message}>No match available.</div>
+)}
+
       </div>
     </main>
   )
@@ -228,6 +253,29 @@ function formatStatus(status = '') {
 
   return (
     <main style={styles.page}>
+    <style>{`
+  @keyframes livePulse {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+      box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7);
+    }
+    70% {
+      transform: scale(1.15);
+      opacity: 0.8;
+      box-shadow: 0 0 0 8px rgba(255, 59, 48, 0);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+      box-shadow: 0 0 0 0 rgba(255, 59, 48, 0);
+    }
+  }
+
+  .live-pulse {
+    animation: livePulse 1.5s infinite;
+  }
+`}</style>
       <div style={styles.container}>
 
         <header style={styles.header}>
@@ -244,7 +292,7 @@ function formatStatus(status = '') {
         </header>
 
         <div style={styles.liveBar}>
-          <span style={styles.liveDot}></span>
+         <span className="live-pulse" style={styles.liveDot}></span>
           {match.status === 'full_time' ? 'FULL TIME' : 'LIVE'}
         </div>
 
@@ -378,11 +426,23 @@ const styles = {
     gap: '8px'
   },
 
+  upcomingBar: {
+  width: 'fit-content',
+  margin: '0 auto 24px',
+  padding: '8px 18px',
+  borderRadius: '999px',
+  background: '#123524',
+  color: '#f4c430',
+  fontWeight: '900',
+  letterSpacing: '1.5px',
+  fontSize: '13px'
+},
+  
   liveDot: {
     width: '8px',
     height: '8px',
     borderRadius: '50%',
-    background: '#f4c430'
+    background: '#ff3b30'
   },
 
   matchInfo: {

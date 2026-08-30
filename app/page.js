@@ -552,18 +552,18 @@ async function resetExistingMatch() {
   setExistingMatch(null)
 }
   
-  async function startMatch() {
+async function startMatch() {
   if (period === 'PRE-MATCH' && !matchId) {
-    const homeTeamId =
-      setup.sohSide === 'home' ? 1 : Number(setup.oppositionTeamId)
+    if (!setup.date) {
+      alert('Please choose a match date before starting the match.')
+      return
+    }
 
-    const awayTeamId =
-      setup.sohSide === 'away' ? 1 : Number(setup.oppositionTeamId)
-// Make sure no previous match is still marked as live
-const { error: deactivateError } = await supabase
-  .from('matches')
-  .update({ active: false })
-  .eq('active', true)
+  const homeTeamId =
+  setup.sohSide === 'home' ? 1 : Number(setup.oppositionTeamId)
+
+const awayTeamId =
+  setup.sohSide === 'away' ? 1 : Number(setup.oppositionTeamId)
 
 if (deactivateError) {
   console.error('Error deactivating previous match:', deactivateError)

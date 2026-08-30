@@ -989,7 +989,7 @@ console.log('RESET RESULT:', data, error)
     <h3>Recent Events</h3>
 
     {matchEvents
-      .slice(showAllEvents ? 0 : -4)
+      .slice(showAllEvents ? 0 : 4)
       .map(event => (
 
       <div key={event.id} className="button-row compact">

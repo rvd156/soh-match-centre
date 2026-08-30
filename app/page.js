@@ -1021,8 +1021,6 @@ console.log('RESET RESULT:', data, error)
   </div>
 )}
 
-</>}
-
 <button
   className="display-toggle"
   onClick={() => setDisplayMode(v => !v)}

@@ -1018,7 +1018,7 @@ console.log('RESET RESULT:', data, error)
   </button>
 </div>
       ))}
-  <      </div>
+  </div>
     )}
 
     <button

@@ -969,8 +969,31 @@ console.log('RESET RESULT:', data, error)
       <button className="display-toggle" onClick={()=>setDisplayMode(v=>!v)}>{displayMode?'Exit Display Mode':'Open Display Mode'}</button>
     </section>
   {scorerPicker && (
-  <div className="scorer-picker">
-    <div className="scorer-picker-card">
+  <div
+  className="scorer-picker"
+  style={{
+    position: 'fixed',
+    inset: 0,
+    zIndex: 1000,
+    display: 'flex',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    background: 'rgba(0, 0, 0, 0.65)',
+    padding: '16px'
+  }}
+>
+    <div
+  className="scorer-picker-card"
+  style={{
+    width: '100%',
+    maxWidth: '500px',
+    maxHeight: '80vh',
+    overflowY: 'auto',
+    borderRadius: '20px',
+    padding: '24px',
+    marginBottom: '0'
+  }}
+>
       <h2>
         {scorerPicker.type === 'goals'
   ? 'Goal Scorer'

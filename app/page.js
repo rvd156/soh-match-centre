@@ -986,48 +986,48 @@ console.log('RESET RESULT:', data, error)
     <h3>Recent Events</h3>
 
     {matchEvents.map(event => (
-       <div key={event.id} className="button-row compact">
-  <span>
-    {event.event_type === 'goal'
-      ? '🥅'
-      : event.event_type === 'point'
-        ? '⚪'
-        : event.event_type === 'two_pointer'
-          ? '🟧'
-          : event.event_type === 'yellow_card'
-            ? '🟨'
-            : '🟥'}{' '}
+      <div key={event.id} className="button-row compact">
+        <span>
+          {event.event_type === 'goal'
+            ? '🥅'
+            : event.event_type === 'point'
+              ? '⚪'
+              : event.event_type === 'two_pointer'
+                ? '🟧'
+                : event.event_type === 'yellow_card'
+                  ? '🟨'
+                  : '🟥'}{' '}
 
-    {event.players?.name || 'Unknown Player'} ·{' '}
+          {event.players?.name || 'Unknown Player'} ·{' '}
 
-    {event.event_type === 'goal'
-      ? 'Goal'
-      : event.event_type === 'point'
-        ? 'Point'
-        : event.event_type === 'two_pointer'
-          ? '2PT'
-          : event.event_type === 'yellow_card'
-            ? 'Yellow Card'
-            : 'Red Card'}{' '}
+          {event.event_type === 'goal'
+            ? 'Goal'
+            : event.event_type === 'point'
+              ? 'Point'
+              : event.event_type === 'two_pointer'
+                ? '2PT'
+                : event.event_type === 'yellow_card'
+                  ? 'Yellow Card'
+                  : 'Red Card'}{' '}
 
-    · {event.match_minute}'
-  </span>
+          · {event.match_minute}
+        </span>
 
-  <button onClick={() => removeMatchEvent(event)}>
-    Remove
-  </button>
-</div>
-      ))}
+        <button onClick={() => removeMatchEvent(event)}>
+          Remove
+        </button>
+      </div>
+    ))}
   </div>
-    )}
+)}
 
-        <button
-      className="display-toggle"
-      onClick={() => setDisplayMode(v => !v)}
-    >
-      {displayMode ? 'Exit Display Mode' : 'Open Display Mode'}
-    </button>
-  </section>
+<button
+  className="display-toggle"
+  onClick={() => setDisplayMode(v => !v)}
+>
+  {displayMode ? 'Exit Display Mode' : 'Open Display Mode'}
+</button>
+</section>
   {scorerPicker && (
   <div
   className="scorer-picker"

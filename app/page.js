@@ -914,6 +914,8 @@ console.log('RESET RESULT:', data, error)
   label={awayName}
   onChange={(t, d) => d > 0 ? requestScore('away', t) : changeScore('away', t, d)}
 />
+        </div>
+
         <div className="match-controls">
 
   {period === 'PRE-MATCH' && (

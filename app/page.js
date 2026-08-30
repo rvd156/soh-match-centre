@@ -848,9 +848,20 @@ console.log('RESET RESULT:', data, error)
   setMatchId(null)
 }
 
-  if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} existingMatch={existingMatch} onResumeMatch={resumeMatch} onResetExistingMatch={resetExistingMatch} 
- onStart={() => setup.opposition.trim() && setSetupComplete(true)}
-} onPublishFixture={publishUpcomingFixture} />
+ if (!setupComplete) return (
+  <Setup
+    setup={setup}
+    setSetup={setSetup}
+    teams={teams}
+    teamsLoading={teamsLoading}
+    teamsError={teamsError}
+    existingMatch={existingMatch}
+    onResumeMatch={resumeMatch}
+    onResetExistingMatch={resetExistingMatch}
+    onStart={() => setup.opposition.trim() && setSetupComplete(true)}
+    onPublishFixture={publishUpcomingFixture}
+  />
+)
   return <main className={displayMode ? 'display-page' : ''}>
     <section className="scoreboard-card">
       <div className="topbar">

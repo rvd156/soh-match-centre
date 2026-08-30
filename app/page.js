@@ -1021,13 +1021,13 @@ console.log('RESET RESULT:', data, error)
   </div>
     )}
 
-    <button
+        <button
       className="display-toggle"
       onClick={() => setDisplayMode(v => !v)}
     >
       {displayMode ? 'Exit Display Mode' : 'Open Display Mode'}
     </button>
-    </section>
+  </section>
   {scorerPicker && (
   <div
   className="scorer-picker"

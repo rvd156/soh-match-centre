@@ -914,18 +914,73 @@ console.log('RESET RESULT:', data, error)
   label={awayName}
   onChange={(t, d) => d > 0 ? requestScore('away', t) : changeScore('away', t, d)}
 />
-        </div>
         <div className="match-controls">
-          <button onClick={startMatch} className="primary">{running?'Running':period==='PRE-MATCH'?'Start Match':'Resume'}</button>
-          <button onClick={pauseMatch}>Pause</button><button onClick={halfTime}>Half Time</button>
-          <button onClick={secondHalf}>Start 2nd Half</button>
-<button onClick={fullTime}>Full Time</button>
-<button onClick={startExtraTime}>Start Extra Time</button>
-<button onClick={extraTimeHalfTime}>ET Half Time</button>
-<button onClick={secondHalfExtraTime}>Start ET 2nd Half</button>
-<button onClick={extraTimeFullTime}>ET Full Time</button>
-<button onClick={resetMatch} className="danger">Reset</button>
-        </div>
+
+  {period === 'PRE-MATCH' && (
+    <button onClick={startMatch} className="primary">
+      Start Match
+    </button>
+  )}
+
+  {(period === 'FIRST HALF' || period === 'SECOND HALF' || period === 'EXTRA TIME' || period === 'EXTRA TIME 2ND HALF') && (
+    <>
+      <button onClick={startMatch} className="primary">
+        {running ? 'Running' : 'Resume'}
+      </button>
+
+      <button onClick={pauseMatch}>
+        Pause
+      </button>
+    </>
+  )}
+
+  {period === 'FIRST HALF' && (
+    <button onClick={halfTime}>
+      Half Time
+    </button>
+  )}
+
+  {period === 'HALF TIME' && (
+    <button onClick={secondHalf} className="primary">
+      Start 2nd Half
+    </button>
+  )}
+
+  {period === 'SECOND HALF' && (
+    <button onClick={fullTime}>
+      Full Time
+    </button>
+  )}
+
+  {period === 'FULL TIME' && (
+    <button onClick={startExtraTime} className="primary">
+      Start Extra Time
+    </button>
+  )}
+
+  {period === 'EXTRA TIME' && (
+    <button onClick={extraTimeHalfTime}>
+      ET Half Time
+    </button>
+  )}
+
+  {period === 'ET HALF TIME' && (
+    <button onClick={secondHalfExtraTime} className="primary">
+      Start ET 2nd Half
+    </button>
+  )}
+
+  {period === 'EXTRA TIME 2ND HALF' && (
+    <button onClick={extraTimeFullTime}>
+      ET Full Time
+    </button>
+  )}
+
+  <button onClick={resetMatch} className="danger">
+    Reset
+  </button>
+
+</div>
   {matchEvents.length > 0 && (
   <div className="control-card">
     <h3>Recent Events</h3>

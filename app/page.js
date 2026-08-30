@@ -848,7 +848,24 @@ console.log('RESET RESULT:', data, error)
   setMatchId(null)
 }
 
-  if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} existingMatch={existingMatch} onResumeMatch={resumeMatch} onResetExistingMatch={resetExistingMatch} onStart={() => setup.opposition.trim() && setSetupComplete(true)} onPublishFixture={publishUpcomingFixture} />
+  if (!setupComplete) return <Setup setup={setup} setSetup={setSetup} teams={teams} teamsLoading={teamsLoading} teamsError={teamsError} existingMatch={existingMatch} onResumeMatch={resumeMatch} onResetExistingMatch={resetExistingMatch} onStart={() => {
+  if (!setup.date) {
+    alert('Please choose a match date before continuing.')
+    return
+  }
+
+  if (!setup.throwIn) {
+    alert('Please choose a throw-in time before continuing.')
+    return
+  }
+
+  if (!setup.opposition.trim()) {
+    alert('Please choose an opposition team before continuing.')
+    return
+  }
+
+  setSetupComplete(true)
+}} onPublishFixture={publishUpcomingFixture} />
   return <main className={displayMode ? 'display-page' : ''}>
     <section className="scoreboard-card">
       <div className="topbar">
@@ -1159,7 +1176,7 @@ onChange={e => {
 >
   Publish Upcoming Fixture
 </button>
-    <button className="start-setup" disabled={!setup.opposition.trim()} onClick={onStart}>Continue to Scoreboard →</button>
+    <button className="start-setup" disabled={!setup.opposition.trim() || !setup.date || !setup.throwIn} onClick={onStart}>Continue to Scoreboard →</button>
   </section></main>
 }
 

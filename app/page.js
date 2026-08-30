@@ -553,23 +553,37 @@ async function resetExistingMatch() {
 }
   
 async function startMatch() {
+  let currentMatchId = matchId
+
   if (period === 'PRE-MATCH' && !matchId) {
     if (!setup.date) {
       alert('Please choose a match date before starting the match.')
       return
     }
 
-  const homeTeamId =
-  setup.sohSide === 'home' ? 1 : Number(setup.oppositionTeamId)
+    if (!setup.throwIn) {
+      alert('Please choose a throw-in time before starting the match.')
+      return
+    }
 
-const awayTeamId =
-  setup.sohSide === 'away' ? 1 : Number(setup.oppositionTeamId)
+    const homeTeamId =
+      setup.sohSide === 'home' ? 1 : Number(setup.oppositionTeamId)
 
-if (deactivateError) {
-  console.error('Error deactivating previous match:', deactivateError)
-  alert('Could not clear the previous live match.')
-  return
-}
+    const awayTeamId =
+      setup.sohSide === 'away' ? 1 : Number(setup.oppositionTeamId)
+
+    // Make sure no previous match is still marked as live
+    const { error: deactivateError } = await supabase
+      .from('matches')
+      .update({ active: false })
+      .eq('active', true)
+
+    if (deactivateError) {
+      console.error('Error deactivating previous match:', deactivateError)
+      alert('Could not clear the previous live match.')
+      return
+    }
+
     const { data, error } = await supabase
       .from('matches')
       .insert({
@@ -600,23 +614,31 @@ if (deactivateError) {
     }
 
     console.log('MATCH CREATED:', data)
+
+    currentMatchId = data.id
     setMatchId(data.id)
   }
 
-  if (period === 'PRE-MATCH') setPeriod('FIRST HALF')
+  if (period === 'PRE-MATCH') {
+    setPeriod('FIRST HALF')
+  }
 
-if (matchId) {
-  const { error } = await supabase
-    .from('matches')
-    .update({
-      clock_started_at: new Date().toISOString()
-    })
-    .eq('id', matchId)
+  // Start/resume the database clock
+  if (currentMatchId) {
+    const { error } = await supabase
+      .from('matches')
+      .update({
+        clock_started_at: new Date().toISOString()
+      })
+      .eq('id', currentMatchId)
 
-  if (error) console.error('Error resuming match clock:', error)
-}
+    if (error) {
+      console.error('Error starting match clock:', error)
+    }
+  }
 
-setRunning(true)
+  // Start the local clock
+  setRunning(true)
 }
  async function pauseMatch() {
   setRunning(false)
@@ -658,7 +680,7 @@ async function secondHalf() {
   setPeriod('SECOND HALF')
   setRunning(true)
 
-  if (matchId) {
+ if (matchId) {
     const { error } = await supabase
       .from('matches')
       .update({

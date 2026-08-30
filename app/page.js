@@ -1018,9 +1018,15 @@ console.log('RESET RESULT:', data, error)
   </button>
 </div>
       ))}
-  </div>
-)}
-            <button className="display-toggle" onClick={()=>setDisplayMode(v=>!v)}>{displayMode?'Exit Display Mode':'Open Display Mode'}</button>
+  <      </div>
+    )}
+
+    <button
+      className="display-toggle"
+      onClick={() => setDisplayMode(v => !v)}
+    >
+      {displayMode ? 'Exit Display Mode' : 'Open Display Mode'}
+    </button>
     </section>
   {scorerPicker && (
   <div

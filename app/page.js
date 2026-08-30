@@ -551,6 +551,12 @@ async function resetExistingMatch() {
 
   setExistingMatch(null)
 }
+
+useEffect(() => {
+  if (!existingMatch || teams.length === 0) return
+
+  resumeMatch()
+}, [existingMatch, teams])
   
 async function startMatch() {
   let currentMatchId = matchId

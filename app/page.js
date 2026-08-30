@@ -38,6 +38,7 @@ const [newPlayerNumber, setNewPlayerNumber] = useState('')
 const [matchId, setMatchId] = useState(null)
 const [existingMatch, setExistingMatch] = useState(null)
 const [matchEvents, setMatchEvents] = useState([])
+const [showAllEvents, setShowAllEvents] = useState(false)
   
   const intervalRef = useRef(null)
 
@@ -983,11 +984,14 @@ console.log('RESET RESULT:', data, error)
   </button>
 
 </div>
-  {matchEvents.length > 0 && (
+{matchEvents.length > 0 && (
   <div className="control-card">
     <h3>Recent Events</h3>
 
-    {matchEvents.map(event => (
+    {matchEvents
+      .slice(showAllEvents ? 0 : -4)
+      .map(event => (
+
       <div key={event.id} className="button-row compact">
         <span>
           {event.event_type === 'goal'
@@ -1019,7 +1023,16 @@ console.log('RESET RESULT:', data, error)
           Remove
         </button>
       </div>
-    ))}
+        ))}
+
+    {matchEvents.length > 4 && (
+      <button
+        className="display-toggle"
+        onClick={() => setShowAllEvents(v => !v)}
+      >
+        {showAllEvents ? 'Show Recent Events' : 'View All Events'}
+      </button>
+    )}
   </div>
 )}
 

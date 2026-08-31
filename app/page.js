@@ -1040,6 +1040,14 @@ console.log('RESET RESULT:', data, error)
 
 <button
   className="display-toggle"
+  style={{
+    display: 'block',
+    width: 'auto',
+    margin: '16px 0 0 auto',
+    padding: '10px 14px',
+    fontSize: '14px',
+    opacity: 0.8
+  }}
   onClick={() => setDisplayMode(v => !v)}
 >
   {displayMode ? 'Exit Display Mode' : 'Open Display Mode'}

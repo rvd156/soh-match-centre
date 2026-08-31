@@ -23,14 +23,14 @@ async function loadMatchEvents(matchId) {
     .from('match_events')
     .select(`
   *,
-  players (
-    id,
-    name,
-    jersey_number
-  ),
-  teams (
-    name
-  )
+  players!match_events_player_id_fkey (
+  id,
+  name,
+  jersey_number
+),
+teams (
+  name
+)
 `)
     .eq('match_id', matchId)
     .in('event_type', ['goal', 'point', 'two_pointer', 'yellow_card', 'red_card'])

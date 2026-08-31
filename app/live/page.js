@@ -552,7 +552,7 @@ const sohWon =
         fontWeight: '700'
       }}
     >
-      {match.period} · {formatTime(displaySeconds)}
+      {match.period}
     </div>
   </div>
 )}  

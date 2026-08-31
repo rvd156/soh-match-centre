@@ -260,6 +260,26 @@ setLoading(false)
     supabase.removeChannel(eventsChannel)
   }
 }, [match?.id])
+
+useEffect(() => {
+  if (!scoreboardRef.current) return
+
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      setShowStickyScore(!entry.isIntersecting)
+    },
+    {
+      threshold: 0
+    }
+  )
+
+  observer.observe(scoreboardRef.current)
+
+  return () => {
+    observer.disconnect()
+  }
+}, [])
+  
   useEffect(() => {
   if (!match) return
 

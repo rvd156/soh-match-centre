@@ -730,7 +730,7 @@ const sohWon =
   >
     <img
       src="/b-more-social-logo.png"
-      alt="B More Social"
+      alt="Created by B More Social"
       style={{
         width: '180px',
         height: 'auto',
@@ -1083,7 +1083,7 @@ goalCelebrationText: {
 },
 
   footer: {
-  marginTop: '32px',
+  marginTop: '24px',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',

@@ -711,6 +711,20 @@ const sohWon =
             : event.event_type === 'yellow_card'
               ? 'Yellow Card'
               : 'Red Card'}
+        </>
+  )}
+
+  {event.event_type !== 'manual_update' && (
+    <>
+      {' · '}
+      <span
+        style={{
+          color: '#f4c430',
+          fontWeight: '700'
+        }}
+      >
+        {event.teams?.name || 'Team'}
+      </span>
     </>
   )}
 </div>

@@ -354,7 +354,7 @@ async function loadMatchEvents(currentMatchId) {
       event_type,
       match_minute,
       clock_seconds,
-      players (
+ players!match_events_player_id_fkey (
   name
 ),
 teams (

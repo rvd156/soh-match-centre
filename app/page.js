@@ -1145,6 +1145,67 @@ justifyContent: 'center',
 
       <p>{scorerPicker.teamName}</p>
 
+<button
+  type="button"
+  style={{
+    width: '100%',
+    marginBottom: '12px',
+    background: 'transparent',
+    color: '#ffffff',
+    border: '1px solid #6b7a73',
+    borderRadius: '14px',
+    padding: '14px'
+  }}
+  onClick={async () => {
+    const { error } = await supabase
+      .from('match_events')
+      .insert({
+        match_id: matchId,
+        team_id:
+          scorerPicker.side === 'home'
+            ? (setup.sohSide === 'home' ? 1 : Number(setup.oppositionTeamId))
+            : (setup.sohSide === 'away' ? 1 : Number(setup.oppositionTeamId)),
+        player_id: null,
+        event_type:
+          scorerPicker.type === 'goals'
+            ? 'goal'
+            : scorerPicker.type === 'two_pointer'
+              ? 'two_pointer'
+              : scorerPicker.type === 'yellow_card'
+                ? 'yellow_card'
+                : scorerPicker.type === 'red_card'
+                  ? 'red_card'
+                  : 'point',
+        score_type: 'play',
+        match_minute: Math.floor(displaySeconds / 60),
+        clock_seconds: displaySeconds
+      })
+
+    if (error) {
+      console.error('Error saving unknown event:', error)
+      alert('Could not save event to database.')
+      return
+    }
+
+    loadMatchEvents(matchId)
+
+    if (
+      scorerPicker.type !== 'yellow_card' &&
+      scorerPicker.type !== 'red_card'
+    ) {
+      changeScore(
+        scorerPicker.side,
+        scorerPicker.type === 'two_pointer' ? 'points' : scorerPicker.type,
+        scorerPicker.type === 'two_pointer' ? 2 : 1
+      )
+    }
+
+    setScorerPicker(null)
+  }}
+>
+  ? Unknown / Team Only
+</button>
+
 <div
   className="player-picker-buttons"
   style={{

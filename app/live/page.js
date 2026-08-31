@@ -519,6 +519,44 @@ const sohWon =
 `}</style>
       <div style={styles.container}>
 
+  {showStickyScore && match && homeTeam && awayTeam && (
+  <div
+    style={{
+      position: 'sticky',
+      top: 0,
+      zIndex: 999,
+      background: '#0d2419',
+      borderBottom: '1px solid #c8a951',
+      padding: '8px 12px',
+      textAlign: 'center',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.25)'
+    }}
+  >
+    <div
+      style={{
+        fontSize: '14px',
+        fontWeight: '800',
+        lineHeight: 1.3
+      }}
+    >
+      {homeTeam.name} {match.home_score ?? 0}
+      {'  •  '}
+      {match.away_score ?? 0} {awayTeam.name}
+    </div>
+
+    <div
+      style={{
+        marginTop: '2px',
+        fontSize: '11px',
+        color: '#aebdb4',
+        fontWeight: '700'
+      }}
+    >
+      {match.period} · {formatTime(displaySeconds)}
+    </div>
+  </div>
+)}  
+
         <header style={styles.header}>
           <img
             src="/soh-crest.png"

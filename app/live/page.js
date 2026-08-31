@@ -539,9 +539,11 @@ const sohWon =
         lineHeight: 1.3
       }}
     >
-      {homeTeam.name} {match.home_score ?? 0}
-      {'  •  '}
-      {match.away_score ?? 0} {awayTeam.name}
+      {homeTeam.name}{' '}
+{match.home_goals}-{String(match.home_points).padStart(2, '0')}
+{'  •  '}
+{match.away_goals}-{String(match.away_points).padStart(2, '0')}{' '}
+{awayTeam.name}
     </div>
 
     <div

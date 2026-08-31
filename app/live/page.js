@@ -49,7 +49,7 @@ async function loadMatchEvents(matchId) {
   'two_pointer',
   'yellow_card',
   'red_card',
-  'substitution'
+  'substitution',
   'manual_update'
 ])
     .order('clock_seconds', { ascending: true })

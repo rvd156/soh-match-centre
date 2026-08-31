@@ -347,19 +347,28 @@ async function loadMatchEvents(currentMatchId) {
   const { data, error } = await supabase
     .from('match_events')
     .select(`
-      id,
-      match_id,
-      team_id,
-      player_id,
-      event_type,
-      match_minute,
-      clock_seconds,
- players!match_events_player_id_fkey (
-  name
-),
-teams (
-  name
-)
+  id,
+  match_id,
+  team_id,
+  player_id,
+  player_off_id,
+  player_on_id,
+  event_type,
+  match_minute,
+  clock_seconds,
+  players!match_events_player_id_fkey (
+    name
+  ),
+  player_off:players!match_events_player_off_id_fkey (
+    name
+  ),
+  player_on:players!match_events_player_on_id_fkey (
+    name
+  ),
+  teams (
+    name
+  )
+`)
     `)
     .eq('match_id', currentMatchId)
     .order('created_at', { ascending: false })

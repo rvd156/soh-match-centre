@@ -892,6 +892,48 @@ console.log('RESET RESULT:', data, error)
   />
 )
   return <main className={displayMode ? 'display-page' : ''}>
+
+  {!displayMode && (
+  <div
+    style={{
+      position: 'sticky',
+      top: 0,
+      zIndex: 900,
+      display: 'grid',
+      gridTemplateColumns: '1fr auto 1fr',
+      alignItems: 'center',
+      gap: '12px',
+      padding: '10px 16px',
+      marginBottom: '10px',
+      background: '#111a16',
+      borderBottom: '1px solid #30493d'
+    }}
+  >
+    <div style={{ textAlign: 'left', fontWeight: 700 }}>
+      {homeName}{' '}
+      <span style={{ fontSize: '18px' }}>
+        {home.goals}-{String(home.points).padStart(2, '0')}
+      </span>
+    </div>
+
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ fontSize: '12px', opacity: 0.7 }}>
+        {period}
+      </div>
+      <div style={{ fontSize: '20px', fontWeight: 800 }}>
+        {clock}
+      </div>
+    </div>
+
+    <div style={{ textAlign: 'right', fontWeight: 700 }}>
+      <span style={{ fontSize: '18px' }}>
+        {away.goals}-{String(away.points).padStart(2, '0')}
+      </span>{' '}
+      {awayName}
+    </div>
+  </div>
+)}
+      
     <section className="scoreboard-card">
       <div className="topbar">
         <img className="crest-small" src="/soh-crest.png" alt="SOH crest" />

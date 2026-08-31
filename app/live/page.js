@@ -581,7 +581,7 @@ const sohWon =
   </div>
 )}
 
-{matchEvents.length > 0 && (
+{(homeEvents.length > 0 || awayEvents.length > 0) && (
   <section style={styles.scorers}>
     <div style={styles.scorerColumn}>
       <div style={styles.scorersTeamName}>

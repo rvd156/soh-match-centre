@@ -1087,79 +1087,81 @@ justifyContent: 'center',
 
       <p>{scorerPicker.teamName}</p>
 
-      <select
-        defaultValue=""
-        onChange={async (e) => {
-          if (!e.target.value) return
-          if (e.target.value === 'add-new-player') {
-  setAddingPlayer(true)
-  setNewPlayerName('')
-  setNewPlayerNumber('')
-  return
-}
+      <div className="player-picker-buttons">
 
-          const player = scorerPicker.players.find(
-  p => String(p.id) === String(e.target.value)
-)
-if (!player) return
-          console.log('SCORER:', player)
+  {scorerPicker.players.map(player => (
+    <button
+      key={player.id}
+      type="button"
+      onClick={async () => {
 
-const { error } = await supabase
-  .from('match_events')
-  .insert({
-    match_id: matchId,
-    team_id: player.team_id,
-    player_id: player.id,
-  event_type:
-  scorerPicker.type === 'goals'
-    ? 'goal'
-    : scorerPicker.type === 'two_pointer'
-      ? 'two_pointer'
-      : scorerPicker.type === 'yellow_card'
-        ? 'yellow_card'
-        : scorerPicker.type === 'red_card'
-          ? 'red_card'
-          : 'point',
-score_type: 'play',
-   match_minute: Math.floor(displaySeconds / 60),
-clock_seconds: displaySeconds
-  })
+        console.log('SCORER:', player)
 
-if (error) {
-  console.error('Error saving score event:', error)
-  alert('Could not save scorer to database.')
-  return
-}
+        const { error } = await supabase
+          .from('match_events')
+          .insert({
+            match_id: matchId,
+            team_id: player.team_id,
+            player_id: player.id,
+            event_type:
+              scorerPicker.type === 'goals'
+                ? 'goal'
+                : scorerPicker.type === 'two_pointer'
+                  ? 'two_pointer'
+                  : scorerPicker.type === 'yellow_card'
+                    ? 'yellow_card'
+                    : scorerPicker.type === 'red_card'
+                      ? 'red_card'
+                      : 'point',
+            score_type: 'play',
+            match_minute: Math.floor(displaySeconds / 60),
+            clock_seconds: displaySeconds
+          })
 
-console.log('SCORE EVENT SAVED')
-loadMatchEvents(matchId)
-if (
-  scorerPicker.type === 'yellow_card' ||
-  scorerPicker.type === 'red_card'
-) {
-  setScorerPicker(null)
-  return
-}
-changeScore(
-  scorerPicker.side,
-  scorerPicker.type === 'two_pointer' ? 'points' : scorerPicker.type,
-  scorerPicker.type === 'two_pointer' ? 2 : 1
-)
-setScorerPicker(null)
-        }}
-      >
-        <option value="" disabled>Select player</option>
+        if (error) {
+          console.error('Error saving score event:', error)
+          alert('Could not save scorer to database.')
+          return
+        }
 
-        {scorerPicker.players.map(player => (
-          <option key={player.id} value={player.id}>
-            {player.jersey_number ? `${player.jersey_number}. ` : ''}
-            {player.name}
-          </option>
-        ))}
-<option value="add-new-player">
-  ➕ Add New Player
-</option>
-      </select>
+        console.log('SCORE EVENT SAVED')
+
+        loadMatchEvents(matchId)
+
+        if (
+          scorerPicker.type === 'yellow_card' ||
+          scorerPicker.type === 'red_card'
+        ) {
+          setScorerPicker(null)
+          return
+        }
+
+        changeScore(
+          scorerPicker.side,
+          scorerPicker.type === 'two_pointer' ? 'points' : scorerPicker.type,
+          scorerPicker.type === 'two_pointer' ? 2 : 1
+        )
+
+        setScorerPicker(null)
+      }}
+    >
+      {player.jersey_number ? `${player.jersey_number}. ` : ''}
+      {player.name}
+    </button>
+  ))}
+
+  <button
+    type="button"
+    onClick={() => {
+      setAddingPlayer(true)
+      setNewPlayerName('')
+      setNewPlayerNumber('')
+    }}
+  >
+    ➕ Add New Player
+  </button>
+
+</div>
 
   {addingPlayer && (
   <div>

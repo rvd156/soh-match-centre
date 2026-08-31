@@ -1179,6 +1179,37 @@ console.log('RESET RESULT:', data, error)
         }}
       />
 
+        <button
+  type="button"
+  disabled={!manualUpdateText.trim()}
+  onClick={async () => {
+    const { error } = await supabase
+      .from('match_events')
+      .insert({
+        match_id: matchId,
+        team_id: null,
+        player_id: null,
+        event_type: 'manual_update',
+        score_type: null,
+        match_minute: Math.floor(displaySeconds / 60),
+        clock_seconds: displaySeconds,
+        notes: manualUpdateText.trim()
+      })
+
+    if (error) {
+      console.error('Error saving match update:', error)
+      alert('Could not save match update.')
+      return
+    }
+
+    loadMatchEvents(matchId)
+    setManualUpdateOpen(false)
+    setManualUpdateText('')
+  }}
+>
+  Post Update
+</button>
+
       <button
         type="button"
         onClick={() => {

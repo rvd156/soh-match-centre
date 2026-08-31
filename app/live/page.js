@@ -615,11 +615,11 @@ const sohWon =
       background: '#123524',
       border: '1px solid #1c4932',
       borderRadius: '14px',
-      padding: '12px 14px',
+      padding: '10px 12px',
       textAlign: 'center',
       fontWeight: '800',
-      fontSize: '15px',
-      lineHeight: 1.4
+      fontSize: '14px'
+      lineHeight: 1.35
     }}
   >
     {latestEvent.event_type === 'substitution' ? (

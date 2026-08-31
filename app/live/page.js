@@ -742,7 +742,7 @@ const sohWon =
       src="/b-more-social-logo.png"
       alt="B More Social"
       style={{
-        width: '165px'
+        width: '165px',
         height: 'auto',
         display: 'block'
       }}

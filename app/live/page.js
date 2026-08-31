@@ -499,6 +499,31 @@ const sohWon =
           </div>
         </div>
 
+<div
+  style={{
+    textAlign: 'center',
+    color: '#aebdb4',
+    fontSize: '14px',
+    fontWeight: '600',
+    marginBottom: '16px',
+    lineHeight: 1.6
+  }}
+>
+  {[
+    match.venue && `📍 ${match.venue}`,
+    match.match_date &&
+      new Date(`${match.match_date}T12:00:00`).toLocaleDateString('en-IE', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      }),
+    match.referee && `Referee: ${match.referee}`
+  ]
+    .filter(Boolean)
+    .join('  •  ')}
+</div>
+            
         <section style={styles.scoreboard}>
 
           <div style={styles.team}>
@@ -694,18 +719,21 @@ const sohWon =
   </section>
 )}
        <footer style={styles.footer}>
-  {match.venue && <span>📍 {match.venue}</span>}
-
-  {match.match_date && (
-    <span>
-      {new Date(`${match.match_date}T12:00:00`).toLocaleDateString('en-IE', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      })}
-    </span>
-  )}
+  <span>
+    Created by{' '}
+    <a
+      href="https://bmoresocial.ie"
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        color: '#f4c430',
+        textDecoration: 'none',
+        fontWeight: '700'
+      }}
+    >
+      B More Social
+    </a>
+  </span>
 </footer>
 
       </div>

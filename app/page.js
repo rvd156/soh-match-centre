@@ -1345,28 +1345,35 @@ function ScoreControls({label,onChange}){
     <div className="control-card">
       <h3>{label}</h3>
 
-      <div className="button-row">
-        <button
-          className="score-btn goal"
-          onClick={() => onChange('goals', 1)}
-        >
-          + Goal
-        </button>
+      <div
+  className="button-row"
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(3, 1fr)',
+    gap: '8px'
+  }}
+>
+  <button
+    className="score-btn goal"
+    onClick={() => onChange('goals', 1)}
+  >
+    + Goal
+  </button>
 
-        <button
-          className="score-btn point"
-          onClick={() => onChange('points', 1)}
-        >
-          + Point
-        </button>
+  <button
+    className="score-btn point"
+    onClick={() => onChange('points', 1)}
+  >
+    + Point
+  </button>
 
-        <button
-          className="score-btn point"
-          onClick={() => onChange('two_pointer', 1)}
-        >
-          + 2 PT
-        </button>
-      </div>
+  <button
+    className="score-btn point"
+    onClick={() => onChange('two_pointer', 1)}
+  >
+    + 2 PT
+  </button>
+</div>
 
     <div className="button-row compact">
   <button onClick={() => onChange('yellow_card', 1)}>

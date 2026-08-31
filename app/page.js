@@ -1193,18 +1193,32 @@ console.log('RESET RESULT:', data, error)
   </button>
 
   <button
-    type="button"
-    onClick={() => setManualUpdateText('Wide')}
-  >
-    Wide
-  </button>
+  type="button"
+  onClick={() => setManualUpdateText(`Wide for ${homeName}`)}
+>
+  Wide - {homeName}
+</button>
 
-  <button
-    type="button"
-    onClick={() => setManualUpdateText('Free awarded')}
-  >
-    Free Awarded
-  </button>
+<button
+  type="button"
+  onClick={() => setManualUpdateText(`Wide for ${awayName}`)}
+>
+  Wide - {awayName}
+</button>
+
+<button
+  type="button"
+  onClick={() => setManualUpdateText(`Free awarded to ${homeName}`)}
+>
+  Free - {homeName}
+</button>
+
+<button
+  type="button"
+  onClick={() => setManualUpdateText(`Free awarded to ${awayName}`)}
+>
+  Free - {awayName}
+</button>
 </div>
 
 <textarea

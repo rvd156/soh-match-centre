@@ -1375,7 +1375,15 @@ function ScoreControls({label,onChange}){
   </button>
 </div>
 
-    <div className="button-row compact">
+   <div
+  className="button-row compact"
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '8px',
+    marginTop: '8px'
+  }}
+>
   <button onClick={() => onChange('yellow_card', 1)}>
     🟨 Yellow Card
   </button>

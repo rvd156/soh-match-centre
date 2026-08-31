@@ -1087,7 +1087,14 @@ justifyContent: 'center',
 
       <p>{scorerPicker.teamName}</p>
 
-      <div className="player-picker-buttons">
+      <div
+  className="player-picker-buttons"
+  style={{
+    maxHeight: '45vh',
+    overflowY: 'auto',
+    paddingRight: '4px'
+  }}
+>
 
   {scorerPicker.players.map(player => (
     <button

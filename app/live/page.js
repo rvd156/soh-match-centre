@@ -884,7 +884,7 @@ upcomingTime: {
     background: '#0d2419',
     border: '1px solid #1c4932',
     borderRadius: '24px',
-    padding: '36px 20px'
+    padding: '26px 20px'
   },
 
   team: {
@@ -893,8 +893,8 @@ upcomingTime: {
   },
 
   crest: {
-    width: '85px',
-    height: '85px',
+    width: '76px',
+    height: '76px',
     objectFit: 'contain',
     marginBottom: '14px'
   },

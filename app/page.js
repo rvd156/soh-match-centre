@@ -1137,16 +1137,20 @@ justifyContent: 'center',
 }}
 >
       <h2>
-        {scorerPicker.type === 'goals'
-  ? 'Goal Scorer'
-  : scorerPicker.type === 'two_pointer'
-    ? '2-Point Scorer'
-    : scorerPicker.type === 'yellow_card'
-      ? 'Yellow Card'
-      : scorerPicker.type === 'red_card'
-        ? 'Red Card'
-        : 'Point Scorer'}
-      </h2>
+  {scorerPicker.type === 'substitution'
+    ? scorerPicker.substitutionStep === 'off'
+      ? 'Player Going Off'
+      : 'Player Coming On'
+    : scorerPicker.type === 'goals'
+      ? 'Goal Scorer'
+      : scorerPicker.type === 'two_pointer'
+        ? '2-Point Scorer'
+        : scorerPicker.type === 'yellow_card'
+          ? 'Yellow Card'
+          : scorerPicker.type === 'red_card'
+            ? 'Red Card'
+            : 'Point Scorer'}
+</h2>
 
       <p>{scorerPicker.teamName}</p>
 

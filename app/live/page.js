@@ -718,34 +718,21 @@ const sohWon =
     </div>
   </section>
 )}
-      <footer style={styles.footer}>
+     <footer style={styles.footer}>
   <a
     href="https://bmoresocial.ie"
     target="_blank"
     rel="noopener noreferrer"
     style={{
-      display: 'inline-flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      gap: '10px',
+      display: 'inline-block',
       textDecoration: 'none'
     }}
   >
-    <span
-      style={{
-        color: '#aebdb4',
-        fontSize: '12px',
-        whiteSpace: 'nowrap'
-      }}
-    >
-      Created by
-    </span>
-
     <img
       src="/b-more-social-logo.png"
       alt="B More Social"
       style={{
-        width: '165px',
+        width: '180px',
         height: 'auto',
         display: 'block'
       }}
@@ -1096,7 +1083,7 @@ goalCelebrationText: {
 },
 
   footer: {
-  marginTop: '24px',
+  marginTop: '32px',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',

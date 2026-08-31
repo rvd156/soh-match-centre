@@ -723,12 +723,12 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     gap: '16px',
-    marginBottom: '28px'
+    marginBottom: '18px'
   },
 
   mainCrest: {
-    width: '72px',
-    height: '72px',
+    width: '58px',
+    height: '58px',
     objectFit: 'contain'
   },
 
@@ -741,7 +741,7 @@ const styles = {
 
   title: {
     margin: '3px 0 0',
-    fontSize: '28px',
+    fontSize: '24px'
     fontWeight: '900'
   },
 

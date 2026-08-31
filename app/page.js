@@ -368,7 +368,6 @@ async function loadMatchEvents(currentMatchId) {
   teams (
     name
   )
-`)
     `)
     .eq('match_id', currentMatchId)
     .order('created_at', { ascending: false })

@@ -693,10 +693,20 @@ const sohWon =
     </div>
   </section>
 )}
-        <footer style={styles.footer}>
-          {match.venue && <span>{match.venue}</span>}
-          {match.match_date && <span>{match.match_date}</span>}
-        </footer>
+       <footer style={styles.footer}>
+  {match.venue && <span>📍 {match.venue}</span>}
+
+  {match.match_date && (
+    <span>
+      {new Date(`${match.match_date}T12:00:00`).toLocaleDateString('en-IE', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      })}
+    </span>
+  )}
+</footer>
 
       </div>
     </main>

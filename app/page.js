@@ -909,7 +909,7 @@ console.log('RESET RESULT:', data, error)
       borderBottom: '1px solid #30493d'
     }}
   >
-    <div style={{ textAlign: 'left', fontWeight: 700 }}>
+   <div style={{ textAlign: 'left', fontWeight: 700, fontSize: '14px' }}>
       {homeName}{' '}
       <span style={{ fontSize: '18px' }}>
         {home.goals}-{String(home.points).padStart(2, '0')}
@@ -925,7 +925,7 @@ console.log('RESET RESULT:', data, error)
       </div>
     </div>
 
-    <div style={{ textAlign: 'right', fontWeight: 700 }}>
+    <div style={{ textAlign: 'right', fontWeight: 700, fontSize: '14px' }}>
       <span style={{ fontSize: '18px' }}>
         {away.goals}-{String(away.points).padStart(2, '0')}
       </span>{' '}

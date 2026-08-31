@@ -652,18 +652,26 @@ async function startMatch() {
   }
 
   // Start/resume the database clock
-  if (currentMatchId) {
-    const { error } = await supabase
-      .from('matches')
-      .update({
-        clock_started_at: new Date().toISOString()
-      })
-      .eq('id', currentMatchId)
+if (currentMatchId) {
+  const isExtraTime = period.startsWith('EXTRA TIME')
 
-    if (error) {
-      console.error('Error starting match clock:', error)
-    }
+  const update = isExtraTime
+    ? {
+        extra_time_started_at: new Date().toISOString()
+      }
+    : {
+        clock_started_at: new Date().toISOString()
+      }
+
+  const { error } = await supabase
+    .from('matches')
+    .update(update)
+    .eq('id', currentMatchId)
+
+  if (error) {
+    console.error('Error starting match clock:', error)
   }
+}
 
   // Start the local clock
   setRunning(true)

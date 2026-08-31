@@ -373,9 +373,10 @@ async function loadMatchEvents(currentMatchId) {
     .order('created_at', { ascending: false })
 
   if (error) {
-    console.error('Error loading match events:', error)
-    return
-  }
+  console.error('Error loading match events:', error)
+  alert(`Match events error: ${error.message}`)
+  return
+}
 
   setMatchEvents(data || [])
 }

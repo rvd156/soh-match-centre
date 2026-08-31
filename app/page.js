@@ -252,13 +252,14 @@ const awayCrest = sohIsHome ? setup.oppositionCrest : sohCrest
 
   const players = isSoh ? sohPlayers : oppositionPlayers
 
-  setScorerPicker({
-    side,
-    type,
-    players,
-    teamName: side === 'home' ? homeName : awayName
-  })
-}
+setScorerPicker({
+  side,
+  type,
+  players,
+  teamName: side === 'home' ? homeName : awayName,
+  substitutionStep: type === 'substitution' ? 'off' : null,
+  playerOff: null
+})
 
   async function addNewPlayer() {
   const name = newPlayerName.trim()

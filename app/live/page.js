@@ -718,40 +718,29 @@ const sohWon =
     </div>
   </section>
 )}
-      <footer style={styles.footer}>
-  <div
-    style={{
-      textAlign: 'center',
-      fontSize: '13px',
-      color: '#aebdb4',
-      marginBottom: '8px'
-    }}
-  >
-    Created by
-  </div>
+     footer: {
+  marginTop: '32px',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  paddingBottom: '24px'
+},
 
-  <a
-    href="https://bmoresocial.ie"
-    target="_blank"
-    rel="noopener noreferrer"
-    style={{
-      display: 'inline-block',
-      background: '#ffffff',
-      padding: '8px 12px',
-      borderRadius: '10px'
-    }}
-  >
-    <img
-      src="/b-more-social-logo.png"
-      alt="B More Social"
-      style={{
-        width: '150px',
-        height: 'auto',
-        display: 'block'
-      }}
-    />
-  </a>
-</footer>
+footerCreditLink: {
+  display: 'inline-flex',
+  alignItems: 'center',
+  gap: '12px',
+  textDecoration: 'none',
+  color: '#aebdb4',
+  fontSize: '16px',
+  fontWeight: '500'
+},
+
+footerLogo: {
+  height: '34px',
+  width: 'auto',
+  display: 'block'
+}
 
       </div>
     </main>

@@ -1066,8 +1066,12 @@ console.log('RESET RESULT:', data, error)
 
       <div key={event.id} className="button-row compact">
         <span>
-  {event.event_type === 'substitution' ? (
-    <>
+  {event.event_type === 'manual_update' ? (
+  <>
+    ✍️ {event.notes || 'Match update'} · {event.match_minute}
+  </>
+) : event.event_type === 'substitution' ? (
+  <>
       🔄 {event.player_off?.name || 'Unknown'} OFF →{' '}
       {event.player_on?.name || 'Unknown'} ON · {event.match_minute}
     </>

@@ -1053,9 +1053,10 @@ console.log('RESET RESULT:', data, error)
     inset: 0,
     zIndex: 1000,
     display: 'flex',
-   alignItems: 'center',
-  justifyContent: 'center',
-    background: 'rgba(0, 0, 0, 0.65)',
+   alignItems: 'flex-end',
+justifyContent: 'center',
+paddingBottom: '90px',
+    background: '#111a16',
     padding: '16px'
   }}
 >

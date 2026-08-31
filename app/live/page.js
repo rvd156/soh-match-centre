@@ -574,7 +574,7 @@ const sohWon =
 
       {homeEvents.map(event => (
         <div key={event.id} style={styles.scorerRow}>
-          {event.players?.name || 'Unknown Player'}
+          {event.players?.name || event.teams?.name || 'Team'}
           {' '}
           {event.event_type === 'goal'
             ? '1-00'
@@ -596,7 +596,7 @@ const sohWon =
 
       {awayEvents.map(event => (
         <div key={event.id} style={styles.scorerRow}>
-          {event.players?.name || 'Unknown Player'}
+         {event.players?.name || event.teams?.name || 'Team'}
           {' '}
           {event.event_type === 'goal'
             ? '1-00'

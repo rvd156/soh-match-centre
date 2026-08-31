@@ -640,7 +640,7 @@ const sohWon =
   event.event_type === 'two_pointer' ||
   event.event_type === 'yellow_card' ||
   event.event_type === 'red_card' ||
-  event.event_type === 'substitution'
+  event.event_type === 'substitution' ||
   event.event_type === 'manual_update'
 )
         .map(event => (

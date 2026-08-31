@@ -1191,8 +1191,6 @@ console.log('RESET RESULT:', data, error)
     </div>
   </div>
 )}
-
-{scorerPicker && (
   {scorerPicker && (
   <div
   className="scorer-picker"

@@ -21,16 +21,26 @@ async function loadMatchEvents(matchId) {
 
   const { data, error } = await supabase
     .from('match_events')
-    .select(`
+ .select(`
   *,
   players!match_events_player_id_fkey (
-  id,
-  name,
-  jersey_number
-),
-teams (
-  name
-)
+    id,
+    name,
+    jersey_number
+  ),
+  player_off:players!match_events_player_off_id_fkey (
+    id,
+    name,
+    jersey_number
+  ),
+  player_on:players!match_events_player_on_id_fkey (
+    id,
+    name,
+    jersey_number
+  ),
+  teams (
+    name
+  )
 `)
     .eq('match_id', matchId)
     .in('event_type', [

@@ -33,7 +33,14 @@ teams (
 )
 `)
     .eq('match_id', matchId)
-    .in('event_type', ['goal', 'point', 'two_pointer', 'yellow_card', 'red_card'])
+    .in('event_type', [
+  'goal',
+  'point',
+  'two_pointer',
+  'yellow_card',
+  'red_card',
+  'substitution'
+])
     .order('clock_seconds', { ascending: true })
 
   if (error) {

@@ -1234,11 +1234,24 @@ justifyContent: 'center',
     border: '1px solid #30493d',
     borderRadius: '14px'
   }}
-      onClick={async () => {
+     onClick={async () => {
 
-        console.log('SCORER:', player)
+  console.log('SCORER:', player)
 
-        const { error } = await supabase
+  if (
+    scorerPicker.type === 'substitution' &&
+    scorerPicker.substitutionStep === 'off'
+  ) {
+    setScorerPicker({
+      ...scorerPicker,
+      substitutionStep: 'on',
+      playerOff: player
+    })
+
+    return
+  }
+
+  const { error } = await supabase
           .from('match_events')
           .insert({
             match_id: matchId,

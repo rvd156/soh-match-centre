@@ -1251,52 +1251,83 @@ justifyContent: 'center',
     return
   }
 
+  if (
+  scorerPicker.type === 'substitution' &&
+  scorerPicker.substitutionStep === 'on'
+) {
   const { error } = await supabase
-          .from('match_events')
-          .insert({
-            match_id: matchId,
-            team_id: player.team_id,
-            player_id: player.id,
-            event_type:
-              scorerPicker.type === 'goals'
-                ? 'goal'
-                : scorerPicker.type === 'two_pointer'
-                  ? 'two_pointer'
-                  : scorerPicker.type === 'yellow_card'
-                    ? 'yellow_card'
-                    : scorerPicker.type === 'red_card'
-                      ? 'red_card'
-                      : 'point',
-            score_type: 'play',
-            match_minute: Math.floor(displaySeconds / 60),
-            clock_seconds: displaySeconds
-          })
+    .from('match_events')
+    .insert({
+      match_id: matchId,
+      team_id: player.team_id,
+      player_id: null,
+      player_off_id: scorerPicker.playerOff?.id || null,
+      player_on_id: player.id,
+      event_type: 'substitution',
+      score_type: 'play',
+      match_minute: Math.floor(displaySeconds / 60),
+      clock_seconds: displaySeconds
+    })
 
-        if (error) {
-          console.error('Error saving score event:', error)
-          alert('Could not save scorer to database.')
-          return
-        }
+  if (error) {
+    console.error('Error saving substitution:', error)
+    alert('Could not save substitution to database.')
+    return
+  }
 
-        console.log('SCORE EVENT SAVED')
+  console.log('SUBSTITUTION SAVED')
 
-        loadMatchEvents(matchId)
+  loadMatchEvents(matchId)
+  setScorerPicker(null)
+  return
+}
 
-        if (
-          scorerPicker.type === 'yellow_card' ||
-          scorerPicker.type === 'red_card'
-        ) {
-          setScorerPicker(null)
-          return
-        }
+const { error } = await supabase
+  .from('match_events')
+  .insert({
+    match_id: matchId,
+    team_id: player.team_id,
+    player_id: player.id,
+    event_type:
+      scorerPicker.type === 'goals'
+        ? 'goal'
+        : scorerPicker.type === 'two_pointer'
+          ? 'two_pointer'
+          : scorerPicker.type === 'yellow_card'
+            ? 'yellow_card'
+            : scorerPicker.type === 'red_card'
+              ? 'red_card'
+              : 'point',
+    score_type: 'play',
+    match_minute: Math.floor(displaySeconds / 60),
+    clock_seconds: displaySeconds
+  })
 
-        changeScore(
-          scorerPicker.side,
-          scorerPicker.type === 'two_pointer' ? 'points' : scorerPicker.type,
-          scorerPicker.type === 'two_pointer' ? 2 : 1
-        )
+if (error) {
+  console.error('Error saving score event:', error)
+  alert('Could not save scorer to database.')
+  return
+}
 
-        setScorerPicker(null)
+console.log('SCORE EVENT SAVED')
+
+loadMatchEvents(matchId)
+
+if (
+  scorerPicker.type === 'yellow_card' ||
+  scorerPicker.type === 'red_card'
+) {
+  setScorerPicker(null)
+  return
+}
+
+changeScore(
+  scorerPicker.side,
+  scorerPicker.type === 'two_pointer' ? 'points' : scorerPicker.type,
+  scorerPicker.type === 'two_pointer' ? 2 : 1
+)
+
+setScorerPicker(null)
       }}
     >
       {player.jersey_number ? `${player.jersey_number}. ` : ''}

@@ -637,7 +637,7 @@ const sohWon =
         ? '🟨'
         : '🟥'}{' '}
 
-  {event.players?.name || 'Unknown Player'} ·{' '}
+  {event.players?.name || event.teams?.name || 'Team'} ·{' '}
 
   {event.event_type === 'goal'
    ? <span style={styles.goalEvent}>GOAL</span>

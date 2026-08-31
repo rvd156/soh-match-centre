@@ -582,6 +582,52 @@ const sohWon =
           </div>
 
         </section>
+{latestEvent && (
+  <div
+    style={{
+      marginTop: '14px',
+      marginBottom: '18px',
+      background: '#123524',
+      border: '1px solid #1c4932',
+      borderRadius: '14px',
+      padding: '12px 14px',
+      textAlign: 'center',
+      fontWeight: '800',
+      fontSize: '15px',
+      lineHeight: 1.4
+    }}
+  >
+    {latestEvent.event_type === 'substitution' ? (
+      <>
+        🔄 Substitution
+      </>
+    ) : latestEvent.event_type === 'yellow_card' ? (
+      <>
+        🟨 Yellow Card
+      </>
+    ) : latestEvent.event_type === 'red_card' ? (
+      <>
+        🟥 Red Card
+      </>
+    ) : latestEvent.event_type === 'goal' ? (
+      <>
+        🥅 GOAL
+      </>
+    ) : latestEvent.event_type === 'two_pointer' ? (
+      <>
+        🟧 2PT
+      </>
+    ) : latestEvent.event_type === 'point' ? (
+      <>
+        ⚪ Point
+      </>
+    ) : (
+      <>
+        ✍️ Match Update
+      </>
+    )}
+  </div>
+)}
 {showGoalCelebration && (
   <>
     <style>{`

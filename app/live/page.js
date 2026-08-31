@@ -22,13 +22,16 @@ async function loadMatchEvents(matchId) {
   const { data, error } = await supabase
     .from('match_events')
     .select(`
-      *,
-      players (
-        id,
-        name,
-        jersey_number
-      )
-    `)
+  *,
+  players (
+    id,
+    name,
+    jersey_number
+  ),
+  teams (
+    name
+  )
+`)
     .eq('match_id', matchId)
     .in('event_type', ['goal', 'point', 'two_pointer', 'yellow_card', 'red_card'])
     .order('clock_seconds', { ascending: true })

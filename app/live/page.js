@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 
 export default function LiveMatchPage() {
@@ -14,6 +14,7 @@ export default function LiveMatchPage() {
   const [showGoalCelebration, setShowGoalCelebration] = useState(false)
   const [latestEvent, setLatestEvent] = useState(null)
   const [showStickyScore, setShowStickyScore] = useState(false)
+  const scoreboardRef = useRef(null)
 
 async function loadMatchEvents(matchId) {
   if (!matchId) {

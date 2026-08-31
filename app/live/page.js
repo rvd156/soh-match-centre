@@ -641,6 +641,7 @@ const sohWon =
   event.event_type === 'yellow_card' ||
   event.event_type === 'red_card' ||
   event.event_type === 'substitution'
+  event.event_type === 'manual_update'
 )
         .map(event => (
          <div key={event.id} style={styles.scorerRow}>

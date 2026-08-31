@@ -719,21 +719,22 @@ const sohWon =
   </section>
 )}
        <footer style={styles.footer}>
-  <span>
-    Created by{' '}
-    <a
-      href="https://bmoresocial.ie"
-      target="_blank"
-      rel="noopener noreferrer"
+  <a
+    href="https://bmoresocial.ie"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={{ display: 'inline-block' }}
+  >
+    <img
+      src="/b-more-social-logo.png"
+      alt="B More Social"
       style={{
-        color: '#f4c430',
-        textDecoration: 'none',
-        fontWeight: '700'
+        width: '150px',
+        height: 'auto',
+        display: 'block'
       }}
-    >
-      B More Social
-    </a>
-  </span>
+    />
+  </a>
 </footer>
 
       </div>

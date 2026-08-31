@@ -560,7 +560,7 @@ const sohWon =
     .join('  •  ')}
 </div>
             
-        <section style={styles.scoreboard}>
+        <section ref={scoreboardRef} style={styles.scoreboard}>
 
           <div style={styles.team}>
             {homeTeam?.crest_url && (

@@ -492,7 +492,7 @@ if (isScoreEvent) {
 
   changeScore(eventSide, scoreType, scoreAmount)
 }
-  loadMatchEvents(matchId)
+    
 }
   
   async function checkForExistingMatch() {

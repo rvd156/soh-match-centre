@@ -1069,7 +1069,7 @@ justifyContent: 'center',
   borderRadius: '20px',
   padding: '24px',
   marginBottom: '0',
-  background: '#111a16',
+ background: '#14231d',
   transform: 'translateY(18vh)'
 }}
 >
@@ -1090,7 +1090,7 @@ justifyContent: 'center',
 <div
   className="player-picker-buttons"
   style={{
-    maxHeight: '45vh',
+    maxHeight: '30vh',
     overflowY: 'auto',
     paddingRight: '4px'
   }}
@@ -1098,8 +1098,15 @@ justifyContent: 'center',
 
   {scorerPicker.players.map(player => (
     <button
-      key={player.id}
-      type="button"
+     <button
+  key={player.id}
+  type="button"
+  style={{
+    background: '#24382f',
+    color: '#ffffff',
+    border: '1px solid #30493d',
+    borderRadius: '14px'
+  }}
       onClick={async () => {
 
         console.log('SCORER:', player)
@@ -1157,16 +1164,22 @@ justifyContent: 'center',
     </button>
   ))}
 
-  <button
-    type="button"
-    onClick={() => {
-      setAddingPlayer(true)
-      setNewPlayerName('')
-      setNewPlayerNumber('')
-    }}
-  >
-    ➕ Add New Player
-  </button>
+ <button
+  type="button"
+  style={{
+    background: 'transparent',
+    color: '#ffffff',
+    border: '1px solid #3aaa68',
+    borderRadius: '14px'
+  }}
+  onClick={() => {
+    setAddingPlayer(true)
+    setNewPlayerName('')
+    setNewPlayerNumber('')
+  }}
+>
+  ➕ Add New Player
+</button>
 
 </div>
 

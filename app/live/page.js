@@ -623,38 +623,48 @@ const sohWon =
       <div style={styles.scorersTitle}>MATCH EVENTS</div>
 
       {matchEvents
-       .filter(event =>
+      .filter(event =>
   event.event_type === 'goal' ||
   event.event_type === 'point' ||
   event.event_type === 'two_pointer' ||
   event.event_type === 'yellow_card' ||
-  event.event_type === 'red_card'
+  event.event_type === 'red_card' ||
+  event.event_type === 'substitution'
 )
         .map(event => (
-          <div key={event.id} style={styles.scorerRow}>
+         <div key={event.id} style={styles.scorerRow}>
   {event.match_minute}'{' '}
 
-  {event.event_type === 'goal'
-  ? <span style={styles.greenFlag}></span>
-  : event.event_type === 'point'
-    ? <span style={styles.whiteFlag}></span>
-    : event.event_type === 'two_pointer'
-     ? <span style={styles.orangeFlag}></span>
-      : event.event_type === 'yellow_card'
-        ? '🟨'
-        : '🟥'}{' '}
+  {event.event_type === 'substitution' ? (
+    <>
+      🔄 {event.player_off?.name || 'Unknown'} OFF →{' '}
+      {event.player_on?.name || 'Unknown'} ON
+    </>
+  ) : (
+    <>
+      {event.event_type === 'goal'
+        ? <span style={styles.greenFlag}></span>
+        : event.event_type === 'point'
+          ? <span style={styles.whiteFlag}></span>
+          : event.event_type === 'two_pointer'
+            ? <span style={styles.orangeFlag}></span>
+            : event.event_type === 'yellow_card'
+              ? '🟨'
+              : '🟥'}{' '}
 
-  {event.players?.name || event.teams?.name || 'Team'} ·{' '}
+      {event.players?.name || event.teams?.name || 'Team'} ·{' '}
 
-  {event.event_type === 'goal'
-   ? <span style={styles.goalEvent}>GOAL</span>
-    : event.event_type === 'point'
-      ? 'Point'
-      : event.event_type === 'two_pointer'
-        ? '2PT'
-        : event.event_type === 'yellow_card'
-          ? 'Yellow Card'
-          : 'Red Card'}
+      {event.event_type === 'goal'
+        ? <span style={styles.goalEvent}>GOAL</span>
+        : event.event_type === 'point'
+          ? 'Point'
+          : event.event_type === 'two_pointer'
+            ? '2PT'
+            : event.event_type === 'yellow_card'
+              ? 'Yellow Card'
+              : 'Red Card'}
+    </>
+  )}
 </div>
         ))}
     </div>

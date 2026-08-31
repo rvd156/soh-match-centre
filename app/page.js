@@ -1041,9 +1041,7 @@ console.log('RESET RESULT:', data, error)
 
 <button
   onClick={() => {
-    setScorerPicker({
-      type: 'manual_update'
-    })
+    alert('Match Update coming next')
   }}
 >
   ✍️ Add Match Update

@@ -13,6 +13,7 @@ export default function LiveMatchPage() {
   const [matchEvents, setMatchEvents] = useState([])
   const [showGoalCelebration, setShowGoalCelebration] = useState(false)
   const [latestEvent, setLatestEvent] = useState(null)
+  const [showStickyScore, setShowStickyScore] = useState(false)
 
 async function loadMatchEvents(matchId) {
   if (!matchId) {

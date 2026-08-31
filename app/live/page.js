@@ -647,8 +647,15 @@ const sohWon =
 
   {event.event_type === 'substitution' ? (
     <>
-      🔄 {event.player_off?.name || 'Unknown'} OFF →{' '}
-      {event.player_on?.name || 'Unknown'} ON
+      🔄 {
+  event.player_off?.name && event.player_on?.name
+    ? `${event.player_off.name} OFF → ${event.player_on.name} ON`
+    : event.player_off?.name
+      ? `${event.player_off.name} OFF · Substitution`
+      : event.player_on?.name
+        ? `Substitution · ${event.player_on.name} ON`
+        : `Substitution · ${event.teams?.name || 'Team'}`
+}
     </>
   ) : (
     <>

@@ -735,18 +735,17 @@ const sohWon =
     target="_blank"
     rel="noopener noreferrer"
     style={{
-      display: 'inline-block',
-      background: '#ffffff',
-      padding: '8px 12px',
-      borderRadius: '10px'
+      display: 'inline-block'
     }}
   >
     <img
       src="/b-more-social-logo.png"
       alt="B More Social"
       style={{
-  display: 'inline-block'
-}}
+        width: '150px',
+        height: 'auto',
+        display: 'block'
+      }}
     />
   </a>
 </footer>

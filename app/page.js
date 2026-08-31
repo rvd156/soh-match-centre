@@ -1513,7 +1513,13 @@ function ScoreControls({label,onChange}){
   <button onClick={() => onChange('red_card', 1)}>
     🟥 Red Card
   </button>
+
+  <button
+    style={{ gridColumn: '1 / -1' }}
+    onClick={() => onChange('substitution', 1)}
+  >
+    🔄 Substitution
+  </button>
 </div>
-    </div>
   )
 }

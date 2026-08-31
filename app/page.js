@@ -1141,6 +1141,58 @@ console.log('RESET RESULT:', data, error)
   {displayMode ? 'Exit Display Mode' : 'Open Display Mode'}
 </button>
 </section>
+{manualUpdateOpen && (
+  <div
+    style={{
+      position: 'fixed',
+      inset: 0,
+      zIndex: 1000,
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      background: 'rgba(0, 0, 0, 0.65)',
+      padding: '16px'
+    }}
+  >
+    <div
+      style={{
+        width: '100%',
+        maxWidth: '500px',
+        background: '#14231d',
+        borderRadius: '20px',
+        padding: '24px'
+      }}
+    >
+      <h2>Add Match Update</h2>
+
+      <textarea
+        placeholder="Type match update..."
+        value={manualUpdateText}
+        onChange={(e) => setManualUpdateText(e.target.value)}
+        rows={4}
+        style={{
+          width: '100%',
+          padding: '14px',
+          borderRadius: '12px',
+          marginBottom: '12px',
+          fontSize: '16px'
+        }}
+      />
+
+      <button
+        type="button"
+        onClick={() => {
+          setManualUpdateOpen(false)
+          setManualUpdateText('')
+        }}
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+)}
+
+{scorerPicker && (
   {scorerPicker && (
   <div
   className="scorer-picker"

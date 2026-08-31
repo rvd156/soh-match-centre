@@ -718,12 +718,28 @@ const sohWon =
     </div>
   </section>
 )}
-       <footer style={styles.footer}>
+      <footer style={styles.footer}>
+  <div
+    style={{
+      textAlign: 'center',
+      fontSize: '13px',
+      color: '#aebdb4',
+      marginBottom: '8px'
+    }}
+  >
+    Created by
+  </div>
+
   <a
     href="https://bmoresocial.ie"
     target="_blank"
     rel="noopener noreferrer"
-    style={{ display: 'inline-block' }}
+    style={{
+      display: 'inline-block',
+      background: '#ffffff',
+      padding: '8px 12px',
+      borderRadius: '10px'
+    }}
   >
     <img
       src="/b-more-social-logo.png"

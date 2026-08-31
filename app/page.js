@@ -1050,30 +1050,39 @@ console.log('RESET RESULT:', data, error)
 
       <div key={event.id} className="button-row compact">
         <span>
-          {event.event_type === 'goal'
-            ? '🥅'
-            : event.event_type === 'point'
-              ? '⚪'
-              : event.event_type === 'two_pointer'
-                ? '🟧'
-                : event.event_type === 'yellow_card'
-                  ? '🟨'
-                  : '🟥'}{' '}
+  {event.event_type === 'substitution' ? (
+    <>
+      🔄 {event.player_off?.name || 'Unknown'} OFF →{' '}
+      {event.player_on?.name || 'Unknown'} ON · {event.match_minute}
+    </>
+  ) : (
+    <>
+      {event.event_type === 'goal'
+        ? '🥅'
+        : event.event_type === 'point'
+          ? '⚪'
+          : event.event_type === 'two_pointer'
+            ? '🟧'
+            : event.event_type === 'yellow_card'
+              ? '🟨'
+              : '🟥'}{' '}
 
-         {event.players?.name || event.teams?.name || 'Team'} ·{' '}
+      {event.players?.name || event.teams?.name || 'Team'} ·{' '}
 
-          {event.event_type === 'goal'
-            ? 'Goal'
-            : event.event_type === 'point'
-              ? 'Point'
-              : event.event_type === 'two_pointer'
-                ? '2PT'
-                : event.event_type === 'yellow_card'
-                  ? 'Yellow Card'
-                  : 'Red Card'}{' '}
+      {event.event_type === 'goal'
+        ? 'Goal'
+        : event.event_type === 'point'
+          ? 'Point'
+          : event.event_type === 'two_pointer'
+            ? '2PT'
+            : event.event_type === 'yellow_card'
+              ? 'Yellow Card'
+              : 'Red Card'}{' '}
 
-          · {event.match_minute}
-        </span>
+      · {event.match_minute}
+    </>
+  )}
+</span>
 
         <button
   style={{

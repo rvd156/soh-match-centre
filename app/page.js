@@ -1087,7 +1087,7 @@ justifyContent: 'center',
 
       <p>{scorerPicker.teamName}</p>
 
-      <div
+<div
   className="player-picker-buttons"
   style={{
     maxHeight: '45vh',

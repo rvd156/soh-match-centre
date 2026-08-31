@@ -293,7 +293,58 @@ setScorerPicker({
   }
 
   console.log('NEW PLAYER ADDED:', data)
+if (scorerPicker.type === 'substitution') {
 
+  if (data.team_id === 1) {
+    setSohPlayers(prev => [...prev, data])
+  } else {
+    setOppositionPlayers(prev => [...prev, data])
+  }
+
+  if (scorerPicker.substitutionStep === 'off') {
+    setScorerPicker({
+      ...scorerPicker,
+      players: [...scorerPicker.players, data],
+      substitutionStep: 'on',
+      playerOff: data
+    })
+
+    setAddingPlayer(false)
+    setNewPlayerName('')
+    setNewPlayerNumber('')
+    return
+  }
+
+  if (scorerPicker.substitutionStep === 'on') {
+    const { error: substitutionError } = await supabase
+      .from('match_events')
+      .insert({
+        match_id: matchId,
+        team_id: data.team_id,
+        player_id: null,
+        player_off_id: scorerPicker.playerOff?.id || null,
+        player_on_id: data.id,
+        event_type: 'substitution',
+        score_type: 'play',
+        match_minute: Math.floor(displaySeconds / 60),
+        clock_seconds: displaySeconds
+      })
+
+    if (substitutionError) {
+      console.error('Error saving substitution:', substitutionError)
+      alert('Player was added, but the substitution could not be saved.')
+      return
+    }
+
+    loadMatchEvents(matchId)
+
+    setAddingPlayer(false)
+    setNewPlayerName('')
+    setNewPlayerNumber('')
+    setScorerPicker(null)
+    return
+  }
+}
 const { error: eventError } = await supabase
   .from('match_events')
   .insert({

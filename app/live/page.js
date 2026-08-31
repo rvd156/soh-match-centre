@@ -724,7 +724,7 @@ const sohWon =
       textAlign: 'center',
       fontSize: '13px',
       color: '#aebdb4',
-      marginBottom: '8px'
+      marginBottom: '2px'
     }}
   >
     Created by
@@ -742,7 +742,7 @@ const sohWon =
       src="/b-more-social-logo.png"
       alt="B More Social"
       style={{
-        width: '150px',
+        width: '165px'
         height: 'auto',
         display: 'block'
       }}

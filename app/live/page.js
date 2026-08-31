@@ -955,8 +955,8 @@ const styles = {
   },
 
   mainCrest: {
-    width: '58px',
-    height: '58px',
+  width: '72px',
+  height: '72px',
     objectFit: 'contain'
   },
 

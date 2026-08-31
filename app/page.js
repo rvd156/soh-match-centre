@@ -353,8 +353,11 @@ async function loadMatchEvents(currentMatchId) {
       match_minute,
       clock_seconds,
       players (
-        name
-      )
+  name
+),
+teams (
+  name
+)
     `)
     .eq('match_id', currentMatchId)
     .order('created_at', { ascending: false })
@@ -1046,7 +1049,7 @@ console.log('RESET RESULT:', data, error)
                   ? '🟨'
                   : '🟥'}{' '}
 
-          {event.players?.name || 'Unknown Player'} ·{' '}
+         {event.players?.name || event.teams?.name || 'Team'} ·{' '}
 
           {event.event_type === 'goal'
             ? 'Goal'

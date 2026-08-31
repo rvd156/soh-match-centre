@@ -1196,11 +1196,11 @@ console.log('RESET RESULT:', data, error)
         notes: manualUpdateText.trim()
       })
 
-    if (error) {
-      console.error('Error saving match update:', error)
-      alert('Could not save match update.')
-      return
-    }
+  if (error) {
+  console.error('Error saving match update:', error)
+  alert(`Match update error: ${error.message}`)
+  return
+}
 
     loadMatchEvents(matchId)
     setManualUpdateOpen(false)

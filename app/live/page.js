@@ -202,11 +202,36 @@ setLoading(false)
   schema: 'public',
   table: 'match_events'
 },
-      (payload) => {
+      async (payload) => {
   loadMatchEvents(match.id)
 
   if (payload.eventType === 'INSERT') {
-    setLatestEvent(payload.new)
+    const { data: eventData, error: eventError } = await supabase
+      .from('match_events')
+      .select(`
+        *,
+        players!match_events_player_id_fkey (
+          name
+        ),
+        player_off:players!match_events_player_off_id_fkey (
+          name
+        ),
+        player_on:players!match_events_player_on_id_fkey (
+          name
+        ),
+        teams (
+          name
+        )
+      `)
+      .eq('id', payload.new.id)
+      .single()
+
+    if (eventError) {
+      console.error('Error loading latest event:', eventError)
+      setLatestEvent(payload.new)
+    } else {
+      setLatestEvent(eventData)
+    }
 
     setTimeout(() => {
       setLatestEvent(null)

@@ -1098,7 +1098,6 @@ justifyContent: 'center',
 
   {scorerPicker.players.map(player => (
     <button
-     <button
   key={player.id}
   type="button"
   style={{

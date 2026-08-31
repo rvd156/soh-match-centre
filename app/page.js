@@ -39,6 +39,8 @@ const [matchId, setMatchId] = useState(null)
 const [existingMatch, setExistingMatch] = useState(null)
 const [matchEvents, setMatchEvents] = useState([])
 const [showAllEvents, setShowAllEvents] = useState(false)
+const [manualUpdateOpen, setManualUpdateOpen] = useState(false)
+const [manualUpdateText, setManualUpdateText] = useState('')
   
   const intervalRef = useRef(null)
 

@@ -1183,7 +1183,14 @@ justifyContent: 'center',
 </div>
 
   {addingPlayer && (
-  <div>
+  <div
+    style={{
+      display: 'flex',
+      flexDirection: 'column',
+      gap: '10px',
+      marginTop: '12px'
+    }}
+  >
     <input
       type="text"
       placeholder="Player name"

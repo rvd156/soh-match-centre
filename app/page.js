@@ -474,10 +474,10 @@ const eventName =
     .eq('id', event.id)
 
   if (error) {
-    console.error('Error removing card event:', error)
-    alert('Could not remove the card.')
-    return
-  }
+  console.error('Error removing match event:', error)
+  alert('Could not remove the match event.')
+  return
+}
 if (isScoreEvent) {
   const scoreType =
     event.event_type === 'goal' ? 'goals' : 'points'

@@ -1039,6 +1039,16 @@ console.log('RESET RESULT:', data, error)
     </button>
   )}
 
+<button
+  onClick={() => {
+    setScorerPicker({
+      type: 'manual_update'
+    })
+  }}
+>
+  ✍️ Add Match Update
+</button>
+
   <button onClick={resetMatch} className="danger">
     Reset
   </button>

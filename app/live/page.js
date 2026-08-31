@@ -12,6 +12,7 @@ export default function LiveMatchPage() {
   const [upcomingFixture, setUpcomingFixture] = useState(null)
   const [matchEvents, setMatchEvents] = useState([])
   const [showGoalCelebration, setShowGoalCelebration] = useState(false)
+  const [latestEvent, setLatestEvent] = useState(null)
 
 async function loadMatchEvents(matchId) {
   if (!matchId) {

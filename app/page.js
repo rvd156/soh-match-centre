@@ -478,6 +478,11 @@ const eventName =
   alert('Could not remove the match event.')
   return
 }
+
+  setMatchEvents(prev =>
+  prev.filter(matchEvent => matchEvent.id !== event.id)
+)
+    
 if (isScoreEvent) {
   const scoreType =
     event.event_type === 'goal' ? 'goals' : 'points'

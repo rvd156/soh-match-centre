@@ -1521,5 +1521,7 @@ function ScoreControls({label,onChange}){
     🔄 Substitution
   </button>
 </div>
+
+</div>
   )
 }

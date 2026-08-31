@@ -1053,9 +1053,8 @@ console.log('RESET RESULT:', data, error)
     inset: 0,
     zIndex: 1000,
     display: 'flex',
-   alignItems: 'flex-end',
+   alignItems: 'center',
 justifyContent: 'center',
-paddingBottom: '90px',
     background: '#111a16',
     padding: '16px'
   }}
@@ -1063,14 +1062,16 @@ paddingBottom: '90px',
     <div
   className="scorer-picker-card"
   style={{
-    width: '100%',
-    maxWidth: '500px',
-    maxHeight: '70vh',
-    overflowY: 'auto',
-    borderRadius: '20px',
-    padding: '24px',
-    marginBottom: '0'
-  }}
+  width: '100%',
+  maxWidth: '500px',
+  maxHeight: '70vh',
+  overflowY: 'auto',
+  borderRadius: '20px',
+  padding: '24px',
+  marginBottom: '0',
+  background: '#111a16',
+  transform: 'translateY(18vh)'
+}}
 >
       <h2>
         {scorerPicker.type === 'goals'

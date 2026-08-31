@@ -1019,9 +1019,17 @@ console.log('RESET RESULT:', data, error)
           · {event.match_minute}
         </span>
 
-        <button onClick={() => removeMatchEvent(event)}>
-          Remove
-        </button>
+        <button
+  style={{
+    width: 'auto',
+    padding: '8px 12px',
+    fontSize: '14px',
+    marginLeft: 'auto'
+  }}
+  onClick={() => removeMatchEvent(event)}
+>
+  Remove
+</button>
       </div>
         ))}
 

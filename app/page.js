@@ -1038,17 +1038,19 @@ console.log('RESET RESULT:', data, error)
         <TeamPanel name={awayName} team={away} total={total(away)} crest={awayCrest} />
       </div>
       {!displayMode && <>
-        <div className="admin-grid">
-          <ScoreControls
-  label={homeName}
-  onChange={(t, d) => d > 0 ? requestScore('home', t) : changeScore('home', t, d)}
-/>
+       {matchId && (
+  <div className="admin-grid">
+    <ScoreControls
+      label={homeName}
+      onChange={(t, d) => d > 0 ? requestScore('home', t) : changeScore('home', t, d)}
+    />
 
-<ScoreControls
-  label={awayName}
-  onChange={(t, d) => d > 0 ? requestScore('away', t) : changeScore('away', t, d)}
-/>
-        </div>
+    <ScoreControls
+      label={awayName}
+      onChange={(t, d) => d > 0 ? requestScore('away', t) : changeScore('away', t, d)}
+    />
+  </div>
+)}
 
         <div className="match-controls">
 

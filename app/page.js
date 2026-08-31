@@ -1171,7 +1171,6 @@ justifyContent: 'center',
 </h2>
 
       <p>{scorerPicker.teamName}</p>
-
 <button
   type="button"
   style={{
@@ -1184,52 +1183,53 @@ justifyContent: 'center',
     padding: '14px'
   }}
   onClick={async () => {
-  if (
-  scorerPicker.type === 'substitution' &&
-  scorerPicker.substitutionStep === 'off'
-) {
-  setScorerPicker({
-    ...scorerPicker,
-    substitutionStep: 'on',
-    playerOff: null
-  })
 
-  return
-}
+    if (scorerPicker.type === 'substitution') {
 
-if (
-  scorerPicker.type === 'substitution' &&
-  scorerPicker.substitutionStep === 'on'
-) {
-  const teamId =
-    scorerPicker.side === 'home'
-      ? (setup.sohSide === 'home' ? 1 : Number(setup.oppositionTeamId))
-      : (setup.sohSide === 'away' ? 1 : Number(setup.oppositionTeamId))
+      if (scorerPicker.substitutionStep === 'off') {
+        setScorerPicker({
+          ...scorerPicker,
+          substitutionStep: 'on',
+          playerOff: null
+        })
 
-  const { error } = await supabase
-    .from('match_events')
-    .insert({
-      match_id: matchId,
-      team_id: teamId,
-      player_id: null,
-      player_off_id: scorerPicker.playerOff?.id || null,
-      player_on_id: null,
-      event_type: 'substitution',
-      score_type: 'play',
-      match_minute: Math.floor(displaySeconds / 60),
-      clock_seconds: displaySeconds
-    })
+        return
+      }
 
-  if (error) {
-    console.error('Error saving unknown substitution:', error)
-    alert('Could not save substitution to database.')
-    return
-  }
+      if (scorerPicker.substitutionStep === 'on') {
+        const teamId =
+          scorerPicker.side === 'home'
+            ? (setup.sohSide === 'home' ? 1 : Number(setup.oppositionTeamId))
+            : (setup.sohSide === 'away' ? 1 : Number(setup.oppositionTeamId))
 
-  loadMatchEvents(matchId)
-  setScorerPicker(null)
-  return
-}  
+        const { error } = await supabase
+          .from('match_events')
+          .insert({
+            match_id: matchId,
+            team_id: teamId,
+            player_id: null,
+            player_off_id: scorerPicker.playerOff?.id || null,
+            player_on_id: null,
+            event_type: 'substitution',
+            score_type: 'play',
+            match_minute: Math.floor(displaySeconds / 60),
+            clock_seconds: displaySeconds
+          })
+
+        if (error) {
+          console.error('Error saving unknown substitution:', error)
+          alert('Could not save substitution to database.')
+          return
+        }
+
+        loadMatchEvents(matchId)
+        setScorerPicker(null)
+        return
+      }
+
+      return
+    }
+
     const { error } = await supabase
       .from('match_events')
       .insert({

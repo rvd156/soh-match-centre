@@ -672,15 +672,26 @@ async function startMatch() {
   setRunning(false)
 
   if (matchId) {
+    const isExtraTime = period.startsWith('EXTRA TIME')
+
+    const update = isExtraTime
+      ? {
+          extra_time_seconds: extraTimeSeconds,
+          extra_time_started_at: null
+        }
+      : {
+          clock_seconds: seconds,
+          clock_started_at: null
+        }
+
     const { error } = await supabase
       .from('matches')
-      .update({
-        clock_seconds: seconds,
-        clock_started_at: null
-      })
+      .update(update)
       .eq('id', matchId)
 
-    if (error) console.error('Error saving paused match clock:', error)
+    if (error) {
+      console.error('Error saving paused match clock:', error)
+    }
   }
 }
   async function halfTime() {

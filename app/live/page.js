@@ -278,7 +278,7 @@ useEffect(() => {
   return () => {
     observer.disconnect()
   }
-}, [])
+}, [match?.id])
   
   useEffect(() => {
   if (!match) return

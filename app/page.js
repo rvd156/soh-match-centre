@@ -1211,9 +1211,14 @@ justifyContent: 'center',
   </div>
 )}
 
-      <button onClick={() => setScorerPicker(null)}>
-        Cancel
-      </button>
+      <button
+  style={{
+    marginTop: '12px'
+  }}
+  onClick={() => setScorerPicker(null)}
+>
+  Cancel
+</button>
     </div>
   </div>
 )}

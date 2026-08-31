@@ -618,7 +618,7 @@ const sohWon =
       padding: '10px 12px',
       textAlign: 'center',
       fontWeight: '800',
-      fontSize: '14px'
+      fontSize: '14px',
       lineHeight: 1.35
     }}
   >

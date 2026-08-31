@@ -196,11 +196,10 @@ setLoading(false)
     .channel(`match-events-${match.id}`)
     .on(
       'postgres_changes',
-     {
+    {
   event: '*',
   schema: 'public',
-  table: 'match_events',
-  filter: `match_id=eq.${match.id}`
+  table: 'match_events'
 },
       (payload) => {
   loadMatchEvents(match.id)

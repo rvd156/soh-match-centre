@@ -260,6 +260,7 @@ setScorerPicker({
   substitutionStep: type === 'substitution' ? 'off' : null,
   playerOff: null
 })
+    }
 
   async function addNewPlayer() {
   const name = newPlayerName.trim()

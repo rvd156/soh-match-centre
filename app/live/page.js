@@ -747,7 +747,7 @@ const styles = {
 
   liveBar: {
     width: 'fit-content',
-    margin: '0 auto 24px',
+    margin: '0 auto 16px',
     padding: '8px 16px',
     borderRadius: '999px',
     background: '#123524',
@@ -853,9 +853,9 @@ upcomingTime: {
   },
 
   matchInfo: {
-    textAlign: 'center',
-    marginBottom: '32px'
-  },
+  textAlign: 'center',
+  marginBottom: '22px'
+},
 
   competition: {
     color: '#f4c430',
@@ -871,10 +871,10 @@ upcomingTime: {
   },
 
   clock: {
-    fontSize: '42px',
-    fontWeight: '900',
-    marginTop: '5px'
-  },
+  fontSize: '36px',
+  fontWeight: '900',
+  marginTop: '4px'
+},
 
   scoreboard: {
     display: 'grid',

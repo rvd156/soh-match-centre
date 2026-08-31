@@ -740,10 +740,10 @@ const styles = {
   },
 
   title: {
-    margin: '3px 0 0',
-    fontSize: '24px'
-    fontWeight: '900'
-  },
+  margin: '3px 0 0',
+  fontSize: '24px',
+  fontWeight: '900'
+},
 
   liveBar: {
     width: 'fit-content',

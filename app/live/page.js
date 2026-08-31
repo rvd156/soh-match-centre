@@ -734,7 +734,7 @@ const sohWon =
     <span
       style={{
         color: '#aebdb4',
-        fontSize: '14px',
+        fontSize: '12px',
         whiteSpace: 'nowrap'
       }}
     >
@@ -745,7 +745,7 @@ const sohWon =
       src="/b-more-social-logo.png"
       alt="B More Social"
       style={{
-        width: '130px',
+        width: '165px',
         height: 'auto',
         display: 'block'
       }}

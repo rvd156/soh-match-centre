@@ -381,7 +381,7 @@ async function loadMatchEvents(currentMatchId) {
   setMatchEvents(data || [])
 }
   async function removeMatchEvent(event) {
-  const eventName =
+const eventName =
   event.event_type === 'goal'
     ? 'goal'
     : event.event_type === 'point'
@@ -390,7 +390,11 @@ async function loadMatchEvents(currentMatchId) {
         ? '2-pointer'
         : event.event_type === 'yellow_card'
           ? 'yellow card'
-          : 'red card'
+          : event.event_type === 'red_card'
+            ? 'red card'
+            : event.event_type === 'substitution'
+              ? 'substitution'
+              : 'event'
 
   if (
     !window.confirm(

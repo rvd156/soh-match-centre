@@ -50,6 +50,7 @@ async function loadMatchEvents(matchId) {
   'yellow_card',
   'red_card',
   'substitution'
+  'manual_update'
 ])
     .order('clock_seconds', { ascending: true })
 
@@ -645,19 +646,23 @@ const sohWon =
          <div key={event.id} style={styles.scorerRow}>
   {event.match_minute}'{' '}
 
-  {event.event_type === 'substitution' ? (
-    <>
-      🔄 {
-  event.player_off?.name && event.player_on?.name
-    ? `${event.player_off.name} OFF → ${event.player_on.name} ON`
-    : event.player_off?.name
-      ? `${event.player_off.name} OFF · Substitution`
-      : event.player_on?.name
-        ? `Substitution · ${event.player_on.name} ON`
-        : `Substitution · ${event.teams?.name || 'Team'}`
-}
-    </>
-  ) : (
+  {event.event_type === 'manual_update' ? (
+  <>
+    ✍️ {event.notes || 'Match update'}
+  </>
+) : event.event_type === 'substitution' ? (
+  <>
+    🔄 {
+      event.player_off?.name && event.player_on?.name
+        ? `${event.player_off.name} OFF → ${event.player_on.name} ON`
+        : event.player_off?.name
+          ? `${event.player_off.name} OFF · Substitution`
+          : event.player_on?.name
+            ? `Substitution · ${event.player_on.name} ON`
+            : `Substitution · ${event.teams?.name || 'Team'}`
+    }
+  </>
+) : (
     <>
       {event.event_type === 'goal'
         ? <span style={styles.greenFlag}></span>

@@ -624,33 +624,63 @@ const sohWon =
   >
     {latestEvent.event_type === 'substitution' ? (
       <>
-        🔄 Substitution
+        🔄{' '}
+        {latestEvent.player_off?.name
+          ? `${latestEvent.player_off.name} OFF`
+          : 'Substitution'}
+        {' → '}
+        {latestEvent.player_on?.name
+          ? `${latestEvent.player_on.name} ON`
+          : 'Substitution'}
+        {latestEvent.teams?.name && (
+          <> · {latestEvent.teams.name}</>
+        )}
       </>
     ) : latestEvent.event_type === 'yellow_card' ? (
       <>
-        🟨 Yellow Card
+        🟨 {latestEvent.players?.name || 'Yellow Card'}
+        {' · Yellow Card'}
+        {latestEvent.teams?.name && (
+          <> · {latestEvent.teams.name}</>
+        )}
       </>
     ) : latestEvent.event_type === 'red_card' ? (
       <>
-        🟥 Red Card
+        🟥 {latestEvent.players?.name || 'Red Card'}
+        {' · Red Card'}
+        {latestEvent.teams?.name && (
+          <> · {latestEvent.teams.name}</>
+        )}
       </>
     ) : latestEvent.event_type === 'goal' ? (
       <>
-        🥅 GOAL
+        🥅 {latestEvent.players?.name || 'GOAL'}
+        {' · GOAL'}
+        {latestEvent.teams?.name && (
+          <> · {latestEvent.teams.name}</>
+        )}
       </>
     ) : latestEvent.event_type === 'two_pointer' ? (
       <>
-        🟧 2PT
+        🟧 {latestEvent.players?.name || '2PT'}
+        {' · 2PT'}
+        {latestEvent.teams?.name && (
+          <> · {latestEvent.teams.name}</>
+        )}
       </>
     ) : latestEvent.event_type === 'point' ? (
       <>
-        ⚪ Point
+        ⚪ {latestEvent.players?.name || 'Point'}
+        {' · Point'}
+        {latestEvent.teams?.name && (
+          <> · {latestEvent.teams.name}</>
+        )}
       </>
-    ) : (
+    ) : latestEvent.event_type === 'manual_update' ? (
       <>
-        ✍️ Match Update
+        ✍️ {latestEvent.notes || 'Match Update'}
       </>
-    )}
+    ) : null}
   </div>
 )}
 {showGoalCelebration && (

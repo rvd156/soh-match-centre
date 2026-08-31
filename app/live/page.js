@@ -205,6 +205,14 @@ setLoading(false)
       (payload) => {
   loadMatchEvents(match.id)
 
+  if (payload.eventType === 'INSERT') {
+    setLatestEvent(payload.new)
+
+    setTimeout(() => {
+      setLatestEvent(null)
+    }, 4000)
+  }
+
   if (
     payload.eventType === 'INSERT' &&
     payload.new?.event_type === 'goal'

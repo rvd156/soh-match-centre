@@ -1053,8 +1053,8 @@ console.log('RESET RESULT:', data, error)
     inset: 0,
     zIndex: 1000,
     display: 'flex',
-    alignItems: 'flex-end',
-    justifyContent: 'center',
+   alignItems: 'center',
+  justifyContent: 'center',
     background: 'rgba(0, 0, 0, 0.65)',
     padding: '16px'
   }}
@@ -1064,7 +1064,7 @@ console.log('RESET RESULT:', data, error)
   style={{
     width: '100%',
     maxWidth: '500px',
-    maxHeight: '80vh',
+    maxHeight: '70vh',
     overflowY: 'auto',
     borderRadius: '20px',
     padding: '24px',

@@ -1043,7 +1043,8 @@ console.log('RESET RESULT:', data, error)
 
 <button
   onClick={() => {
-    alert('Match Update coming next')
+    setManualUpdateText('')
+    setManualUpdateOpen(true)
   }}
 >
   ✍️ Add Match Update

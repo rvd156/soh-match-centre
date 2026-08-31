@@ -1170,7 +1170,44 @@ console.log('RESET RESULT:', data, error)
     >
       <h2>Add Match Update</h2>
 
-      <textarea
+<div
+  style={{
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, 1fr)',
+    gap: '8px',
+    marginBottom: '12px'
+  }}
+>
+  <button
+    type="button"
+    onClick={() => setManualUpdateText('Injury stoppage')}
+  >
+    Injury Stoppage
+  </button>
+
+  <button
+    type="button"
+    onClick={() => setManualUpdateText('Play resumes')}
+  >
+    Play Resumes
+  </button>
+
+  <button
+    type="button"
+    onClick={() => setManualUpdateText('Wide')}
+  >
+    Wide
+  </button>
+
+  <button
+    type="button"
+    onClick={() => setManualUpdateText('Free awarded')}
+  >
+    Free Awarded
+  </button>
+</div>
+
+<textarea
         placeholder="Type match update..."
         value={manualUpdateText}
         onChange={(e) => setManualUpdateText(e.target.value)}

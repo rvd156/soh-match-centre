@@ -46,8 +46,8 @@ const [upcomingFixture, setUpcomingFixture] = useState(null)
   const intervalRef = useRef(null)
 
   useEffect(() => {
-  const handlePageShow = (event) => {
-    if (event.persisted && !matchId) {
+  const handlePageShow = () => {
+    if (!matchId) {
       setSetupComplete(false)
     }
   }

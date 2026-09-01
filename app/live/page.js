@@ -920,11 +920,30 @@ const sohWon =
     <div style={{ width: '100%' }}>
       <div style={styles.scorersTitle}>MATCH EVENTS</div>
 
-      map(event => (
-        <div key={event.id} style={styles.scorerRow}>
-  {event.match_minute}'{' '}
-        <div key={event.id} style={styles.scorerRow}>
-  {event.match_minute}'{' '}
+    {(showAllMatchEvents
+  ? matchEvents.filter(event =>
+      event.event_type === 'goal' ||
+      event.event_type === 'point' ||
+      event.event_type === 'two_pointer' ||
+      event.event_type === 'yellow_card' ||
+      event.event_type === 'red_card' ||
+      event.event_type === 'substitution' ||
+      event.event_type === 'manual_update'
+    )
+  : matchEvents
+      .filter(event =>
+        event.event_type === 'goal' ||
+        event.event_type === 'point' ||
+        event.event_type === 'two_pointer' ||
+        event.event_type === 'yellow_card' ||
+        event.event_type === 'red_card' ||
+        event.event_type === 'substitution' ||
+        event.event_type === 'manual_update'
+      )
+      .slice(0, 8)
+).map(event => (
+  <div key={event.id} style={styles.scorerRow}>
+    {event.match_minute}'{' '}
 
   {event.event_type === 'manual_update' ? (
   <>

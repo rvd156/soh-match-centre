@@ -278,17 +278,6 @@ useEffect(() => {
 
   loadMatchEvents(matchId)
 }, [matchId])
-  
-  useEffect(() => {
-    const saved = localStorage.getItem('soh-match-centre-v2-1')
-    if (!saved) return
-    try {
-      const p = JSON.parse(saved)
-      setSetup({ ...defaultSetup, ...(p.setup ?? {}) }); setSetupComplete(p.setupComplete ?? false)
-      setHome(p.home ?? emptyTeam); setAway(p.away ?? emptyTeam)
-      setSeconds(p.seconds ?? 0); setPeriod(p.period ?? 'PRE-MATCH')
-    } catch {}
-  }, [])
 
   useEffect(() => {
     try {

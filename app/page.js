@@ -131,6 +131,33 @@ const [upcomingFixture, setUpcomingFixture] = useState(null)
 }, [matchId])
 
   useEffect(() => {
+  if (teams.length === 0) return
+
+  const channel = supabase
+    .channel('admin-new-match')
+    .on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'matches'
+      },
+      payload => {
+        const newMatch = payload.new
+
+        if (newMatch.active === true) {
+          resumeMatch(newMatch)
+        }
+      }
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
+  }
+}, [teams])
+
+  useEffect(() => {
   async function loadTeams() {
     setTeamsLoading(true)
     setTeamsError('')

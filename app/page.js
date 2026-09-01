@@ -1086,16 +1086,20 @@ console.log('RESET RESULT:', data, error)
         <div className="clock">{clock}</div>
       </div>
       {(setup.venue || setup.date || setup.throwIn || setup.referee) && (
-  <div className="match-meta">
-    {[
-      setup.venue,
-      formatDate(setup.date),
-      setup.throwIn && `${setup.throwIn.slice(0, 5)} throw-in`,
-      setup.referee && `Referee: ${setup.referee}`
-    ]
-      .filter(Boolean)
-      .join(' • ')}
-  </div>
+  <div
+  className="match-meta"
+  style={{
+    display: 'flex',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    gap: '6px 12px'
+  }}
+>
+  {setup.venue && <span>{setup.venue}</span>}
+  {setup.date && <span>{formatDate(setup.date)}</span>}
+  {setup.throwIn && <span>{setup.throwIn.slice(0, 5)} throw-in</span>}
+  {setup.referee && <span>Referee: {setup.referee}</span>}
+</div>
 )}
       <div className="teams">
         <TeamPanel name={homeName} team={home} total={total(home)} crest={homeCrest} />

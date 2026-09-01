@@ -335,12 +335,10 @@ useEffect(() => {
 
 const update = isExtraTime
   ? {
-      extra_time_seconds: extraTimeSeconds,
-      extra_time_started_at: now
+      extra_time_seconds: extraTimeSeconds
     }
   : {
-      clock_seconds: seconds,
-      clock_started_at: now
+      clock_seconds: seconds
     }
     const { error } = await supabase
       .from('matches')

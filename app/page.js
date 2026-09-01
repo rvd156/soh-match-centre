@@ -616,16 +616,16 @@ if (isScoreEvent) {
 setExistingMatch(data)
 }
   
-  function resumeMatch() {
-  if (!existingMatch) return
+ function resumeMatch(matchToResume = existingMatch) {
+  if (!matchToResume) return
 
   const sohSide =
-    existingMatch.home_team_id === 1 ? 'home' : 'away'
+    matchToResume.home_team_id === 1 ? 'home' : 'away'
 
   const oppositionTeamId =
     sohSide === 'home'
-      ? existingMatch.away_team_id
-      : existingMatch.home_team_id
+      ? matchToResume.away_team_id
+      : matchToResume.home_team_id
 
   const oppositionTeam = teams.find(
     team => Number(team.id) === Number(oppositionTeamId)
@@ -647,15 +647,15 @@ setExistingMatch(data)
     'extra_time_half_time',
     'extra_time_second_half',
     'after_extra_time'
-  ].includes(existingMatch.status)
+  ].includes(matchToResume.status)
 
   const startedAt = isExtraTime
-    ? existingMatch.extra_time_started_at
-    : existingMatch.clock_started_at
+    ? matchToResume.extra_time_started_at
+    : matchToResume.clock_started_at
 
   const baseSeconds = isExtraTime
-    ? (existingMatch.extra_time_seconds || 0)
-    : (existingMatch.clock_seconds || 0)
+    ? (matchToResume.extra_time_seconds || 0)
+    : (matchToResume.clock_seconds || 0)
 
   let restoredSeconds = baseSeconds
 
@@ -670,16 +670,16 @@ setExistingMatch(data)
     restoredSeconds += elapsed
   }
 
-  setMatchId(existingMatch.id)
+  setMatchId(matchToResume.id)
 
   setHome({
-    goals: existingMatch.home_goals || 0,
-    points: existingMatch.home_points || 0
+    goals: matchToResume.home_goals || 0,
+    points: matchToResume.home_points || 0
   })
 
   setAway({
-    goals: existingMatch.away_goals || 0,
-    points: existingMatch.away_points || 0
+    goals: matchToResume.away_goals || 0,
+    points: matchToResume.away_points || 0
   })
 
   setSetup(s => ({
@@ -687,16 +687,16 @@ setExistingMatch(data)
     opposition: oppositionTeam?.name || 'Opposition',
     oppositionTeamId,
     oppositionCrest: oppositionTeam?.crest_url || '',
-    competition: existingMatch.competition || '',
-    venue: existingMatch.venue || '',
-    referee: existingMatch.referee || '',
-    date: existingMatch.match_date || '',
-    throwIn: existingMatch.throw_in?.slice(0, 5) || '',
-    halfLength: String(existingMatch.half_length || 30),
+    competition: matchToResume.competition || '',
+    venue: matchToResume.venue || '',
+    referee: matchToResume.referee || '',
+    date: matchToResume.match_date || '',
+    throwIn: matchToResume.throw_in?.slice(0, 5) || '',
+    halfLength: String(matchToResume.half_length || 30),
     sohSide
   }))
 
-  setPeriod(periodMap[existingMatch.status] || 'PRE-MATCH')
+  setPeriod(periodMap[matchToResume.status] || 'PRE-MATCH')
 
   if (isExtraTime) {
     setExtraTimeSeconds(restoredSeconds)
@@ -708,7 +708,7 @@ setExistingMatch(data)
   setDisplayMode(false)
   setSetupComplete(true)
   setExistingMatch(null)
-}  
+}
 async function resetExistingMatch() {
   if (!existingMatch) return
 

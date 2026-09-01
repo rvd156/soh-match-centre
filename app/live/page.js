@@ -55,7 +55,7 @@ async function loadMatchEvents(matchId) {
   'substitution',
   'manual_update'
 ])
-    .order('clock_seconds', { ascending: true })
+    .order('clock_seconds', { ascending: false })
 
   if (error) {
     console.error('Error loading match events:', error)

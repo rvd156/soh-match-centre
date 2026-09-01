@@ -890,13 +890,16 @@ const sohWon =
     <>
       {' · '}
       <span
-        style={{
-          color: '#f4c430',
-          fontWeight: '700'
-        }}
-      >
-        {event.teams?.name || 'Team'}
-      </span>
+  style={{
+    color:
+      event.team_id === 1
+        ? '#f4c430'
+        : '#ff6b6b',
+    fontWeight: '700'
+  }}
+>
+  {event.teams?.name || 'Team'}
+</span>
     </>
   )}
 </div>

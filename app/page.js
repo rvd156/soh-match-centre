@@ -46,6 +46,20 @@ const [upcomingFixture, setUpcomingFixture] = useState(null)
   const intervalRef = useRef(null)
 
   useEffect(() => {
+  const handlePageShow = (event) => {
+    if (event.persisted && !matchId) {
+      setSetupComplete(false)
+    }
+  }
+
+  window.addEventListener('pageshow', handlePageShow)
+
+  return () => {
+    window.removeEventListener('pageshow', handlePageShow)
+  }
+}, [matchId])
+
+  useEffect(() => {
   async function loadTeams() {
     setTeamsLoading(true)
     setTeamsError('')

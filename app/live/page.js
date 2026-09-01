@@ -846,7 +846,14 @@ const sohWon =
 
   {event.event_type === 'manual_update' ? (
   <>
+    <span
+  style={{
+    color: '#aebdb4',
+    fontWeight: '700'
+  }}
+>
     ✍️ {event.notes || 'Match update'}
+</span>
   </>
 ) : event.event_type === 'substitution' ? (
   <>

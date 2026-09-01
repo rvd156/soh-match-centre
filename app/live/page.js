@@ -394,7 +394,7 @@ function formatStatus(status = '') {
     lineHeight: 1.4
   }}
 >
-  🔴 Live match updates will appear here once the game begins.
+  🔴 Live updates will appear here when the match begins.
 </div>       
 
 {upcomingFixture.competition && (

@@ -86,6 +86,7 @@ async function loadUpcomingFixture() {
 }
     
   loadTeams()
+  loadUpcomingFixture()
 checkForExistingMatch()
 }, [])
 useEffect(() => {

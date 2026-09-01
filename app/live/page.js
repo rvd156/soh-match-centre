@@ -379,6 +379,23 @@ function formatStatus(status = '') {
       UPCOMING FIXTURE
     </div>
 
+<div
+  style={{
+    margin: '18px auto 24px',
+    maxWidth: '520px',
+    padding: '12px 16px',
+    background: '#123524',
+    border: '1px solid #1c4932',
+    borderRadius: '12px',
+    color: '#f4f4f4',
+    fontSize: '15px',
+    fontWeight: '700',
+    textAlign: 'center',
+    lineHeight: 1.4
+  }}
+>
+  🔴 Live match updates will appear here once the game begins.
+</div>       
 
 {upcomingFixture.competition && (
   <div style={styles.upcomingCompetition}>
@@ -470,19 +487,7 @@ function formatStatus(status = '') {
     />
   </a>
 </section>
-
-<div
-  style={{
-    marginTop: '24px',
-    color: '#aebdb4',
-    fontSize: '15px',
-    fontWeight: '600',
-    textAlign: 'center'
-  }}
->
-  Live match updates will appear here once the game begins.
-</div>
-      
+   
 </div>
 </>
 ) : (

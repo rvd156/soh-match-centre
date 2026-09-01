@@ -1085,7 +1085,18 @@ console.log('RESET RESULT:', data, error)
         <div className="match-status"><strong>{period}</strong><span>{setup.competition || 'SOH MATCH CENTRE'}</span></div>
         <div className="clock">{clock}</div>
       </div>
-      {(setup.venue || setup.date || setup.throwIn) && <div className="match-meta">{[setup.venue, formatDate(setup.date), setup.throwIn && `${setup.throwIn} throw-in`].filter(Boolean).join(' • ')}</div>}
+      {(setup.venue || setup.date || setup.throwIn || setup.referee) && (
+  <div className="match-meta">
+    {[
+      setup.venue,
+      formatDate(setup.date),
+      setup.throwIn && `${setup.throwIn.slice(0, 5)} throw-in`,
+      setup.referee && `Referee: ${setup.referee}`
+    ]
+      .filter(Boolean)
+      .join(' • ')}
+  </div>
+)}
       <div className="teams">
         <TeamPanel name={homeName} team={home} total={total(home)} crest={homeCrest} />
         <div className="divider">V</div>

@@ -841,31 +841,7 @@ const sohWon =
   event.event_type === 'manual_update'
 )
         .map(event => (
-         <div
-  key={event.id}
-  style={{
-  ...styles.scorerRow,
-  width: event.event_type === 'manual_update' ? '100%' : '82%',
-  marginLeft:
-    event.event_type === 'manual_update'
-      ? '0'
-      : event.team_id === homeTeam?.id
-        ? '0'
-        : 'auto',
-  marginRight:
-    event.event_type === 'manual_update'
-      ? '0'
-      : event.team_id === homeTeam?.id
-        ? 'auto'
-        : '0',
-  textAlign:
-    event.event_type === 'manual_update'
-      ? 'center'
-      : event.team_id === homeTeam?.id
-        ? 'left'
-        : 'right'
-}}
->
+        <div key={event.id} style={styles.scorerRow}>
   {event.match_minute}'{' '}
 
   {event.event_type === 'manual_update' ? (

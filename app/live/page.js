@@ -1063,7 +1063,7 @@ const styles = {
   background: '#0d2419',
   border: '1px solid #1c4932',
   borderRadius: '24px',
-  padding: '36px 20px',
+  padding: '28px 20px',
   marginBottom: '24px'
 },
 
@@ -1076,7 +1076,7 @@ upcomingCrest: {
   width: '110px',
   height: '110px',
   objectFit: 'contain',
-  marginBottom: '16px'
+  marginBottom: '10px'
 },
 
 upcomingTeamName: {

@@ -41,6 +41,7 @@ const [matchEvents, setMatchEvents] = useState([])
 const [showAllEvents, setShowAllEvents] = useState(false)
 const [manualUpdateOpen, setManualUpdateOpen] = useState(false)
 const [manualUpdateText, setManualUpdateText] = useState('')
+const [upcomingFixture, setUpcomingFixture] = useState(null)
   
   const intervalRef = useRef(null)
 
@@ -67,6 +68,23 @@ const [manualUpdateText, setManualUpdateText] = useState('')
     setTeamsLoading(false)
   }
 
+async function loadUpcomingFixture() {
+  const { data, error } = await supabase
+    .from('upcoming_fixtures')
+    .select('*')
+    .eq('active', true)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Error loading upcoming fixture:', error)
+    return
+  }
+
+  setUpcomingFixture(data || null)
+}
+    
   loadTeams()
 checkForExistingMatch()
 }, [])

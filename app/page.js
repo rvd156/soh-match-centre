@@ -74,6 +74,15 @@ const [upcomingFixture, setUpcomingFixture] = useState(null)
       },
       payload => {
         const updatedMatch = payload.new
+        if (updatedMatch.active === false) {
+  setMatchId(null)
+  setRunning(false)
+  setPeriod('PRE-MATCH')
+  setSetupComplete(false)
+  setHome(emptyTeam)
+  setAway(emptyTeam)
+  return
+}
 
         setHome({
           goals: updatedMatch.home_goals || 0,

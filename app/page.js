@@ -116,11 +116,24 @@ const [upcomingFixture, setUpcomingFixture] = useState(null)
 if (updatedMatch.status === 'second_half') {
   setSeconds(updatedMatch.clock_seconds || 0)
 }
-if (updatedMatch.status === 'extra_time') {
-  setExtraTimeSeconds(updatedMatch.extra_time_seconds || 0)
-}
-if (updatedMatch.status === 'extra_time_second_half') {
-  setExtraTimeSeconds(updatedMatch.extra_time_seconds || 0)
+if (
+  updatedMatch.status === 'extra_time' ||
+  updatedMatch.status === 'extra_time_second_half'
+) {
+  let syncedExtraTime = updatedMatch.extra_time_seconds || 0
+
+  if (updatedMatch.extra_time_started_at) {
+    const elapsed = Math.max(
+      0,
+      Math.floor(
+        (Date.now() - new Date(updatedMatch.extra_time_started_at).getTime()) / 1000
+      )
+    )
+
+    syncedExtraTime += elapsed
+  }
+
+  setExtraTimeSeconds(syncedExtraTime)
 }
        const isExtraTimeStatus = [
   'extra_time',

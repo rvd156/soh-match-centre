@@ -383,7 +383,7 @@ function formatStatus(status = '') {
   style={{
     margin: '18px auto 24px',
     maxWidth: '520px',
-    padding: '12px 16px',
+    padding: '10px 14px',
     background: '#123524',
     border: '1px solid #1c4932',
     borderRadius: '12px',

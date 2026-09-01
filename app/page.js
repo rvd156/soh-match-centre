@@ -1004,6 +1004,7 @@ console.log('RESET RESULT:', data, error)
     onResetExistingMatch={resetExistingMatch}
     onStart={() => setup.opposition.trim() && setSetupComplete(true)}
     onPublishFixture={publishUpcomingFixture}
+    upcomingFixture={upcomingFixture}
   />
 )
   return <main className={displayMode ? 'display-page' : ''}>
@@ -1708,7 +1709,19 @@ setScorerPicker(null)
 )}
   </main>
 }
-function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFixture,existingMatch,onResumeMatch,onResetExistingMatch}){
+function Setup({
+  setup,
+  setSetup,
+  teams,
+  teamsLoading,
+  teamsError,
+  onStart,
+  onPublishFixture,
+  existingMatch,
+  onResumeMatch,
+  onResetExistingMatch,
+  upcomingFixture
+}) {
   const update = (key,value) => setSetup(s=>({...s,[key]:value}))
   function uploadCrest(event) {
   const file = event.target.files?.[0]
@@ -1751,6 +1764,80 @@ function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFi
 >
   Reset Match
 </button>
+
+      </section>
+    </main>
+  )
+}
+
+if (upcomingFixture) {
+  return (
+    <main className="setup-page">
+      <section className="setup-card">
+
+        <div className="setup-brand">
+          <img src="/soh-crest.png" alt="SOH crest" />
+          <div>
+            <p>SEÁN O'HESLIN'S GAA</p>
+            <h1>Match Centre</h1>
+          </div>
+        </div>
+
+        <div className="setup-heading">
+          <span>UPCOMING FIXTURE</span>
+          <h2>{upcomingFixture.opposition}</h2>
+          <p>
+            {upcomingFixture.competition || 'Upcoming Match'}
+          </p>
+        </div>
+
+        <div
+          style={{
+            textAlign: 'center',
+            marginBottom: '20px',
+            lineHeight: 1.8
+          }}
+        >
+          {upcomingFixture.match_date && (
+            <div>{formatDate(upcomingFixture.match_date)}</div>
+          )}
+
+          {upcomingFixture.throw_in && (
+            <div>
+              Throw-in: {upcomingFixture.throw_in.slice(0, 5)}
+            </div>
+          )}
+
+          {upcomingFixture.venue && (
+            <div>📍 {upcomingFixture.venue}</div>
+          )}
+
+          {upcomingFixture.referee && (
+            <div>Referee: {upcomingFixture.referee}</div>
+          )}
+        </div>
+
+        <button
+          className="start-setup"
+          onClick={() => {
+            setSetup(s => ({
+              ...s,
+              opposition: upcomingFixture.opposition || '',
+              oppositionTeamId: upcomingFixture.opposition_team_id || '',
+              oppositionCrest: upcomingFixture.opposition_crest || '',
+              competition: upcomingFixture.competition || '',
+              venue: upcomingFixture.venue || '',
+              referee: upcomingFixture.referee || '',
+              date: upcomingFixture.match_date || '',
+              throwIn: upcomingFixture.throw_in || '',
+              sohSide: upcomingFixture.soh_side || 'home'
+            }))
+
+            onStart()
+          }}
+        >
+          Continue to Scoreboard →
+        </button>
 
       </section>
     </main>

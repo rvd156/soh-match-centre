@@ -1323,12 +1323,12 @@ scorersTitle: {
 },
 
 scorerRow: {
-  padding: '7px 0',
+  padding: '6px 4px',
   borderBottom: '1px solid #1c4932',
   textAlign: 'center',
   fontSize: '15px',
   fontWeight: '600',
-  lineHeight: 1.3
+  lineHeight: 1.25
 },
 
 goalEvent: {

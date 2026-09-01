@@ -451,6 +451,26 @@ function formatStatus(status = '') {
     Referee: {upcomingFixture.referee}
   </div>
 )}
+
+<section style={styles.sponsorSection}>
+  <div style={styles.sponsorLabel}>
+    Match Coverage Sponsored By
+  </div>
+
+  <a
+    href="https://www.facebook.com/ballinamore.seanoheslinsgaa"
+    target="_blank"
+    rel="noopener noreferrer"
+    style={styles.sponsorLink}
+  >
+    <img
+      src="/ballinamore-le-cheile.png"
+      alt="Ballinamore Le Chéile"
+      style={styles.sponsorImage}
+    />
+  </a>
+</section>
+      
 </div>
 </>
 ) : (
@@ -1081,6 +1101,29 @@ upcomingTime: {
   fontSize: '16px',
   fontWeight: '600',
   marginTop: '10px'
+},
+
+  sponsorSection: {
+  marginTop: '28px',
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: '12px'
+},
+
+sponsorLabel: {
+  color: '#aebdb4',
+  fontSize: '18px',
+  fontWeight: '800',
+  fontStyle: 'italic',
+  textAlign: 'center'
+},
+
+sponsorImage: {
+  width: '100%',
+  maxWidth: '420px',
+  height: 'auto',
+  display: 'block'
 },
   
   liveDot: {

@@ -116,6 +116,9 @@ const [upcomingFixture, setUpcomingFixture] = useState(null)
 if (updatedMatch.status === 'second_half') {
   setSeconds(updatedMatch.clock_seconds || 0)
 }
+if (updatedMatch.status === 'extra_time') {
+  setExtraTimeSeconds(updatedMatch.extra_time_seconds || 0)
+}
 if (updatedMatch.status === 'extra_time_second_half') {
   setExtraTimeSeconds(updatedMatch.extra_time_seconds || 0)
 }

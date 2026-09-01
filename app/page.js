@@ -1756,8 +1756,6 @@ function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFi
     </main>
   )
 }
-return <main className="setup-page">
-
   return <main className="setup-page"><section className="setup-card">
     <div className="setup-brand"><img src="/soh-crest.png" alt="SOH crest"/><div><p>SEÁN O'HESLIN'S GAA</p><h1>Match Centre</h1></div></div>
     <div className="setup-heading"><span>NEW MATCH</span><h2>Match Setup</h2><p>Enter the match details before throw-in.</p></div>

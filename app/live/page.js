@@ -1012,6 +1012,32 @@ const sohWon =
   )}
 </div>
         ))}
+{matchEvents.filter(event =>
+  event.event_type === 'goal' ||
+  event.event_type === 'point' ||
+  event.event_type === 'two_pointer' ||
+  event.event_type === 'yellow_card' ||
+  event.event_type === 'red_card' ||
+  event.event_type === 'substitution' ||
+  event.event_type === 'manual_update'
+).length > 8 && (
+  <button
+    onClick={() => setShowAllMatchEvents(prev => !prev)}
+    style={{
+      margin: '14px auto 0',
+      display: 'block',
+      background: 'transparent',
+      border: '1px solid #1c4932',
+      color: '#f4c430',
+      borderRadius: '10px',
+      padding: '8px 14px',
+      fontSize: '13px',
+      fontWeight: '800'
+    }}
+  >
+    {showAllMatchEvents ? 'Show Less' : 'View All Match Events'}
+  </button>
+)}
     </div>
   </section>
 )}

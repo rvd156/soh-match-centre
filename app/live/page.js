@@ -562,39 +562,70 @@ const sohWon =
       position: 'sticky',
       top: 0,
       zIndex: 999,
-      background: '#0d2419',
-      borderBottom: '1px solid #c8a951',
-      padding: '8px 12px',
-      textAlign: 'center',
-      boxShadow: '0 2px 8px rgba(0,0,0,0.25)'
+      background: '#0b1f16',
+      borderBottom: '1px solid #1c4932',
+      padding: '7px 10px',
+      boxShadow: '0 2px 8px rgba(0,0,0,0.28)'
     }}
   >
     <div
       style={{
-        fontSize: '14px',
-        fontWeight: '800',
-        lineHeight: 1.3
+        display: 'grid',
+        gridTemplateColumns: '1fr auto 1fr',
+        alignItems: 'center',
+        gap: '8px',
+        fontSize: '13px',
+        fontWeight: '800'
       }}
     >
-      {homeTeam.name}{' '}
-{match.home_goals}-{String(match.home_points).padStart(2, '0')}
-{'  •  '}
-{match.away_goals}-{String(match.away_points).padStart(2, '0')}{' '}
-{awayTeam.name}
-    </div>
+      <div style={{ textAlign: 'left' }}>
+        {homeTeam.name}
+        <div
+          style={{
+            fontSize: '18px',
+            lineHeight: 1.1
+          }}
+        >
+          {match.home_goals}-{String(match.home_points).padStart(2, '0')}
+        </div>
+      </div>
 
-    <div
-      style={{
-        marginTop: '2px',
-        fontSize: '11px',
-        color: '#aebdb4',
-        fontWeight: '700'
-      }}
-    >
-      {formatStatus(match.status)} · {formatClock(liveSeconds)}
+      <div
+        style={{
+          textAlign: 'center',
+          color: '#aebdb4',
+          fontSize: '10px',
+          fontWeight: '700',
+          whiteSpace: 'nowrap'
+        }}
+      >
+        <div>{formatStatus(match.status)}</div>
+        <div
+          style={{
+            marginTop: '1px',
+            color: '#ffffff',
+            fontSize: '13px',
+            fontWeight: '900'
+          }}
+        >
+          {formatClock(liveSeconds)}
+        </div>
+      </div>
+
+      <div style={{ textAlign: 'right' }}>
+        {awayTeam.name}
+        <div
+          style={{
+            fontSize: '18px',
+            lineHeight: 1.1
+          }}
+        >
+          {match.away_goals}-{String(match.away_points).padStart(2, '0')}
+        </div>
+      </div>
     </div>
   </div>
-)}  
+)}
 
         <header style={styles.header}>
           <img

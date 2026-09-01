@@ -349,7 +349,14 @@ const update = isExtraTime
   }
 }, [seconds, extraTimeSeconds, running, period, matchId])
 
-  const displaySeconds = period.startsWith('EXTRA TIME')
+const isExtraTimePeriod = [
+  'EXTRA TIME',
+  'ET HALF TIME',
+  'EXTRA TIME 2ND HALF',
+  'AET'
+].includes(period)
+
+const displaySeconds = isExtraTimePeriod
   ? extraTimeSeconds
   : seconds
 

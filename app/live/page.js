@@ -856,7 +856,7 @@ const sohWon =
 
       <div style={styles.scorersTitle}>SCORERS</div>
 
-      {homeEvents.map(event => (
+      {(showAllScorers ? homeEvents : homeEvents.slice(0, 4)).map(event => (
         <div key={event.id} style={styles.scorerRow}>
           {event.players?.name || event.teams?.name || 'Team'}
           {' '}
@@ -878,7 +878,7 @@ const sohWon =
 
       <div style={styles.scorersTitle}>SCORERS</div>
 
-      {awayEvents.map(event => (
+      {(showAllScorers ? awayEvents : awayEvents.slice(0, 4)).map(event => (
         <div key={event.id} style={styles.scorerRow}>
          {event.players?.name || event.teams?.name || 'Team'}
           {' '}

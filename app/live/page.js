@@ -892,6 +892,26 @@ const sohWon =
         </div>
       ))}
     </div>
+
+  {(homeEvents.length > 4 || awayEvents.length > 4) && (
+  <button
+    onClick={() => setShowAllScorers(prev => !prev)}
+    style={{
+      margin: '14px auto 0',
+      display: 'block',
+      background: 'transparent',
+      border: '1px solid #1c4932',
+      color: '#f4c430',
+      borderRadius: '10px',
+      padding: '8px 14px',
+      fontSize: '13px',
+      fontWeight: '800'
+    }}
+  >
+    {showAllScorers ? 'Show Less' : 'View All Scorers'}
+  </button>
+)}
+
   </section>
 )}
   {matchEvents.length > 0 && (

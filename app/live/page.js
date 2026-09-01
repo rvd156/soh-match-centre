@@ -14,6 +14,7 @@ export default function LiveMatchPage() {
   const [showGoalCelebration, setShowGoalCelebration] = useState(false)
   const [latestEvent, setLatestEvent] = useState(null)
   const [showAllScorers, setShowAllScorers] = useState(false)
+  const [showAllMatchEvents, setShowAllMatchEvents] = useState(false)
   const [showStickyScore, setShowStickyScore] = useState(false)
   const scoreboardRef = useRef(null)
 
@@ -919,17 +920,9 @@ const sohWon =
     <div style={{ width: '100%' }}>
       <div style={styles.scorersTitle}>MATCH EVENTS</div>
 
-      {matchEvents
-      .filter(event =>
-  event.event_type === 'goal' ||
-  event.event_type === 'point' ||
-  event.event_type === 'two_pointer' ||
-  event.event_type === 'yellow_card' ||
-  event.event_type === 'red_card' ||
-  event.event_type === 'substitution' ||
-  event.event_type === 'manual_update'
-)
-        .map(event => (
+      map(event => (
+        <div key={event.id} style={styles.scorerRow}>
+  {event.match_minute}'{' '}
         <div key={event.id} style={styles.scorerRow}>
   {event.match_minute}'{' '}
 

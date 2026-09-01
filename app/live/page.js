@@ -470,6 +470,18 @@ function formatStatus(status = '') {
     />
   </a>
 </section>
+
+<div
+  style={{
+    marginTop: '24px',
+    color: '#aebdb4',
+    fontSize: '15px',
+    fontWeight: '600',
+    textAlign: 'center'
+  }}
+>
+  Live match updates will appear here once the game begins.
+</div>
       
 </div>
 </>

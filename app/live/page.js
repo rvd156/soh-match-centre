@@ -814,6 +814,14 @@ const sohWon =
         ✍️ {latestEvent.notes || 'Match Update'}
       </>
     ) : null}
+<span
+  style={{
+    marginLeft: '6px',
+    opacity: 0.75
+  }}
+>
+  · {latestEvent.match_minute}'
+</span>
   </div>
 )}
 {showGoalCelebration && (

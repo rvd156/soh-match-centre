@@ -564,6 +564,8 @@ const sohWon =
       position: 'sticky',
       top: 0,
       zIndex: 999,
+      WebkitTransform: 'translateZ(0)',
+      transform: 'translateZ(0)',
       background: '#0b1f16',
       borderBottom: '1px solid #1c4932',
       padding: '7px 10px',

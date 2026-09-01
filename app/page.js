@@ -157,6 +157,35 @@ if (isExtraTimeStatus) {
 }, [matchId])
 
   useEffect(() => {
+  if (!matchId) return
+
+  const eventsChannel = supabase
+    .channel(`admin-events-${matchId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'match_events'
+      },
+      payload => {
+        if (
+          payload.eventType === 'DELETE' ||
+          payload.new?.match_id === matchId ||
+          payload.old?.match_id === matchId
+        ) {
+          loadMatchEvents(matchId)
+        }
+      }
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(eventsChannel)
+  }
+}, [matchId])
+
+  useEffect(() => {
   if (teams.length === 0) return
 
   const channel = supabase

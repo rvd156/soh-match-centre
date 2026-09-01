@@ -680,9 +680,20 @@ setExistingMatch(data)
     ? matchToResume.extra_time_started_at
     : matchToResume.clock_started_at
 
-  const baseSeconds = isExtraTime
-    ? (matchToResume.extra_time_seconds || 0)
-    : (matchToResume.clock_seconds || 0)
+  let baseSeconds
+
+if (isExtraTime) {
+  baseSeconds = matchToResume.extra_time_seconds || 0
+} else if (matchToResume.status === 'second_half') {
+  const secondHalfStart = Number(matchToResume.half_length || 30) * 60
+
+  baseSeconds = Math.max(
+    matchToResume.clock_seconds || 0,
+    secondHalfStart
+  )
+} else {
+  baseSeconds = matchToResume.clock_seconds || 0
+}
 
   let restoredSeconds = baseSeconds
 
@@ -732,9 +743,11 @@ setExistingMatch(data)
   }
 
   setRunning(Boolean(startedAt))
-  setDisplayMode(false)
-  setSetupComplete(true)
-  setExistingMatch(null)
+setDisplayMode(false)
+setSetupComplete(true)
+setExistingMatch(null)
+
+loadMatchEvents(matchToResume.id)
 }
 async function resetExistingMatch() {
   if (!existingMatch) return

@@ -248,8 +248,8 @@ const clock = useMemo(
 )
   const total = t => t.goals * 3 + t.points
   const sohIsHome = setup.sohSide === 'home'
-  const homeName = sohIsHome ? 'SOH' : (setup.opposition || 'Opposition')
-  const awayName = sohIsHome ? (setup.opposition || 'Opposition') : 'SOH'
+  const homeName = sohIsHome ? 'Ballinamore SOH' : (setup.opposition || 'Opposition')
+  const awayName = sohIsHome ? (setup.opposition || 'Opposition') : 'Ballinamore SOH'
   const sohCrest = 'https://fmbvqrjkyiuacymhulql.supabase.co/storage/v1/object/public/club-crests/SOH_Logo.png?v=2'
 const homeCrest = sohIsHome ? sohCrest : setup.oppositionCrest
 const awayCrest = sohIsHome ? setup.oppositionCrest : sohCrest

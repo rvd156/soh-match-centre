@@ -60,6 +60,68 @@ const [upcomingFixture, setUpcomingFixture] = useState(null)
 }, [matchId])
 
   useEffect(() => {
+  if (!matchId) return
+
+  const channel = supabase
+    .channel(`admin-match-${matchId}`)
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'matches',
+        filter: `id=eq.${matchId}`
+      },
+      payload => {
+        const updatedMatch = payload.new
+
+        setHome({
+          goals: updatedMatch.home_goals || 0,
+          points: updatedMatch.home_points || 0
+        })
+
+        setAway({
+          goals: updatedMatch.away_goals || 0,
+          points: updatedMatch.away_points || 0
+        })
+
+        setPeriod(
+          updatedMatch.status === 'first_half'
+            ? 'FIRST HALF'
+            : updatedMatch.status === 'half_time'
+              ? 'HALF TIME'
+              : updatedMatch.status === 'second_half'
+                ? 'SECOND HALF'
+                : updatedMatch.status === 'full_time'
+                  ? 'FULL TIME'
+                  : updatedMatch.status === 'extra_time'
+                    ? 'EXTRA TIME - 1ST HALF'
+                    : updatedMatch.status === 'extra_time_half_time'
+                      ? 'ET HALF TIME'
+                      : updatedMatch.status === 'extra_time_second_half'
+                        ? 'EXTRA TIME - 2ND HALF'
+                        : updatedMatch.status === 'after_extra_time'
+                          ? 'AET'
+                          : 'PRE-MATCH'
+        )
+
+        if (updatedMatch.extra_time_started_at) {
+          setRunning(true)
+        } else if (updatedMatch.clock_started_at) {
+          setRunning(true)
+        } else {
+          setRunning(false)
+        }
+      }
+    )
+    .subscribe()
+
+  return () => {
+    supabase.removeChannel(channel)
+  }
+}, [matchId])
+
+  useEffect(() => {
   async function loadTeams() {
     setTeamsLoading(true)
     setTeamsError('')

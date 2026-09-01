@@ -1121,7 +1121,7 @@ sponsorLabel: {
 
 sponsorImage: {
   width: '100%',
-  maxWidth: '420px',
+  maxWidth: '520px',
   height: 'auto',
   display: 'block'
 },

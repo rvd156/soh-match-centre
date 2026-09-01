@@ -1121,7 +1121,7 @@ upcomingTime: {
 },
 
   sponsorSection: {
-  marginTop: '28px',
+  marginTop: '20px',
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -1138,7 +1138,7 @@ sponsorLabel: {
 
 sponsorImage: {
   width: '100%',
-  maxWidth: '520px',
+  maxWidth: '460px',
   height: 'auto',
   display: 'block'
 },

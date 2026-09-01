@@ -119,13 +119,18 @@ if (updatedMatch.status === 'second_half') {
 if (updatedMatch.status === 'extra_time_second_half') {
   setExtraTimeSeconds(updatedMatch.extra_time_seconds || 0)
 }
-        if (updatedMatch.extra_time_started_at) {
-          setRunning(true)
-        } else if (updatedMatch.clock_started_at) {
-          setRunning(true)
-        } else {
-          setRunning(false)
-        }
+       const isExtraTimeStatus = [
+  'extra_time',
+  'extra_time_half_time',
+  'extra_time_second_half',
+  'after_extra_time'
+].includes(updatedMatch.status)
+
+if (isExtraTimeStatus) {
+  setRunning(Boolean(updatedMatch.extra_time_started_at))
+} else {
+  setRunning(Boolean(updatedMatch.clock_started_at))
+}
       }
     )
     .subscribe()

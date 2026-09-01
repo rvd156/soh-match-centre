@@ -561,8 +561,11 @@ const sohWon =
   {showStickyScore && match && homeTeam && awayTeam && (
   <div
     style={{
-      position: 'sticky',
+      position: 'fixed',
       top: 0,
+      left: 0,
+      right: 0,
+      width: '100%',
       zIndex: 999,
       background: '#0b1f16',
       borderBottom: '1px solid #1c4932',

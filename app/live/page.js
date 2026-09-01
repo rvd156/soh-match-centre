@@ -1406,5 +1406,3 @@ goalCelebrationText: {
     fontWeight: '700'
   }
 }
-
-// deploy refresh

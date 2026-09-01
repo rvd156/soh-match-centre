@@ -113,7 +113,9 @@ const [upcomingFixture, setUpcomingFixture] = useState(null)
                           ? 'AET'
                           : 'PRE-MATCH'
         )
-
+if (updatedMatch.status === 'second_half') {
+  setSeconds(updatedMatch.clock_seconds || 0)
+}
         if (updatedMatch.extra_time_started_at) {
           setRunning(true)
         } else if (updatedMatch.clock_started_at) {

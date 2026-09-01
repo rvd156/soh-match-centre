@@ -1756,26 +1756,6 @@ function Setup({setup,setSetup,teams,teamsLoading,teamsError,onStart,onPublishFi
     </main>
   )
 }
-
-function continueUpcomingFixture() {
-  if (!upcomingFixture) return
-
-  setSetup(s => ({
-    ...s,
-    opposition: upcomingFixture.opposition || '',
-    oppositionTeamId: upcomingFixture.opposition_team_id || '',
-    oppositionCrest: upcomingFixture.opposition_crest || '',
-    competition: upcomingFixture.competition || '',
-    venue: upcomingFixture.venue || '',
-    referee: upcomingFixture.referee || '',
-    date: upcomingFixture.match_date || '',
-    throwIn: upcomingFixture.throw_in || '',
-    sohSide: upcomingFixture.soh_side || 'home'
-  }))
-
-  setSetupComplete(true)
-}
-
 return <main className="setup-page">
 
   return <main className="setup-page"><section className="setup-card">

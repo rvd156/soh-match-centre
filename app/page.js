@@ -325,40 +325,6 @@ useEffect(() => {
 
   return () => clearInterval(intervalRef.current)
 }, [running, period])
- useEffect(() => {
-  if (!running || !matchId) return
-
-  const isExtraTime = period.startsWith('EXTRA TIME')
-
-  const syncClock = async () => {
-    const now = new Date().toISOString()
-
-const update = isExtraTime
-  ? {
-      extra_time_seconds: extraTimeSeconds
-    }
-  : {
-      clock_seconds: seconds
-    }
-    const { error } = await supabase
-      .from('matches')
-      .update(update)
-      .eq('id', matchId)
-
-    if (error) {
-      console.error('Error syncing match clock:', error)
-    }
-  }
-  if (isExtraTime) {
-    if (extraTimeSeconds > 0 && extraTimeSeconds % 10 === 0) {
-      syncClock()
-    }
-  } else {
-    if (seconds > 0 && seconds % 10 === 0) {
-      syncClock()
-    }
-  }
-}, [seconds, extraTimeSeconds, running, period, matchId])
 
 const isExtraTimePeriod = [
   'EXTRA TIME',

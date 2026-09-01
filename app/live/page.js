@@ -636,10 +636,6 @@ const sohWon =
   </div>
 )}
 
-{showStickyScore && (
-  <div style={{ height: '58px' }} />
-)}
-
         <header style={styles.header}>
           <img
             src="/soh-crest.png"

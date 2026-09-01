@@ -1911,7 +1911,10 @@ function Setup({
           <p>A match is already running and can be resumed.</p>
         </div>
 
-        <button className="start-setup" onClick={onResumeMatch}>
+        <button
+  className="start-setup"
+  onClick={() => onResumeMatch()}
+>
   Resume Match
 </button>
 

@@ -742,17 +742,18 @@ const sohWon =
 {latestEvent && (
   <div
     style={{
-      marginTop: '14px',
-      marginBottom: '18px',
-      background: '#123524',
-      border: '1px solid #1c4932',
-      borderRadius: '14px',
-      padding: '10px 12px',
-      textAlign: 'center',
-      fontWeight: '800',
-      fontSize: '14px',
-      lineHeight: 1.35
-    }}
+  margin: '12px auto 18px',
+  maxWidth: '720px',
+  background: '#123524',
+  border: '1px solid #2a6046',
+  borderRadius: '12px',
+  padding: '9px 14px',
+  textAlign: 'center',
+  fontWeight: '800',
+  fontSize: '14px',
+  lineHeight: 1.3,
+  boxShadow: '0 4px 12px rgba(0,0,0,0.18)'
+}}
   >
     {latestEvent.event_type === 'substitution' ? (
       <>

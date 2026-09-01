@@ -630,6 +630,15 @@ const sohWon =
     </div>
   </div>
 )}
+  {showStickyScore && match && homeTeam && awayTeam && (
+  <div>
+    ...
+  </div>
+)}
+
+{showStickyScore && (
+  <div style={{ height: '58px' }} />
+)}
 
         <header style={styles.header}>
           <img

@@ -959,6 +959,26 @@ if (deactivateError) {
 
   alert('Upcoming fixture published!')
 }
+
+async function resetUpcomingFixture() {
+  if (!upcomingFixture) return
+
+  const { error } = await supabase
+    .from('upcoming_fixtures')
+    .update({ active: false })
+    .eq('id', upcomingFixture.id)
+
+  if (error) {
+    console.error('Error resetting upcoming fixture:', error)
+    alert(`Could not reset fixture: ${error.message}`)
+    return
+  }
+
+  setUpcomingFixture(null)
+
+  alert('Upcoming fixture reset.')
+}
+  
   async function resetMatch(){
   if(!window.confirm('Reset this match and return to match setup?')) return
 
@@ -1838,7 +1858,18 @@ if (upcomingFixture) {
         >
           Continue to Scoreboard →
         </button>
-
+            
+<button
+  className="start-setup"
+  onClick={resetUpcomingFixture}
+  style={{
+    marginTop: '12px',
+    background: '#8b1e1e'
+  }}
+>
+  Reset Fixture
+</button>
+    
       </section>
     </main>
   )

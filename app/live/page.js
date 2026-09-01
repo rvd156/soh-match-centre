@@ -554,7 +554,7 @@ const sohWon =
         fontWeight: '700'
       }}
     >
-      {match.period}
+      {formatStatus(match.status)} · {formatClock(liveSeconds)}
     </div>
   </div>
 )}  

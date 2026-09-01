@@ -1313,6 +1313,10 @@ scorersTeamName: {
   marginBottom: '4px'
 },
 
+scorersSection: {
+  marginTop: '28px'
+},
+
 scorersTitle: {
   color: '#f4c430',
   fontSize: '14px',

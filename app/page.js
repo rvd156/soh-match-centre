@@ -1025,6 +1025,7 @@ console.log('RESET RESULT:', data, error)
     onStart={() => setup.opposition.trim() && setSetupComplete(true)}
     onPublishFixture={publishUpcomingFixture}
     upcomingFixture={upcomingFixture}
+    onResetUpcomingFixture={resetUpcomingFixture}
   />
 )
   return <main className={displayMode ? 'display-page' : ''}>
@@ -1740,6 +1741,7 @@ function Setup({
   existingMatch,
   onResumeMatch,
   onResetExistingMatch,
+  onResetUpcomingFixture,
   upcomingFixture
 }) {
   const update = (key,value) => setSetup(s=>({...s,[key]:value}))
@@ -1861,7 +1863,7 @@ if (upcomingFixture) {
             
 <button
   className="start-setup"
-  onClick={resetUpcomingFixture}
+  onClick={onResetUpcomingFixture}
   style={{
     marginTop: '12px',
     background: '#8b1e1e'

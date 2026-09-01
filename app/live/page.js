@@ -979,13 +979,13 @@ const sohWon =
 }
 
 const styles = {
-  page: {
-    minHeight: '100vh',
-    background: '#071a12',
-    color: '#ffffff',
-    fontFamily: 'Arial, sans-serif',
-    padding: '24px 16px'
-  },
+page: {
+  minHeight: '100vh',
+  background: '#071a12',
+  color: '#ffffff',
+  fontFamily: 'Arial, sans-serif',
+  padding: '24px 16px 90px'
+},
 
   container: {
     width: '100%',

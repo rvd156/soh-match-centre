@@ -1379,7 +1379,7 @@ scorerRow: {
   padding: '6px 4px',
   borderBottom: '1px solid #1c4932',
   textAlign: 'center',
-  fontSize: '14px',
+  fontSize: '13.5px',
   fontWeight: '600',
   lineHeight: 1.25
 },

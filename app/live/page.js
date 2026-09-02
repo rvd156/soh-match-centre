@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import NotificationButton from '../NotificationButton'
 
 export default function LiveMatchPage() {
   const [match, setMatch] = useState(null)
@@ -375,6 +376,8 @@ function formatStatus(status = '') {
           </div>
         </header>
 
+  <NotificationButton />
+
       {upcomingFixture ? (
   <>
     <div style={styles.upcomingBar}>
@@ -643,6 +646,8 @@ const sohWon =
             <h1 style={styles.title}>MATCH CENTRE</h1>
           </div>
         </header>
+
+            <NotificationButton />
 
         <div style={styles.liveBar}>
          <span className="live-pulse" style={styles.liveDot}></span>

@@ -32,7 +32,11 @@ function supportedEndpoint(endpoint) {
 
 async function requireResult(query) {
   const result = await query
-  if (result.error) throw new Error('Database operation failed.')
+  if (result.error) {
+  throw new Error(
+    `Database ${result.error.code}: ${result.error.message}`
+  )
+}
   return result.data
 }
 
@@ -248,8 +252,16 @@ export async function POST(request) {
     }
 
     return reply({ ...counts, retryNeeded: counts.failed > 0 }, counts.failed ? 503 : 200)
-  } catch {
-    console.error('Goal push processing failed.')
-    return reply({ error: 'Unable to process goal alerts.', retryNeeded: true }, 503)
+   } catch (error) {
+    const message = error instanceof Error
+      ? error.message
+      : 'Unable to process goal alerts.'
+
+    console.error('Goal push processing failed:', message)
+
+    return reply({
+      error: message,
+      retryNeeded: true
+    }, 503)
   }
 }

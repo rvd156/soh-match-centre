@@ -790,100 +790,111 @@ async function resetExistingMatch() {
   setExistingMatch(null)
 }
   
+async function ensureMatchRecord() {
+  if (matchId) return matchId
+
+  if (!setup.date) {
+    alert('Please choose a match date first.')
+    return null
+  }
+
+  if (!setup.throwIn) {
+    alert('Please choose a throw-in time first.')
+    return null
+  }
+
+  const homeTeamId =
+    setup.sohSide === 'home' ? 1 : Number(setup.oppositionTeamId)
+
+  const awayTeamId =
+    setup.sohSide === 'away' ? 1 : Number(setup.oppositionTeamId)
+
+  const { error: deactivateError } = await supabase
+    .from('matches')
+    .update({ active: false })
+    .eq('active', true)
+
+  if (deactivateError) {
+    console.error('Error deactivating previous match:', deactivateError)
+    alert('Could not prepare the new match.')
+    return null
+  }
+
+  const { data, error } = await supabase
+    .from('matches')
+    .insert({
+      home_team_id: homeTeamId,
+      away_team_id: awayTeamId,
+      competition: setup.competition || null,
+      venue: setup.venue || null,
+      referee: setup.referee || null,
+      match_date: setup.date,
+      throw_in: setup.throwIn || null,
+      half_length: Number(setup.halfLength),
+      status: 'pre_match',
+      active: true,
+      home_goals: 0,
+      home_points: 0,
+      away_goals: 0,
+      away_points: 0,
+      clock_seconds: 0,
+      clock_started_at: null
+    })
+    .select('id')
+    .single()
+
+  if (error) {
+    console.error('Error creating match:', error)
+    alert('Could not prepare the match in the database.')
+    return null
+  }
+
+  setMatchId(data.id)
+  return data.id
+}
+
 async function startMatch() {
   let currentMatchId = matchId
 
-  if (period === 'PRE-MATCH' && !matchId) {
-    if (!setup.date) {
-      alert('Please choose a match date before starting the match.')
-      return
-    }
-
-    if (!setup.throwIn) {
-      alert('Please choose a throw-in time before starting the match.')
-      return
-    }
-
-    const homeTeamId =
-      setup.sohSide === 'home' ? 1 : Number(setup.oppositionTeamId)
-
-    const awayTeamId =
-      setup.sohSide === 'away' ? 1 : Number(setup.oppositionTeamId)
-
-    // Make sure no previous match is still marked as live
-    const { error: deactivateError } = await supabase
-      .from('matches')
-      .update({ active: false })
-      .eq('active', true)
-
-    if (deactivateError) {
-      console.error('Error deactivating previous match:', deactivateError)
-      alert('Could not clear the previous live match.')
-      return
-    }
-
-    const { data, error } = await supabase
-      .from('matches')
-      .insert({
-        home_team_id: homeTeamId,
-        away_team_id: awayTeamId,
-        competition: setup.competition || null,
-        venue: setup.venue || null,
-        referee: setup.referee || null,
-        match_date: setup.date,
-        throw_in: setup.throwIn || null,
-        half_length: Number(setup.halfLength),
-        status: 'first_half',
-        active: true,
-        home_goals: 0,
-        home_points: 0,
-        away_goals: 0,
-        away_points: 0,
-        clock_seconds: 0,
-        clock_started_at: new Date().toISOString()
-      })
-      .select('id')
-      .single()
-
-    if (error) {
-      console.error('Error creating match:', error)
-      alert('Could not create match in database.')
-      return
-    }
-
-    console.log('MATCH CREATED:', data)
-
-    currentMatchId = data.id
-    setMatchId(data.id)
+  if (period === 'PRE-MATCH' && !currentMatchId) {
+    currentMatchId = await ensureMatchRecord()
+    if (!currentMatchId) return
   }
 
   if (period === 'PRE-MATCH') {
     setPeriod('FIRST HALF')
   }
 
-  // Start/resume the database clock
-if (currentMatchId) {
-  const isExtraTime = period.startsWith('EXTRA TIME')
+  if (currentMatchId) {
+    const isExtraTime = period.startsWith('EXTRA TIME')
 
-  const update = isExtraTime
-    ? {
-        extra_time_started_at: new Date().toISOString()
-      }
-    : {
-        clock_started_at: new Date().toISOString()
-      }
+    const update =
+      period === 'PRE-MATCH'
+        ? {
+            status: 'first_half',
+            clock_seconds: 0,
+            clock_started_at: new Date().toISOString()
+          }
+        : isExtraTime
+          ? {
+              extra_time_started_at: new Date().toISOString()
+            }
+          : {
+              clock_started_at: new Date().toISOString()
+            }
 
-  const { error } = await supabase
-    .from('matches')
-    .update(update)
-    .eq('id', currentMatchId)
+    const { error } = await supabase
+      .from('matches')
+      .update(update)
+      .eq('id', currentMatchId)
 
-  if (error) {
-    console.error('Error starting match clock:', error)
+    if (error) {
+      console.error('Error starting match clock:', error)
+      alert('Could not start the match clock.')
+      return
+    }
   }
-}
 
-  // Start the local clock
   setRunning(true)
 }
  async function pauseMatch() {

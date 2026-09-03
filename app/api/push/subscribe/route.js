@@ -96,3 +96,78 @@ export async function POST(request) {
     return reply({ error: 'Unable to save subscription.' }, 500)
   }
 }
+
+export async function DELETE(request) {
+  if (request.headers.get('origin') !== new URL(request.url).origin) {
+    return reply({ error: 'Request not allowed.' }, 403)
+  }
+
+  let endpoint
+
+  try {
+    const body = await request.text()
+
+    if (body.length > 4096) {
+      return reply({ error: 'Request is too large.' }, 413)
+    }
+
+    endpoint = JSON.parse(body)?.endpoint
+  } catch {
+    return reply({ error: 'Invalid request.' }, 400)
+  }
+
+  if (typeof endpoint !== 'string' || endpoint.length > 2048) {
+    return reply({ error: 'Invalid subscription.' }, 400)
+  }
+
+  try {
+    const parsed = new URL(endpoint)
+    const allowedHosts = [
+      'fcm.googleapis.com',
+      'updates.push.services.mozilla.com',
+      'web.push.apple.com'
+    ]
+
+    if (
+      parsed.protocol !== 'https:' ||
+      !allowedHosts.includes(parsed.hostname) ||
+      parsed.username ||
+      parsed.password ||
+      parsed.port ||
+      parsed.hash
+    ) {
+      return reply({ error: 'Unsupported push service.' }, 400)
+    }
+  } catch {
+    return reply({ error: 'Invalid subscription.' }, 400)
+  }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const secretKey = process.env.SUPABASE_SECRET_KEY
+
+  if (!supabaseUrl || !secretKey) {
+    return reply({ error: 'Notification setup is incomplete.' }, 503)
+  }
+
+  try {
+    const supabaseAdmin = createClient(supabaseUrl, secretKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false
+      }
+    })
+
+    const { error } = await supabaseAdmin
+      .from('push_subscriptions')
+      .delete()
+      .eq('endpoint', endpoint)
+
+    if (error) {
+      return reply({ error: 'Unable to remove subscription.' }, 500)
+    }
+
+    return reply({ success: true })
+  } catch {
+    return reply({ error: 'Unable to remove subscription.' }, 500)
+  }
+}

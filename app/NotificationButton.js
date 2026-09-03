@@ -342,7 +342,7 @@ export default function NotificationButton() {
 
                 <button type="button" onClick={disableNotifications} disabled={busy || saving}
                   style={turnOffStyle}>
-                  {busy ? 'Turning off…' : 'Turn off notifications'}
+                  {busy ? 'Turning off…' : 'Turn off all notifications'}
                 </button>
               </div>
             </div>
@@ -423,7 +423,8 @@ const closeStyle = {
 }
 
 const turnOffStyle = {
-  marginTop: '14px', background: 'transparent', border: 0,
-  color: '#aebdb4', textDecoration: 'underline', fontSize: '13px',
-  cursor: 'pointer'
+  width: '100%', marginTop: '18px', padding: '11px 14px',
+  background: '#7f1d1d', border: '1px solid #dc2626',
+  borderRadius: '9px', color: '#ffffff', fontSize: '14px',
+  fontWeight: '800', cursor: 'pointer'
 }

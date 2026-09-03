@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { createHash, timingSafeEqual } from 'node:crypto'
 import { POST as sendGoal } from '../goal/route'
+import { POST as sendStatus } from '../status/route'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -36,79 +37,105 @@ export async function GET(request) {
   const startedAt = Date.now()
   const cutoff = new Date(startedAt - 5 * 60 * 1000).toISOString()
   const upperBound = new Date(startedAt).toISOString()
-  const summary = { goalsChecked: 0, sent: 0, failedChecks: 0, deferred: false }
+  const summary = {
+    goalsChecked: 0,
+    statusesChecked: 0,
+    sent: 0,
+    failedChecks: 0,
+    deferred: false
+  }
 
   try {
     const db = createClient(supabaseUrl, supabaseSecret, {
       auth: { persistSession: false, autoRefreshToken: false }
     })
 
-    // Scan recent saved goals, including ones whose webhook never arrived.
-    let cursor = null
-    while (true) {
-      if (Date.now() - startedAt > 60000) {
-        summary.deferred = true
-        break
-      }
-
-      let query = db.from('match_events')
-        .select('id')
-        .eq('event_type', 'goal')
-        .gte('created_at', cutoff)
-        .lte('created_at', upperBound)
-        .order('id', { ascending: true })
-        .limit(50)
-
-      if (cursor !== null) query = query.gt('id', cursor)
-
-      const { data: goals, error } = await query
-      if (error) throw new Error(`Unable to read recent goals (${error.code}).`)
-      if (!goals?.length) break
-
-      for (let index = 0; index < goals.length; index += 2) {
+    async function runRecent({ table, columns, filter, handler, path, countKey, makeRecord }) {
+      let cursor = null
+      while (true) {
         if (Date.now() - startedAt > 60000) {
           summary.deferred = true
           break
         }
 
-        const results = await Promise.allSettled(
-          goals.slice(index, index + 2).map(async goal => {
-            // Call the existing handler directly: no additional HTTP request.
-            // Its database claims skip sent, expired and busy deliveries,
-            // and limit each delivery to three attempts in total.
-            const response = await sendGoal(new Request(
-              'https://soh-match-centre.vercel.app/api/push/goal',
-              {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  Authorization: `Bearer ${sendSecret}`
-                },
-                body: JSON.stringify({
-                  type: 'INSERT',
-                  schema: 'public',
-                  table: 'match_events',
-                  record: { id: goal.id, event_type: 'goal' }
-                })
-              }
-            ))
-            return { ok: response.ok, data: await response.json() }
-          })
-        )
+        let query = db.from(table)
+          .select(columns)
+          .gte('created_at', cutoff)
+          .lte('created_at', upperBound)
+          .order('id', { ascending: true })
+          .limit(50)
+        if (filter) query = filter(query)
+        if (cursor !== null) query = query.gt('id', cursor)
 
-        for (const result of results) {
-          summary.goalsChecked += 1
-          if (result.status === 'rejected') {
-            summary.failedChecks += 1
-          } else {
-            summary.sent += Number(result.value.data.sent) || 0
-            if (!result.value.ok) summary.failedChecks += 1
+        const { data: records, error } = await query
+        if (error) throw new Error(`Unable to read recent ${table} (${error.code}).`)
+        if (!records?.length) break
+
+        for (let index = 0; index < records.length; index += 2) {
+          if (Date.now() - startedAt > 60000) {
+            summary.deferred = true
+            break
+          }
+
+          const results = await Promise.allSettled(
+            records.slice(index, index + 2).map(async record => {
+              const response = await handler(new Request(
+                `https://soh-match-centre.vercel.app${path}`,
+                {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${sendSecret}`
+                  },
+                  body: JSON.stringify({
+                    type: 'INSERT',
+                    schema: 'public',
+                    table,
+                    record: makeRecord(record)
+                  })
+                }
+              ))
+              return { ok: response.ok, data: await response.json() }
+            })
+          )
+
+          for (const result of results) {
+            summary[countKey] += 1
+            if (result.status === 'rejected') {
+              summary.failedChecks += 1
+            } else {
+              summary.sent += Number(result.value.data.sent) || 0
+              if (!result.value.ok) summary.failedChecks += 1
+            }
           }
         }
-      }
 
-      if (summary.deferred || goals.length < 50) break
-      cursor = goals[goals.length - 1].id
+        if (summary.deferred || records.length < 50) break
+        cursor = records[records.length - 1].id
+      }
+    }
+
+    // Scan recent records, including alerts whose webhook never arrived.
+    await runRecent({
+      table: 'match_events',
+      columns: 'id',
+      filter: query => query.eq('event_type', 'goal'),
+      handler: sendGoal,
+      path: '/api/push/goal',
+      countKey: 'goalsChecked',
+      makeRecord: record => ({ id: record.id, event_type: 'goal' })
+    })
+
+    if (!summary.deferred) {
+      await runRecent({
+        table: 'match_status_events',
+        columns: 'id, status',
+        filter: null,
+        handler: sendStatus,
+        path: '/api/push/status',
+        countKey: 'statusesChecked',
+        makeRecord: record => ({ id: record.id, status: record.status })
+      })
     }
 
     console.info('Push retry check:', summary)
@@ -116,6 +143,6 @@ export async function GET(request) {
   } catch (error) {
     console.error('Push retry check failed:',
       error instanceof Error ? error.message : 'Unknown error')
-    return reply({ error: 'Unable to check recent goal alerts.' }, 503)
+    return reply({ error: 'Unable to check recent push alerts.' }, 503)
   }
 }

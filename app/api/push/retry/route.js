@@ -38,7 +38,7 @@ export async function GET(request) {
   const cutoff = new Date(startedAt - 5 * 60 * 1000).toISOString()
   const upperBound = new Date(startedAt).toISOString()
   const summary = {
-    goalsChecked: 0,
+    scoresChecked: 0,
     statusesChecked: 0,
     sent: 0,
     failedChecks: 0,
@@ -118,12 +118,12 @@ export async function GET(request) {
     // Scan recent records, including alerts whose webhook never arrived.
     await runRecent({
       table: 'match_events',
-      columns: 'id',
-      filter: query => query.eq('event_type', 'goal'),
+      columns: 'id, event_type',
+      filter: query => query.in('event_type', ['goal', 'point', 'two_pointer']),
       handler: sendGoal,
       path: '/api/push/goal',
-      countKey: 'goalsChecked',
-      makeRecord: record => ({ id: record.id, event_type: 'goal' })
+      countKey: 'scoresChecked',
+      makeRecord: record => ({ id: record.id, event_type: record.event_type })
     })
 
     if (!summary.deferred) {

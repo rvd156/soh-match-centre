@@ -9,7 +9,9 @@ const allowedStatuses = new Set([
   'half_time',
   'second_half',
   'full_time',
+  'extra_time',
   'extra_time_half_time',
+  'extra_time_second_half',
   'after_extra_time'
 ])
 
@@ -131,7 +133,9 @@ export async function POST(request) {
       half_time: 'HALF TIME',
       second_half: 'SECOND HALF UNDERWAY',
       full_time: 'FULL TIME',
+      extra_time: 'EXTRA TIME UNDERWAY',
       extra_time_half_time: 'EXTRA-TIME HALF TIME',
+      extra_time_second_half: 'SECOND HALF OF EXTRA TIME UNDERWAY',
       after_extra_time: 'FULL TIME — AET'
     }
 

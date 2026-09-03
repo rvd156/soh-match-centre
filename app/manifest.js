@@ -8,6 +8,14 @@ export default function manifest() {
     scope: '/',
     display: 'standalone',
     background_color: '#071a12',
-    theme_color: '#071a12'
+    theme_color: '#071a12',
+    icons: [
+      {
+        src: '/soh-crest.png',
+        sizes: 'any',
+        type: 'image/png',
+        purpose: 'any'
+      }
+    ]
   }
 }

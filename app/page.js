@@ -1340,6 +1340,14 @@ console.log('RESET RESULT:', data, error)
   )}
 
 <button
+  onClick={sendScoreUpdate}
+  disabled={sendingScoreUpdate}
+  className="primary"
+>
+  {sendingScoreUpdate ? 'Sending…' : '📣 Send Score Update'}
+</button>
+
+<button
   onClick={() => {
     setManualUpdateText('')
     setManualUpdateOpen(true)

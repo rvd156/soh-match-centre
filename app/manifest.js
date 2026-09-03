@@ -11,13 +11,13 @@ export default function manifest() {
     theme_color: '#071a12',
     icons: [
       {
-        src: '/soh-match-centre-icon-192.png',
+        src: '/soh-app-icon-192.png',
         sizes: '192x192',
         type: 'image/png',
         purpose: 'any'
       },
       {
-        src: '/soh-match-centre-icon-512.png',
+        src: '/soh-app-icon-512.png',
         sizes: '512x512',
         type: 'image/png',
         purpose: 'any'

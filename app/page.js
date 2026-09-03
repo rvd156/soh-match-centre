@@ -789,6 +789,15 @@ async function resetExistingMatch() {
 
   setExistingMatch(null)
 }
+
+function selectMatchUpdatePreset(text) {
+  if (!matchId || period === 'PRE-MATCH') {
+    alert('This preset is available after the match begins. You can still type and post a pre-match update below.')
+    return
+  }
+
+  setManualUpdateText(text)
+}  
   
 async function ensureMatchRecord() {
   if (matchId) return matchId

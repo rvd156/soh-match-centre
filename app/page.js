@@ -42,6 +42,7 @@ const [showAllEvents, setShowAllEvents] = useState(false)
 const [manualUpdateOpen, setManualUpdateOpen] = useState(false)
 const [manualUpdateText, setManualUpdateText] = useState('')
 const [upcomingFixture, setUpcomingFixture] = useState(null)
+const [sendingScoreUpdate, setSendingScoreUpdate] = useState(false)
   
   const intervalRef = useRef(null)
 

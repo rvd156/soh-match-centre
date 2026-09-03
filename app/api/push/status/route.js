@@ -7,6 +7,7 @@ export const maxDuration = 60
 
 const allowedStatuses = new Set([
   'half_time',
+  'second_half',
   'full_time',
   'extra_time_half_time',
   'after_extra_time'
@@ -128,6 +129,7 @@ export async function POST(request) {
 
     const titles = {
       half_time: 'HALF TIME',
+      second_half: 'SECOND HALF UNDERWAY',
       full_time: 'FULL TIME',
       extra_time_half_time: 'EXTRA-TIME HALF TIME',
       after_extra_time: 'FULL TIME — AET'

@@ -1349,6 +1349,11 @@ console.log('RESET RESULT:', data, error)
 
 <button
   onClick={() => {
+    if (!matchId) {
+      alert('No active match. Start or resume a match before adding a match update.')
+      return
+    }
+
     setManualUpdateText('')
     setManualUpdateOpen(true)
   }}

@@ -5,7 +5,7 @@ import { createHash, timingSafeEqual } from 'node:crypto'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const allowedScoreEvents = new Set(['goal', 'point', 'two_pointer'])
+const allowedScoreEvents = new Set(['goal', 'point', 'two_pointer', 'manual_update'])
 
 const allowedHosts = new Set([
   'fcm.googleapis.com',
@@ -95,7 +95,7 @@ export async function POST(request) {
     const goal = await requireResult(
       db.from('match_events')
         .select(`
-          id, match_id, team_id, event_type, match_minute, created_at,
+          id, match_id, team_id, event_type, match_minute, notes, created_at,
           players!match_events_player_id_fkey (name),
           teams (name)
         `)
@@ -122,11 +122,11 @@ export async function POST(request) {
         .maybeSingle()
     )
 
-    if (
-      !match?.active ||
-      ![String(match.home_team_id), String(match.away_team_id)]
-        .includes(String(goal.team_id))
-    ) {
+    const scoringEvent = goal.event_type !== 'manual_update'
+    const validScoringTeam = [String(match?.home_team_id), String(match?.away_team_id)]
+      .includes(String(goal.team_id))
+
+    if (!match?.active || (scoringEvent && !validScoringTeam)) {
       return reply({ ignored: true, reason: 'No matching active fixture.' })
     }
 
@@ -149,18 +149,35 @@ export async function POST(request) {
       point: 'POINT',
       two_pointer: 'TWO-POINTER'
     }
-    const scorerLine = [
-      scorerName || `${eventLabels[goal.event_type]} for ${teamName}`,
-      Number.isFinite(minute) && minute >= 0 ? `${minute} min` : null
-    ].filter(Boolean).join(' · ')
-    const body = [
-      scorerLine,
-      `${homeName} ${match.home_goals}-${String(match.home_points).padStart(2, '0')}`,
-      `${awayName} ${match.away_goals}-${String(match.away_points).padStart(2, '0')}`
-    ].join('\n')
+
+    let title
+    let body
+
+    if (goal.event_type === 'manual_update') {
+      const updateText = typeof goal.notes === 'string'
+        ? goal.notes.trim().slice(0, 240)
+        : ''
+      if (!updateText) return reply({ ignored: true })
+
+      title = Number.isFinite(minute) && minute >= 0
+        ? `MATCH UPDATE · ${minute} min`
+        : 'MATCH UPDATE'
+      body = updateText
+    } else {
+      const scorerLine = [
+        scorerName || `${eventLabels[goal.event_type]} for ${teamName}`,
+        Number.isFinite(minute) && minute >= 0 ? `${minute} min` : null
+      ].filter(Boolean).join(' · ')
+      title = `${eventLabels[goal.event_type]} — ${teamName}`
+      body = [
+        scorerLine,
+        `${homeName} ${match.home_goals}-${String(match.home_points).padStart(2, '0')}`,
+        `${awayName} ${match.away_goals}-${String(match.away_points).padStart(2, '0')}`
+      ].join('\n')
+    }
 
     const notification = JSON.stringify({
-      title: `${eventLabels[goal.event_type]} — ${teamName}`,
+      title,
       body,
       tag: `${goal.event_type}-${eventId}`,
       url: '/live'
@@ -249,7 +266,9 @@ export async function POST(request) {
             ? 'notify_goals'
             : goal.event_type === 'two_pointer'
               ? 'notify_two_pointers'
-              : 'notify_points',
+              : goal.event_type === 'point'
+                ? 'notify_points'
+                : 'notify_match_updates',
           true
         )
         .lte('created_at', goal.created_at)

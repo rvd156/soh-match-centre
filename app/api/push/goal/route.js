@@ -5,6 +5,8 @@ import { createHash, timingSafeEqual } from 'node:crypto'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
+const allowedScoreEvents = new Set(['goal', 'point', 'two_pointer'])
+
 const allowedHosts = new Set([
   'fcm.googleapis.com',
   'updates.push.services.mozilla.com',
@@ -59,7 +61,7 @@ export async function POST(request) {
     payload?.type !== 'INSERT' ||
     payload?.schema !== 'public' ||
     payload?.table !== 'match_events' ||
-    payload?.record?.event_type !== 'goal'
+    !allowedScoreEvents.has(payload?.record?.event_type)
   ) {
     return reply({ ignored: true })
   }
@@ -101,7 +103,9 @@ export async function POST(request) {
         .maybeSingle()
     )
 
-    if (!goal || goal.event_type !== 'goal') return reply({ ignored: true })
+    if (!goal || !allowedScoreEvents.has(goal.event_type)) {
+      return reply({ ignored: true })
+    }
 
     const age = Date.now() - Date.parse(goal.created_at)
     if (!Number.isFinite(age) || age < -60000 || age > 300000) {
@@ -140,8 +144,13 @@ export async function POST(request) {
     const teamName = (scoringTeam?.name || 'Team').slice(0, 100)
     const scorerName = player?.name?.slice(0, 100)
     const minute = goal.match_minute == null ? null : Number(goal.match_minute)
+    const eventLabels = {
+      goal: 'GOAL',
+      point: 'POINT',
+      two_pointer: 'TWO-POINTER'
+    }
     const scorerLine = [
-      scorerName || `Goal for ${teamName}`,
+      scorerName || `${eventLabels[goal.event_type]} for ${teamName}`,
       Number.isFinite(minute) && minute >= 0 ? `${minute} min` : null
     ].filter(Boolean).join(' · ')
     const body = [
@@ -151,9 +160,9 @@ export async function POST(request) {
     ].join('\n')
 
     const notification = JSON.stringify({
-      title: `GOAL — ${teamName}`,
+      title: `${eventLabels[goal.event_type]} — ${teamName}`,
       body,
-      tag: `goal-${eventId}`,
+      tag: `${goal.event_type}-${eventId}`,
       url: '/live'
     })
 
@@ -235,7 +244,14 @@ export async function POST(request) {
 
       let query = db.from('push_subscriptions')
         .select('endpoint, p256dh, auth')
-        .eq('notify_goals', true)
+        .eq(
+          goal.event_type === 'goal'
+            ? 'notify_goals'
+            : goal.event_type === 'two_pointer'
+              ? 'notify_two_pointers'
+              : 'notify_points',
+          true
+        )
         .lte('created_at', goal.created_at)
         .order('endpoint', { ascending: true })
         .limit(100)
@@ -267,7 +283,7 @@ export async function POST(request) {
 
     return reply({ ...counts, retryNeeded: counts.failed > 0 }, counts.failed ? 503 : 200)
   } catch {
-    console.error('Goal push processing failed.')
-    return reply({ error: 'Unable to process goal alerts.', retryNeeded: true }, 503)
+    console.error('Score push processing failed.')
+    return reply({ error: 'Unable to process score alerts.', retryNeeded: true }, 503)
   }
 }

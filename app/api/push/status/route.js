@@ -133,7 +133,10 @@ export async function POST(request) {
       after_extra_time: 'FULL TIME — AET'
     }
 
-    const body = `${homeName} ${statusEvent.home_goals}-${String(statusEvent.home_points).padStart(2, '0')} · ${awayName} ${statusEvent.away_goals}-${String(statusEvent.away_points).padStart(2, '0')}`
+    const body = [
+      `${homeName} ${statusEvent.home_goals}-${String(statusEvent.home_points).padStart(2, '0')}`,
+      `${awayName} ${statusEvent.away_goals}-${String(statusEvent.away_points).padStart(2, '0')}`
+    ].join('\n')
     const notification = JSON.stringify({
       title: titles[statusEvent.status],
       body,

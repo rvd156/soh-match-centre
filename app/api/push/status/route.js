@@ -6,6 +6,7 @@ export const runtime = 'nodejs'
 export const maxDuration = 60
 
 const allowedStatuses = new Set([
+  'first_half',
   'half_time',
   'second_half',
   'full_time',
@@ -130,6 +131,7 @@ export async function POST(request) {
       String(team.id) === String(statusEvent.away_team_id))?.name || 'Away').slice(0, 100)
 
     const titles = {
+      first_half: 'MATCH UNDERWAY',
       half_time: 'HALF TIME',
       second_half: 'SECOND HALF UNDERWAY',
       full_time: 'FULL TIME',
@@ -139,10 +141,12 @@ export async function POST(request) {
       after_extra_time: 'FULL TIME — AET'
     }
 
-    const body = [
-      `${homeName} ${statusEvent.home_goals}-${String(statusEvent.home_points).padStart(2, '0')}`,
-      `${awayName} ${statusEvent.away_goals}-${String(statusEvent.away_points).padStart(2, '0')}`
-    ].join('\n')
+    const body = statusEvent.status === 'first_half'
+      ? `${homeName} v ${awayName} is now underway.`
+      : [
+          `${homeName} ${statusEvent.home_goals}-${String(statusEvent.home_points).padStart(2, '0')}`,
+          `${awayName} ${statusEvent.away_goals}-${String(statusEvent.away_points).padStart(2, '0')}`
+        ].join('\n')
     const notification = JSON.stringify({
       title: titles[statusEvent.status],
       body,

@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { createHash, timingSafeEqual } from 'node:crypto'
 import { POST as sendGoal } from '../goal/route'
 import { POST as sendStatus } from '../status/route'
+import { POST as sendScoreUpdate } from '../score-update/route'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -40,6 +41,7 @@ export async function GET(request) {
   const summary = {
     scoresChecked: 0,
     statusesChecked: 0,
+    updatesChecked: 0,
     sent: 0,
     failedChecks: 0,
     deferred: false
@@ -135,6 +137,18 @@ export async function GET(request) {
         path: '/api/push/status',
         countKey: 'statusesChecked',
         makeRecord: record => ({ id: record.id, status: record.status })
+      })
+    }
+
+    if (!summary.deferred) {
+      await runRecent({
+        table: 'push_score_updates',
+        columns: 'id',
+        filter: null,
+        handler: sendScoreUpdate,
+        path: '/api/push/score-update',
+        countKey: 'updatesChecked',
+        makeRecord: record => ({ id: record.id })
       })
     }
 

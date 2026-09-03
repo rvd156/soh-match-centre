@@ -1113,6 +1113,35 @@ async function resetUpcomingFixture() {
 
   alert('Upcoming fixture reset.')
 }
+async function sendScoreUpdate() {
+  if (!matchId || sendingScoreUpdate) return
+
+  const confirmed = window.confirm(
+    `Send this score update?\n\n` +
+    `${homeName} ${home.goals}-${String(home.points).padStart(2, '0')}\n` +
+    `${awayName} ${away.goals}-${String(away.points).padStart(2, '0')}`
+  )
+
+  if (!confirmed) return
+
+  setSendingScoreUpdate(true)
+
+  try {
+    const { error } = await supabase.rpc('request_score_update', {
+      p_match_id: matchId
+    })
+
+    if (error) {
+      console.error('Score update notification failed:', error)
+      alert(`Could not send score update: ${error.message}`)
+      return
+    }
+
+    alert('Score update sent!')
+  } finally {
+    setSendingScoreUpdate(false)
+  }
+}
   
   async function resetMatch(){
   if(!window.confirm('Reset this match and return to match setup?')) return

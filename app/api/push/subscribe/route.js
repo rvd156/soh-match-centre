@@ -38,7 +38,8 @@ function preferenceFields(preferences) {
       notify_two_pointers: true,
       notify_points: false,
       notify_match_milestones: true,
-      notify_manual_updates: true
+      notify_manual_updates: true,
+      notify_match_updates: true
     }
   }
 
@@ -49,7 +50,8 @@ function preferenceFields(preferences) {
       notify_two_pointers: true,
       notify_points: true,
       notify_match_milestones: true,
-      notify_manual_updates: true
+      notify_manual_updates: true,
+      notify_match_updates: true
     }
   }
 
@@ -58,7 +60,8 @@ function preferenceFields(preferences) {
     'twoPointers',
     'points',
     'matchMilestones',
-    'manualUpdates'
+    'manualUpdates',
+    'matchUpdates'
   ]
   if (names.some(name => typeof preferences[name] !== 'boolean')) {
     throw new Error('Invalid custom preferences.')
@@ -70,7 +73,8 @@ function preferenceFields(preferences) {
     notify_two_pointers: preferences.twoPointers,
     notify_points: preferences.points,
     notify_match_milestones: preferences.matchMilestones,
-    notify_manual_updates: preferences.manualUpdates
+    notify_manual_updates: preferences.manualUpdates,
+    notify_match_updates: preferences.matchUpdates
   }
 }
 

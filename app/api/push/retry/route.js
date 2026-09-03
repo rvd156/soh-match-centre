@@ -121,7 +121,10 @@ export async function GET(request) {
     await runRecent({
       table: 'match_events',
       columns: 'id, event_type',
-      filter: query => query.in('event_type', ['goal', 'point', 'two_pointer']),
+      filter: query => query.in(
+        'event_type',
+        ['goal', 'point', 'two_pointer', 'manual_update']
+      ),
       handler: sendGoal,
       path: '/api/push/goal',
       countKey: 'scoresChecked',

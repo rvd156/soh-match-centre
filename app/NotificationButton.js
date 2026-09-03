@@ -8,7 +8,8 @@ const defaultCustom = {
   twoPointers: true,
   points: false,
   matchMilestones: true,
-  manualUpdates: true
+  manualUpdates: true,
+  matchUpdates: true
 }
 
 function convertPublicKey(value) {
@@ -298,7 +299,7 @@ export default function NotificationButton() {
                 <ChoiceButton
                   selected={level === 'key_updates'}
                   title="Key updates"
-                  detail="Goals, two-pointers, match milestones and selected score updates"
+              detail="Goals, two-pointers, milestones and selected match updates"
                   disabled={saving}
                   onClick={() => chooseLevel('key_updates')}
                 />
@@ -329,6 +330,8 @@ export default function NotificationButton() {
                       checked={custom.matchMilestones} disabled={saving} onChange={chooseCustom} />
                     <CustomChoice label="Selected score updates" name="manualUpdates"
                       checked={custom.manualUpdates} disabled={saving} onChange={chooseCustom} />
+                    <CustomChoice label="Match updates" name="matchUpdates"
+                      checked={custom.matchUpdates} disabled={saving} onChange={chooseCustom} />
                     <button type="button" onClick={() => setSettingsOpen(false)}
                       disabled={saving} style={{ ...buttonStyle, width: '100%', marginTop: '10px' }}>
                       Done

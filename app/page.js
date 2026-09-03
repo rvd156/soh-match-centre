@@ -1560,26 +1560,37 @@ console.log('RESET RESULT:', data, error)
   type="button"
   disabled={!manualUpdateText.trim()}
   onClick={async () => {
+    let updateMatchId = matchId
+
+    if (!updateMatchId) {
+      updateMatchId = await ensureMatchRecord()
+      if (!updateMatchId) return
+    }
+
+    const isPreMatch = period === 'PRE-MATCH'
+
     const { error } = await supabase
       .from('match_events')
       .insert({
-        match_id: matchId,
+        match_id: updateMatchId,
         team_id: null,
         player_id: null,
         event_type: 'manual_update',
         score_type: null,
-        match_minute: Math.floor(displaySeconds / 60),
-        clock_seconds: displaySeconds,
+        match_minute: isPreMatch
+          ? null
+          : Math.floor(displaySeconds / 60),
+        clock_seconds: isPreMatch ? 0 : displaySeconds,
         notes: manualUpdateText.trim()
       })
 
-  if (error) {
-  console.error('Error saving match update:', error)
-  alert(`Match update error: ${error.message}`)
-  return
-}
+    if (error) {
+      console.error('Error saving match update:', error)
+      alert(`Match update error: ${error.message}`)
+      return
+    }
 
-    loadMatchEvents(matchId)
+    loadMatchEvents(updateMatchId)
     setManualUpdateOpen(false)
     setManualUpdateText('')
   }}

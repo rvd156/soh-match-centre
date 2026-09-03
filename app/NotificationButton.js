@@ -58,6 +58,7 @@ export default function NotificationButton() {
   const [message, setMessage] = useState('')
   const [level, setLevel] = useState('key_updates')
   const [custom, setCustom] = useState(defaultCustom)
+  const [settingsOpen, setSettingsOpen] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -137,11 +138,13 @@ export default function NotificationButton() {
         makePreferences(nextLevel, nextCustom)
       )
       remember(nextLevel, nextCustom)
-      setMessage('Notification choices saved.')
+      setMessage('')
+      return true
     } catch (error) {
       setMessage(error instanceof Error
         ? error.message
         : 'Unable to save notification choices.')
+      return false
     } finally {
       setSaving(false)
     }
@@ -149,7 +152,8 @@ export default function NotificationButton() {
 
   async function chooseLevel(nextLevel) {
     setLevel(nextLevel)
-    await storePreferences(nextLevel, custom)
+    const saved = await storePreferences(nextLevel, custom)
+    if (saved && nextLevel !== 'custom') setSettingsOpen(false)
   }
 
   async function chooseCustom(name) {
@@ -232,6 +236,7 @@ export default function NotificationButton() {
       }
 
       setStatus('available')
+      setSettingsOpen(false)
       setMessage('Notifications are off on this device.')
     } catch (error) {
       setMessage(error instanceof Error
@@ -248,9 +253,13 @@ export default function NotificationButton() {
     ? 'Notifications are blocked. Change this in your browser or device settings.'
     : status === 'unsupported'
       ? 'Match notifications are unavailable in this browser.'
-      : status === 'enabled'
-        ? 'Match notifications enabled'
-        : ''
+      : ''
+
+  const levelNames = {
+    key_updates: 'Key updates',
+    every_score: 'Every score',
+    custom: 'Custom'
+  }
 
   return (
     <div style={{ textAlign: 'center', margin: '0 auto 20px', maxWidth: '430px' }}>
@@ -263,53 +272,81 @@ export default function NotificationButton() {
 
       {status === 'enabled' && (
         <>
-          <div style={panelStyle}>
-            <div style={{ color: '#ffffff', fontWeight: '800', marginBottom: '10px' }}>
-              Notify me about
-            </div>
-
-            <ChoiceButton
-              selected={level === 'key_updates'}
-              title="Key updates"
-              detail="Goals, two-pointers, match milestones and selected score updates"
-              disabled={saving}
-              onClick={() => chooseLevel('key_updates')}
-            />
-            <ChoiceButton
-              selected={level === 'every_score'}
-              title="Every score"
-              detail="Everything in Key updates, plus every regular point"
-              disabled={saving}
-              onClick={() => chooseLevel('every_score')}
-            />
-            <ChoiceButton
-              selected={level === 'custom'}
-              title="Custom"
-              detail="Choose individual types below"
-              disabled={saving}
-              onClick={() => chooseLevel('custom')}
-            />
-
-            {level === 'custom' && (
-              <div style={customStyle}>
-                <CustomChoice label="Goals" name="goals" checked={custom.goals}
-                  disabled={saving} onChange={chooseCustom} />
-                <CustomChoice label="Two-pointers" name="twoPointers"
-                  checked={custom.twoPointers} disabled={saving} onChange={chooseCustom} />
-                <CustomChoice label="Regular points" name="points" checked={custom.points}
-                  disabled={saving} onChange={chooseCustom} />
-                <CustomChoice label="Half-time and full-time" name="matchMilestones"
-                  checked={custom.matchMilestones} disabled={saving} onChange={chooseCustom} />
-                <CustomChoice label="Selected score updates" name="manualUpdates"
-                  checked={custom.manualUpdates} disabled={saving} onChange={chooseCustom} />
-              </div>
-            )}
-          </div>
-
-          <button type="button" onClick={disableNotifications} disabled={busy || saving}
-            style={{ ...buttonStyle, color: '#ffffff' }}>
-            {busy ? 'Turning off…' : 'Turn off notifications'}
+          <button type="button" onClick={() => setSettingsOpen(true)}
+            style={buttonStyle}>
+            <span style={{ display: 'block' }}>🔔 Notification settings</span>
+            <span style={{
+              display: 'block', color: '#c4d0c8', fontSize: '12px',
+              fontWeight: '600', marginTop: '3px'
+            }}>
+              {levelNames[level]} selected
+            </span>
           </button>
+
+          {settingsOpen && (
+            <div style={backdropStyle} onClick={() => !saving && setSettingsOpen(false)}>
+              <div role="dialog" aria-modal="true" aria-label="Notification choices"
+                style={modalStyle} onClick={event => event.stopPropagation()}>
+                <button type="button" aria-label="Close notification choices"
+                  onClick={() => setSettingsOpen(false)} disabled={saving}
+                  style={closeStyle}>×</button>
+
+                <div style={{ color: '#ffffff', fontSize: '20px', fontWeight: '900', marginBottom: '12px' }}>
+                  Notify me about
+                </div>
+
+                <ChoiceButton
+                  selected={level === 'key_updates'}
+                  title="Key updates"
+                  detail="Goals, two-pointers, match milestones and selected score updates"
+                  disabled={saving}
+                  onClick={() => chooseLevel('key_updates')}
+                />
+                <ChoiceButton
+                  selected={level === 'every_score'}
+                  title="Every score"
+                  detail="Everything in Key updates, plus every regular point"
+                  disabled={saving}
+                  onClick={() => chooseLevel('every_score')}
+                />
+                <ChoiceButton
+                  selected={level === 'custom'}
+                  title="Custom"
+                  detail="Choose individual types below"
+                  disabled={saving}
+                  onClick={() => chooseLevel('custom')}
+                />
+
+                {level === 'custom' && (
+                  <div style={customStyle}>
+                    <CustomChoice label="Goals" name="goals" checked={custom.goals}
+                      disabled={saving} onChange={chooseCustom} />
+                    <CustomChoice label="Two-pointers" name="twoPointers"
+                      checked={custom.twoPointers} disabled={saving} onChange={chooseCustom} />
+                    <CustomChoice label="Regular points" name="points" checked={custom.points}
+                      disabled={saving} onChange={chooseCustom} />
+                    <CustomChoice label="Half-time and full-time" name="matchMilestones"
+                      checked={custom.matchMilestones} disabled={saving} onChange={chooseCustom} />
+                    <CustomChoice label="Selected score updates" name="manualUpdates"
+                      checked={custom.manualUpdates} disabled={saving} onChange={chooseCustom} />
+                    <button type="button" onClick={() => setSettingsOpen(false)}
+                      disabled={saving} style={{ ...buttonStyle, width: '100%', marginTop: '10px' }}>
+                      Done
+                    </button>
+                  </div>
+                )}
+
+                {saving && <div style={{ color: '#f4c430', fontSize: '13px', marginTop: '8px' }}>
+                  Saving…
+                </div>}
+
+                <button type="button" onClick={disableNotifications} disabled={busy || saving}
+                  style={turnOffStyle}>
+                  {busy ? 'Turning off…' : 'Turn off notifications'}
+                </button>
+              </div>
+            </div>
+          )}
         </>
       )}
 
@@ -318,7 +355,6 @@ export default function NotificationButton() {
         fontSize: '13px', marginTop: '8px', lineHeight: 1.5
       }}>
         {fixedMessage}
-        {saving && <div>Saving notification choices…</div>}
         {message && <div>{message}</div>}
       </div>
     </div>
@@ -356,11 +392,6 @@ function CustomChoice({ label, name, checked, disabled, onChange }) {
   )
 }
 
-const panelStyle = {
-  background: '#0b1f16', border: '1px solid #1c4932',
-  borderRadius: '12px', padding: '14px', marginBottom: '12px'
-}
-
 const customStyle = {
   textAlign: 'left', borderTop: '1px solid #37634e',
   padding: '8px 4px 0', marginTop: '10px'
@@ -370,4 +401,29 @@ const buttonStyle = {
   background: '#123524', border: '1px solid #1c4932', color: '#f4c430',
   borderRadius: '10px', padding: '10px 16px', fontSize: '14px',
   fontWeight: '800', cursor: 'pointer'
+}
+
+const backdropStyle = {
+  position: 'fixed', inset: 0, zIndex: 2000,
+  background: 'rgba(0, 0, 0, 0.72)', padding: '18px',
+  display: 'flex', alignItems: 'center', justifyContent: 'center'
+}
+
+const modalStyle = {
+  position: 'relative', width: '100%', maxWidth: '430px', maxHeight: '88vh',
+  overflowY: 'auto', background: '#0b1f16', border: '1px solid #37634e',
+  borderRadius: '14px', padding: '20px 16px 16px',
+  boxShadow: '0 18px 50px rgba(0, 0, 0, 0.45)'
+}
+
+const closeStyle = {
+  position: 'absolute', top: '6px', right: '10px', border: 0,
+  background: 'transparent', color: '#ffffff', fontSize: '30px',
+  lineHeight: 1, cursor: 'pointer'
+}
+
+const turnOffStyle = {
+  marginTop: '14px', background: 'transparent', border: 0,
+  color: '#aebdb4', textDecoration: 'underline', fontSize: '13px',
+  cursor: 'pointer'
 }

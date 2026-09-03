@@ -1506,42 +1506,42 @@ console.log('RESET RESULT:', data, error)
 >
   <button
     type="button"
-    onClick={() => setManualUpdateText('Injury stoppage')}
+    onClick={() => selectMatchUpdatePreset('Injury stoppage')}
   >
     Injury Stoppage
   </button>
 
   <button
     type="button"
-    onClick={() => setManualUpdateText('Play resumes')}
+    onClick={() => selectMatchUpdatePreset('Play resumes')}
   >
     Play Resumes
   </button>
 
   <button
   type="button"
-  onClick={() => setManualUpdateText(`Wide for ${homeName}`)}
+  onClick={() => selectMatchUpdatePreset(`Wide for ${homeName}`)}
 >
   Wide - {homeName}
 </button>
 
 <button
   type="button"
-  onClick={() => setManualUpdateText(`Wide for ${awayName}`)}
+  onClick={() => selectMatchUpdatePreset(`Wide for ${awayName}`)}
 >
   Wide - {awayName}
 </button>
 
 <button
   type="button"
-  onClick={() => setManualUpdateText(`Free awarded to ${homeName}`)}
+  onClick={() => selectMatchUpdatePreset(`Free awarded to ${homeName}`)}
 >
   Free - {homeName}
 </button>
 
 <button
   type="button"
-  onClick={() => setManualUpdateText(`Free awarded to ${awayName}`)}
+  onClick={() => selectMatchUpdatePreset(`Free awarded to ${awayName}`)}
 >
   Free - {awayName}
 </button>

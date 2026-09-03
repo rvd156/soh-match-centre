@@ -325,7 +325,7 @@ export default function NotificationButton() {
                       checked={custom.twoPointers} disabled={saving} onChange={chooseCustom} />
                     <CustomChoice label="Regular points" name="points" checked={custom.points}
                       disabled={saving} onChange={chooseCustom} />
-                    <CustomChoice label="Half-time and full-time" name="matchMilestones"
+                    <CustomChoice label="Match milestones" name="matchMilestones"
                       checked={custom.matchMilestones} disabled={saving} onChange={chooseCustom} />
                     <CustomChoice label="Selected score updates" name="manualUpdates"
                       checked={custom.manualUpdates} disabled={saving} onChange={chooseCustom} />

@@ -2,17 +2,48 @@
 
 import { useEffect, useState } from 'react'
 
+const storageKey = 'soh-notification-preferences-v1'
+const defaultCustom = {
+  goals: true,
+  twoPointers: true,
+  points: false,
+  matchMilestones: true,
+  manualUpdates: true
+}
+
 function convertPublicKey(value) {
   const padding = '='.repeat((4 - (value.length % 4)) % 4)
   const base64 = (value + padding).replace(/-/g, '+').replace(/_/g, '/')
   return Uint8Array.from(atob(base64), char => char.charCodeAt(0))
 }
 
-async function saveSubscription(subscription) {
+function loadPreferences() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(storageKey))
+    if (!['key_updates', 'every_score', 'custom'].includes(saved?.level)) {
+      return { level: 'key_updates', custom: defaultCustom }
+    }
+    return {
+      level: saved.level,
+      custom: { ...defaultCustom, ...(saved.custom || {}) }
+    }
+  } catch {
+    return { level: 'key_updates', custom: defaultCustom }
+  }
+}
+
+function makePreferences(level, custom) {
+  return level === 'custom' ? { level, ...custom } : { level }
+}
+
+async function saveSubscription(subscription, preferences) {
   const response = await fetch('/api/push/subscribe', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(subscription.toJSON())
+    body: JSON.stringify({
+      subscription: subscription.toJSON(),
+      preferences
+    })
   })
   const data = await response.json()
   if (!response.ok || data.success !== true) {
@@ -23,12 +54,19 @@ async function saveSubscription(subscription) {
 export default function NotificationButton() {
   const [status, setStatus] = useState('checking')
   const [busy, setBusy] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
+  const [level, setLevel] = useState('key_updates')
+  const [custom, setCustom] = useState(defaultCustom)
 
   useEffect(() => {
     let cancelled = false
 
     async function checkStatus() {
+      const saved = loadPreferences()
+      setLevel(saved.level)
+      setCustom(saved.custom)
+
       const supported =
         window.isSecureContext &&
         'Notification' in window &&
@@ -53,11 +91,12 @@ export default function NotificationButton() {
 
         if (subscription && Notification.permission === 'granted') {
           setStatus('enabled')
-
-          // Repair a missing server record without interrupting the supporter.
-          saveSubscription(subscription).catch(() => {
+          saveSubscription(
+            subscription,
+            makePreferences(saved.level, saved.custom)
+          ).catch(() => {
             if (!cancelled) {
-              setMessage('Unable to refresh the server registration. Please try again.')
+              setMessage('Unable to refresh notification settings. Please try again.')
             }
           })
         } else {
@@ -74,6 +113,50 @@ export default function NotificationButton() {
     checkStatus()
     return () => { cancelled = true }
   }, [])
+
+  function remember(nextLevel, nextCustom) {
+    try {
+      localStorage.setItem(storageKey, JSON.stringify({
+        level: nextLevel,
+        custom: nextCustom
+      }))
+    } catch {}
+  }
+
+  async function storePreferences(nextLevel, nextCustom) {
+    setSaving(true)
+    setMessage('')
+
+    try {
+      const registration = await navigator.serviceWorker.ready
+      const subscription = await registration.pushManager.getSubscription()
+      if (!subscription) throw new Error('Please enable notifications first.')
+
+      await saveSubscription(
+        subscription,
+        makePreferences(nextLevel, nextCustom)
+      )
+      remember(nextLevel, nextCustom)
+      setMessage('Notification choices saved.')
+    } catch (error) {
+      setMessage(error instanceof Error
+        ? error.message
+        : 'Unable to save notification choices.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function chooseLevel(nextLevel) {
+    setLevel(nextLevel)
+    await storePreferences(nextLevel, custom)
+  }
+
+  async function chooseCustom(name) {
+    const nextCustom = { ...custom, [name]: !custom[name] }
+    setCustom(nextCustom)
+    await storePreferences('custom', nextCustom)
+  }
 
   async function enableNotifications() {
     setBusy(true)
@@ -108,9 +191,10 @@ export default function NotificationButton() {
         })
       }
 
-      await saveSubscription(subscription)
+      await saveSubscription(subscription, makePreferences(level, custom))
+      remember(level, custom)
       setStatus('enabled')
-      setMessage('This device will receive goal alerts.')
+      setMessage('Browser registered for match notifications.')
     } catch (error) {
       setStatus('available')
       setMessage(error instanceof Error
@@ -131,12 +215,9 @@ export default function NotificationButton() {
 
       if (subscription) {
         const endpoint = subscription.endpoint
-
-        // Unsubscribe locally first so this device stops receiving alerts.
         const removed = await subscription.unsubscribe()
         if (!removed) throw new Error('Unable to turn off notifications.')
 
-        // Remove the now-inactive address from the server.
         const response = await fetch('/api/push/subscribe', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
@@ -144,7 +225,6 @@ export default function NotificationButton() {
         })
 
         if (!response.ok) {
-          // The device is already unsubscribed, which stops local delivery.
           setMessage('Notifications are off on this device.')
           setStatus('available')
           return
@@ -173,7 +253,7 @@ export default function NotificationButton() {
         : ''
 
   return (
-    <div style={{ textAlign: 'center', margin: '0 auto 20px' }}>
+    <div style={{ textAlign: 'center', margin: '0 auto 20px', maxWidth: '430px' }}>
       {status === 'available' && (
         <button type="button" onClick={enableNotifications} disabled={busy}
           style={buttonStyle}>
@@ -182,10 +262,55 @@ export default function NotificationButton() {
       )}
 
       {status === 'enabled' && (
-        <button type="button" onClick={disableNotifications} disabled={busy}
-          style={{ ...buttonStyle, color: '#ffffff' }}>
-          {busy ? 'Turning off…' : 'Turn off notifications'}
-        </button>
+        <>
+          <div style={panelStyle}>
+            <div style={{ color: '#ffffff', fontWeight: '800', marginBottom: '10px' }}>
+              Notify me about
+            </div>
+
+            <ChoiceButton
+              selected={level === 'key_updates'}
+              title="Key updates"
+              detail="Goals, two-pointers, match milestones and selected score updates"
+              disabled={saving}
+              onClick={() => chooseLevel('key_updates')}
+            />
+            <ChoiceButton
+              selected={level === 'every_score'}
+              title="Every score"
+              detail="Everything in Key updates, plus every regular point"
+              disabled={saving}
+              onClick={() => chooseLevel('every_score')}
+            />
+            <ChoiceButton
+              selected={level === 'custom'}
+              title="Custom"
+              detail="Choose individual types below"
+              disabled={saving}
+              onClick={() => chooseLevel('custom')}
+            />
+
+            {level === 'custom' && (
+              <div style={customStyle}>
+                <CustomChoice label="Goals" name="goals" checked={custom.goals}
+                  disabled={saving} onChange={chooseCustom} />
+                <CustomChoice label="Two-pointers" name="twoPointers"
+                  checked={custom.twoPointers} disabled={saving} onChange={chooseCustom} />
+                <CustomChoice label="Regular points" name="points" checked={custom.points}
+                  disabled={saving} onChange={chooseCustom} />
+                <CustomChoice label="Half-time and full-time" name="matchMilestones"
+                  checked={custom.matchMilestones} disabled={saving} onChange={chooseCustom} />
+                <CustomChoice label="Selected score updates" name="manualUpdates"
+                  checked={custom.manualUpdates} disabled={saving} onChange={chooseCustom} />
+              </div>
+            )}
+          </div>
+
+          <button type="button" onClick={disableNotifications} disabled={busy || saving}
+            style={{ ...buttonStyle, color: '#ffffff' }}>
+            {busy ? 'Turning off…' : 'Turn off notifications'}
+          </button>
+        </>
       )}
 
       <div role="status" style={{
@@ -193,19 +318,56 @@ export default function NotificationButton() {
         fontSize: '13px', marginTop: '8px', lineHeight: 1.5
       }}>
         {fixedMessage}
+        {saving && <div>Saving notification choices…</div>}
         {message && <div>{message}</div>}
       </div>
     </div>
   )
 }
 
+function ChoiceButton({ selected, title, detail, disabled, onClick }) {
+  return (
+    <button type="button" onClick={onClick} disabled={disabled} style={{
+      width: '100%', textAlign: 'left', display: 'block', marginBottom: '8px',
+      padding: '10px 12px', borderRadius: '9px', cursor: 'pointer',
+      border: selected ? '2px solid #f4c430' : '1px solid #37634e',
+      background: selected ? '#1c4932' : '#123524', color: '#ffffff'
+    }}>
+      <div style={{ fontSize: '14px', fontWeight: '800' }}>
+        {selected ? '✓ ' : ''}{title}
+      </div>
+      <div style={{ color: '#c4d0c8', fontSize: '12px', marginTop: '3px', lineHeight: 1.35 }}>
+        {detail}
+      </div>
+    </button>
+  )
+}
+
+function CustomChoice({ label, name, checked, disabled, onChange }) {
+  return (
+    <label style={{
+      display: 'flex', alignItems: 'center', gap: '9px',
+      color: '#ffffff', fontSize: '13px', padding: '5px 0'
+    }}>
+      <input type="checkbox" checked={checked} disabled={disabled}
+        onChange={() => onChange(name)} />
+      {label}
+    </label>
+  )
+}
+
+const panelStyle = {
+  background: '#0b1f16', border: '1px solid #1c4932',
+  borderRadius: '12px', padding: '14px', marginBottom: '12px'
+}
+
+const customStyle = {
+  textAlign: 'left', borderTop: '1px solid #37634e',
+  padding: '8px 4px 0', marginTop: '10px'
+}
+
 const buttonStyle = {
-  background: '#123524',
-  border: '1px solid #1c4932',
-  color: '#f4c430',
-  borderRadius: '10px',
-  padding: '10px 16px',
-  fontSize: '14px',
-  fontWeight: '800',
-  cursor: 'pointer'
+  background: '#123524', border: '1px solid #1c4932', color: '#f4c430',
+  borderRadius: '10px', padding: '10px 16px', fontSize: '14px',
+  fontWeight: '800', cursor: 'pointer'
 }

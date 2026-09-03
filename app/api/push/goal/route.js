@@ -235,6 +235,7 @@ export async function POST(request) {
 
       let query = db.from('push_subscriptions')
         .select('endpoint, p256dh, auth')
+        .eq('notify_goals', true)
         .lte('created_at', goal.created_at)
         .order('endpoint', { ascending: true })
         .limit(100)

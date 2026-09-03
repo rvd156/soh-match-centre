@@ -32,11 +32,7 @@ function supportedEndpoint(endpoint) {
 
 async function requireResult(query) {
   const result = await query
-  if (result.error) {
-  throw new Error(
-    `Database ${result.error.code}: ${result.error.message}`
-  )
-}
+  if (result.error) throw new Error('Database operation failed.')
   return result.data
 }
 
@@ -114,7 +110,10 @@ export async function POST(request) {
 
     const match = await requireResult(
       db.from('matches')
-        .select('id, active, home_team_id, away_team_id')
+        .select(`
+          id, active, home_team_id, away_team_id,
+          home_goals, home_points, away_goals, away_points
+        `)
         .eq('id', goal.match_id)
         .maybeSingle()
     )
@@ -127,15 +126,29 @@ export async function POST(request) {
       return reply({ ignored: true, reason: 'No matching active fixture.' })
     }
 
-    const team = Array.isArray(goal.teams) ? goal.teams[0] : goal.teams
+    const teams = await requireResult(
+      db.from('teams')
+        .select('id, name')
+        .in('id', [match.home_team_id, match.away_team_id])
+    )
+    const homeName = (teams?.find(team =>
+      String(team.id) === String(match.home_team_id))?.name || 'Home').slice(0, 100)
+    const awayName = (teams?.find(team =>
+      String(team.id) === String(match.away_team_id))?.name || 'Away').slice(0, 100)
+    const scoringTeam = Array.isArray(goal.teams) ? goal.teams[0] : goal.teams
     const player = Array.isArray(goal.players) ? goal.players[0] : goal.players
-    const teamName = (team?.name || 'Team').slice(0, 100)
+    const teamName = (scoringTeam?.name || 'Team').slice(0, 100)
     const scorerName = player?.name?.slice(0, 100)
     const minute = goal.match_minute == null ? null : Number(goal.match_minute)
-    const body = [
-      scorerName ? `${scorerName} scores for ${teamName}.` : `Goal for ${teamName}!`,
+    const scorerLine = [
+      scorerName || `Goal for ${teamName}`,
       Number.isFinite(minute) && minute >= 0 ? `${minute} min` : null
     ].filter(Boolean).join(' · ')
+    const body = [
+      scorerLine,
+      `${homeName} ${match.home_goals}-${String(match.home_points).padStart(2, '0')}`,
+      `${awayName} ${match.away_goals}-${String(match.away_points).padStart(2, '0')}`
+    ].join('\n')
 
     const notification = JSON.stringify({
       title: `GOAL — ${teamName}`,
@@ -252,16 +265,8 @@ export async function POST(request) {
     }
 
     return reply({ ...counts, retryNeeded: counts.failed > 0 }, counts.failed ? 503 : 200)
-   } catch (error) {
-    const message = error instanceof Error
-      ? error.message
-      : 'Unable to process goal alerts.'
-
-    console.error('Goal push processing failed:', message)
-
-    return reply({
-      error: message,
-      retryNeeded: true
-    }, 503)
+  } catch {
+    console.error('Goal push processing failed.')
+    return reply({ error: 'Unable to process goal alerts.', retryNeeded: true }, 503)
   }
 }

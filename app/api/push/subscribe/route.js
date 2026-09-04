@@ -27,7 +27,7 @@ function preferenceFields(preferences) {
   if (preferences == null) return null
 
   const level = preferences.level
-  if (!['key_updates', 'every_score', 'custom'].includes(level)) {
+  if (!['key_updates', 'every_score', 'all_updates', 'custom'].includes(level)) {
     throw new Error('Invalid notification level.')
   }
 
@@ -58,6 +58,22 @@ function preferenceFields(preferences) {
       notify_red_cards: true
     }
   }
+
+  if (level === 'all_updates') {
+  return {
+    notification_level: level,
+    notify_goals: true,
+    notify_two_pointers: true,
+    notify_points: true,
+    notify_match_milestones: true,
+    notify_manual_updates: true,
+    notify_match_updates: true,
+    notify_substitutions: true,
+    notify_yellow_cards: true,
+    notify_black_cards: true,
+    notify_red_cards: true
+  }
+}
 
   const names = [
   'goals',

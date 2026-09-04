@@ -591,10 +591,12 @@ const eventName =
       ? 'point'
       : event.event_type === 'two_pointer'
         ? '2-pointer'
-        : event.event_type === 'yellow_card'
-          ? 'yellow card'
-          : event.event_type === 'red_card'
-            ? 'red card'
+        : event.event_type === 'black_card'
+  ? 'black card'
+  : event.event_type === 'yellow_card'
+    ? 'yellow card'
+    : event.event_type === 'red_card'
+      ? 'red card'
             : event.event_type === 'substitution'
               ? 'substitution'
               : 'event'
@@ -1411,9 +1413,11 @@ console.log('RESET RESULT:', data, error)
           ? '⚪'
           : event.event_type === 'two_pointer'
             ? '🟧'
-            : event.event_type === 'yellow_card'
-              ? '🟨'
-              : '🟥'}{' '}
+            : event.event_type === 'black_card'
+  ? '⬛'
+  : event.event_type === 'yellow_card'
+    ? '🟨'
+    : '🟥'}{' '}
 
       {event.players?.name || event.teams?.name || 'Team'} ·{' '}
 
@@ -1423,9 +1427,11 @@ console.log('RESET RESULT:', data, error)
           ? 'Point'
           : event.event_type === 'two_pointer'
             ? '2PT'
-            : event.event_type === 'yellow_card'
-              ? 'Yellow Card'
-              : 'Red Card'}{' '}
+            : event.event_type === 'black_card'
+  ? 'Black Card'
+  : event.event_type === 'yellow_card'
+    ? 'Yellow Card'
+    : 'Red Card'}{' '}
 
       · {event.match_minute}
     </>

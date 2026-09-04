@@ -377,6 +377,46 @@ function formatStatus(status = '') {
           </div>
         </header>
 
+  <nav
+  aria-label="Match Centre navigation"
+  style={{
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '10px',
+    margin: '0 auto 18px'
+  }}
+>
+  <a
+    href="/live"
+    aria-current="page"
+    style={{
+      padding: '10px 16px',
+      borderRadius: '999px',
+      background: '#f4c430',
+      color: '#071a12',
+      fontWeight: '900',
+      textDecoration: 'none'
+    }}
+  >
+    Live Match
+  </a>
+
+  <a
+    href="/results"
+    style={{
+      padding: '10px 16px',
+      borderRadius: '999px',
+      background: '#123524',
+      border: '1px solid #1c4932',
+      color: '#ffffff',
+      fontWeight: '800',
+      textDecoration: 'none'
+    }}
+  >
+    Previous Results
+  </a>
+</nav>
+
   <NotificationButton />
 
       {upcomingFixture ? (
@@ -648,7 +688,46 @@ const sohWon =
           </div>
         </header>
 
-            <NotificationButton />
+  <nav
+  aria-label="Match Centre navigation"
+  style={{
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '10px',
+    margin: '0 auto 18px'
+  }}
+>
+  <a
+    href="/live"
+    aria-current="page"
+    style={{
+      padding: '10px 16px',
+      borderRadius: '999px',
+      background: '#f4c430',
+      color: '#071a12',
+      fontWeight: '900',
+      textDecoration: 'none'
+    }}
+  >
+    Live Match
+  </a>
+
+  <a
+    href="/results"
+    style={{
+      padding: '10px 16px',
+      borderRadius: '999px',
+      background: '#123524',
+      border: '1px solid #1c4932',
+      color: '#ffffff',
+      fontWeight: '800',
+      textDecoration: 'none'
+    }}
+  >
+    Previous Results
+  </a>
+</nav>
+      <NotificationButton />
 
         <div style={styles.liveBar}>
          <span className="live-pulse" style={styles.liveDot}></span>

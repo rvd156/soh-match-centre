@@ -62,18 +62,33 @@ function eventDescription(event) {
 
   if (['goal', 'point', 'two_pointer'].includes(event.event_type) && event.score_type) {
     const scoreTypes = {
-  play: 'from play',
-  free: 'free',
-  '45': '45',
-  '50': '50',
-  penalty: 'penalty',
-  mark: 'mark',
-  sideline: 'sideline'
-}
+      play: 'from play',
+      free: 'free',
+      '45': '45',
+      '50': '50',
+      penalty: 'penalty',
+      mark: 'mark',
+      sideline: 'sideline'
+    }
     if (scoreTypes[event.score_type]) detail.push(scoreTypes[event.score_type])
   }
 
   return detail.join(' · ')
+}
+
+function milestoneDescription(item) {
+  const labels = {
+    first_half: 'Match underway',
+    half_time: 'Half-time',
+    second_half: 'Second half underway',
+    full_time: 'Full-time',
+    extra_time: 'Extra time underway',
+    extra_time_half_time: 'Extra-time half-time',
+    extra_time_second_half: 'Second half of extra time underway',
+    after_extra_time: 'Full-time after extra time'
+  }
+
+  return labels[item.status] || item.status.replaceAll('_', ' ')
 }
 
 export default function MatchReportPage() {
@@ -81,6 +96,7 @@ export default function MatchReportPage() {
   const matchId = params?.id
   const [match, setMatch] = useState(null)
   const [events, setEvents] = useState([])
+  const [milestones, setMilestones] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -89,7 +105,7 @@ export default function MatchReportPage() {
     let cancelled = false
 
     async function loadReport() {
-      const [matchResult, eventResult] = await Promise.all([
+      const [matchResult, eventResult, milestoneResult] = await Promise.all([
         supabase
           .from('matches')
           .select(`
@@ -118,6 +134,7 @@ export default function MatchReportPage() {
             score_type,
             match_minute,
             clock_seconds,
+            created_at,
             notes,
             team_id,
             players!match_events_player_id_fkey (name),
@@ -137,7 +154,20 @@ export default function MatchReportPage() {
             'manual_update'
           ])
           .order('clock_seconds', { ascending: true })
-          .order('id', { ascending: true })
+          .order('id', { ascending: true }),
+        supabase
+          .from('match_status_events')
+          .select(`
+            id,
+            status,
+            home_goals,
+            home_points,
+            away_goals,
+            away_points,
+            created_at
+          `)
+          .eq('match_id', matchId)
+          .order('created_at', { ascending: true })
       ])
 
       if (cancelled) return
@@ -151,6 +181,11 @@ export default function MatchReportPage() {
           console.error('Unable to load match events:', eventResult.error)
         } else {
           setEvents(eventResult.data || [])
+        }
+        if (milestoneResult.error) {
+          console.error('Unable to load match milestones:', milestoneResult.error)
+        } else {
+          setMilestones(milestoneResult.data || [])
         }
       }
 
@@ -180,6 +215,13 @@ export default function MatchReportPage() {
   const away = related(match.away_team)
   const homeTotal = Number(match.home_goals) * 3 + Number(match.home_points)
   const awayTotal = Number(match.away_goals) * 3 + Number(match.away_points)
+  const timelineItems = [
+    ...events.map(event => ({ ...event, timelineType: 'event' })),
+    ...milestones.map(milestone => ({ ...milestone, timelineType: 'milestone' }))
+  ].sort((a, b) => {
+    const timeDifference = Date.parse(a.created_at) - Date.parse(b.created_at)
+    return timeDifference || Number(a.id) - Number(b.id)
+  })
 
   return (
     <main style={styles.page}>
@@ -217,20 +259,44 @@ export default function MatchReportPage() {
 
         <section style={styles.timelineSection}>
           <h2 style={styles.timelineTitle}>MATCH ACTION</h2>
-          {events.length === 0 ? (
+          {timelineItems.length === 0 ? (
             <div style={styles.message}>No match events were recorded.</div>
           ) : (
             <div style={styles.timeline}>
-              {events.map(event => (
-                <article key={event.id} style={styles.eventRow}>
-                  <div style={styles.minute}>{Number(event.match_minute || 0)}′</div>
-                  <div style={styles.icon}>{eventIcon(event.event_type)}</div>
-                  <div>
-                    <div style={styles.eventText}>{eventDescription(event)}</div>
-                    {event.event_type !== 'manual_update' && related(event.teams)?.name && (
-                      <div style={styles.eventTeam}>{related(event.teams).name}</div>
-                    )}
-                  </div>
+              {timelineItems.map(item => (
+                <article
+                  key={`${item.timelineType}-${item.id}`}
+                  style={item.timelineType === 'milestone'
+                    ? { ...styles.eventRow, ...styles.milestoneRow }
+                    : styles.eventRow}
+                >
+                  {item.timelineType === 'milestone' ? (
+                    <>
+                      <div style={styles.minute}>—</div>
+                      <div style={styles.icon}>🏁</div>
+                      <div>
+                        <div style={styles.milestoneText}>{milestoneDescription(item)}</div>
+                        {item.status !== 'first_half' && (
+                          <div style={styles.eventTeam}>
+                            {home?.name} {item.home_goals}-{String(item.home_points).padStart(2, '0')}
+                            {' · '}
+                            {away?.name} {item.away_goals}-{String(item.away_points).padStart(2, '0')}
+                          </div>
+                        )}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={styles.minute}>{Number(item.match_minute || 0)}′</div>
+                      <div style={styles.icon}>{eventIcon(item.event_type)}</div>
+                      <div>
+                        <div style={styles.eventText}>{eventDescription(item)}</div>
+                        {item.event_type !== 'manual_update' && related(item.teams)?.name && (
+                          <div style={styles.eventTeam}>{related(item.teams).name}</div>
+                        )}
+                      </div>
+                    </>
+                  )}
                 </article>
               ))}
             </div>
@@ -265,5 +331,7 @@ const styles = {
   icon: { fontSize: '16px', textAlign: 'center' },
   eventText: { color: '#fff', fontSize: '14px', fontWeight: '800', lineHeight: 1.4 },
   eventTeam: { color: '#aebdb3', fontSize: '12px', fontWeight: '700', marginTop: '3px' },
+  milestoneRow: { background: '#123524' },
+  milestoneText: { color: '#f4c430', fontSize: '14px', fontWeight: '900', lineHeight: 1.4, textTransform: 'uppercase', letterSpacing: '0.5px' },
   message: { border: '1px solid #1c4932', borderRadius: '16px', background: '#0b281c', color: '#c4d0c8', padding: '28px 18px', textAlign: 'center', fontWeight: '700' }
 }

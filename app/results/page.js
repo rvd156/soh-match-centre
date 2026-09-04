@@ -235,7 +235,7 @@ const styles = {
     borderRadius: '18px',
     background: '#0b281c',
     padding: '18px 16px',
-    boxShadow: '0 10px 30px rgba(0,0,0,0.16)'
+    boxShadow: '0 10px 30px rgba(0,0,0,0.16)',
     display: 'block',
     color: 'inherit',
     textDecoration: 'none',

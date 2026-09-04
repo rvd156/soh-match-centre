@@ -39,7 +39,7 @@ function preferenceFields(preferences) {
       notify_points: false,
       notify_match_milestones: true,
       notify_manual_updates: true,
-      notify_match_updates: true
+      
     }
   }
 
@@ -51,7 +51,11 @@ function preferenceFields(preferences) {
       notify_points: true,
       notify_match_milestones: true,
       notify_manual_updates: true,
-      notify_match_updates: true
+      notify_match_updates: true,
+      notify_substitutions: false,
+      notify_yellow_cards: false,
+      notify_black_cards: true,
+      notify_red_cards: true
     }
   }
 

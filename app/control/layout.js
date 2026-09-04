@@ -70,7 +70,8 @@ export default function ControlLayout({ children }) {
   return (
     <>
       <div
-        style={{
+  id="control-panel-header"
+  style={{
           position: 'sticky',
           top: 0,
           zIndex: 1500,

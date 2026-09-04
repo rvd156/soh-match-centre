@@ -1793,6 +1793,76 @@ justifyContent: 'center',
 </h2>
 
       <p>{scorerPicker.teamName}</p>
+  {['goals', 'points', 'two_pointer'].includes(scorerPicker.type) && (
+  <div style={{ margin: '16px 0 20px' }}>
+    <div
+      style={{
+        marginBottom: '9px',
+        color: '#f4c430',
+        fontSize: '14px',
+        fontWeight: '900'
+      }}
+    >
+      SCORE FROM
+    </div>
+
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+        gap: '8px'
+      }}
+    >
+      {(
+        scorerPicker.type === 'goals'
+          ? [
+              { value: 'play', label: 'From Play' },
+              { value: 'penalty', label: 'Penalty' }
+            ]
+          : scorerPicker.type === 'points'
+            ? [
+                { value: 'play', label: 'From Play' },
+                { value: 'free', label: 'Free' },
+                { value: '45', label: '45' },
+                { value: 'mark', label: 'Mark' }
+              ]
+            : [
+                { value: 'play', label: 'From Play' },
+                { value: 'free', label: 'Free' },
+                { value: 'mark', label: 'Mark' }
+              ]
+      ).map(option => (
+        <button
+          key={option.value}
+          type="button"
+          onClick={() =>
+            setScorerPicker(current => ({
+              ...current,
+              scoreType: option.value
+            }))
+          }
+          style={{
+            padding: '11px 8px',
+            borderRadius: '12px',
+            border:
+              scorerPicker.scoreType === option.value
+                ? '2px solid #f4c430'
+                : '1px solid #52645b',
+            background:
+              scorerPicker.scoreType === option.value
+                ? '#20563c'
+                : '#10251a',
+            color: '#ffffff',
+            fontWeight: '800'
+          }}
+        >
+          {scorerPicker.scoreType === option.value ? '✓ ' : ''}
+          {option.label}
+        </button>
+      ))}
+    </div>
+  </div>
+)}
 <button
   type="button"
   style={{

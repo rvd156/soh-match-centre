@@ -505,9 +505,11 @@ const { error: eventError } = await supabase
           ? 'two_pointer'
           : scorerPicker.type === 'yellow_card'
             ? 'yellow_card'
-            : scorerPicker.type === 'red_card'
-              ? 'red_card'
-              : 'point',
+           : scorerPicker.type === 'red_card'
+  ? 'red_card'
+  : scorerPicker.type === 'black_card'
+    ? 'black_card'
+    : 'point',
     score_type: 'play',
     match_minute: Math.floor(displaySeconds / 60),
     clock_seconds: displaySeconds
@@ -1654,9 +1656,11 @@ justifyContent: 'center',
         ? '2-Point Scorer'
         : scorerPicker.type === 'yellow_card'
           ? 'Yellow Card'
-          : scorerPicker.type === 'red_card'
-            ? 'Red Card'
-            : 'Point Scorer'}
+         : scorerPicker.type === 'red_card'
+  ? 'Red Card'
+  : scorerPicker.type === 'black_card'
+    ? 'Black Card'
+    : 'Point Scorer'}
 </h2>
 
       <p>{scorerPicker.teamName}</p>
@@ -1736,8 +1740,10 @@ justifyContent: 'center',
               : scorerPicker.type === 'yellow_card'
                 ? 'yellow_card'
                 : scorerPicker.type === 'red_card'
-                  ? 'red_card'
-                  : 'point',
+  ? 'red_card'
+  : scorerPicker.type === 'black_card'
+    ? 'black_card'
+    : 'point',
         score_type: 'play',
         match_minute: Math.floor(displaySeconds / 60),
         clock_seconds: displaySeconds
@@ -1848,9 +1854,11 @@ const { error } = await supabase
           ? 'two_pointer'
           : scorerPicker.type === 'yellow_card'
             ? 'yellow_card'
-            : scorerPicker.type === 'red_card'
-              ? 'red_card'
-              : 'point',
+           : scorerPicker.type === 'red_card'
+  ? 'red_card'
+  : scorerPicker.type === 'black_card'
+    ? 'black_card'
+    : 'point',
     score_type: 'play',
     match_minute: Math.floor(displaySeconds / 60),
     clock_seconds: displaySeconds

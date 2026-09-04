@@ -260,7 +260,7 @@ export default function NotificationButton() {
       ? 'Match notifications are unavailable in this browser.'
       : ''
 
-  const levelLabels = {
+  const levelNames = {
   key_updates: 'Key updates',
   every_score: 'Every score',
   all_updates: 'All updates',

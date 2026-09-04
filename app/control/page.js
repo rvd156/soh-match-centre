@@ -1358,7 +1358,7 @@ console.log('RESET RESULT:', data, error)
       right: 0,
       width: '100%',
       boxSizing: 'border-box',
-      zIndex: 900,
+      zIndex: 1600,
       display: 'grid',
       gridTemplateColumns: '1fr auto 1fr',
       alignItems: 'center',

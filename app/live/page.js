@@ -777,7 +777,15 @@ const sohWon =
           <> · {latestEvent.teams.name}</>
         )}
       </>
-    ) : latestEvent.event_type === 'yellow_card' ? (
+    ) : latestEvent.event_type === 'black_card' ? (
+  <>
+    ⬛ {latestEvent.players?.name || 'Black Card'}
+    {' · Black Card'}
+    {latestEvent.teams?.name && (
+      <> · {latestEvent.teams.name}</>
+    )}
+  </>
+     ) : latestEvent.event_type === 'yellow_card' ? (
       <>
         🟨 {latestEvent.players?.name || 'Yellow Card'}
         {' · Yellow Card'}
@@ -995,9 +1003,11 @@ const sohWon =
           ? <span style={styles.whiteFlag}></span>
           : event.event_type === 'two_pointer'
             ? <span style={styles.orangeFlag}></span>
-            : event.event_type === 'yellow_card'
-              ? '🟨'
-              : '🟥'}{' '}
+            : event.event_type === 'black_card'
+  ? '⬛'
+  : event.event_type === 'yellow_card'
+    ? '🟨'
+    : '🟥'}{' '}
 
       {event.players?.name || event.teams?.name || 'Team'} ·{' '}
 
@@ -1007,9 +1017,11 @@ const sohWon =
           ? 'Point'
           : event.event_type === 'two_pointer'
             ? '2PT'
-            : event.event_type === 'yellow_card'
-              ? 'Yellow Card'
-              : 'Red Card'}
+            : event.event_type === 'black_card'
+  ? 'Black Card'
+  : event.event_type === 'yellow_card'
+    ? 'Yellow Card'
+    : 'Red Card'}
         </>
   )}
 

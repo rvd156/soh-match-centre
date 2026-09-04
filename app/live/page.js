@@ -1122,8 +1122,25 @@ const sohWon =
   ? 'Black Card'
   : event.event_type === 'yellow_card'
     ? 'Yellow Card'
-    : 'Red Card'}
-        </>
+            : 'Red Card'}
+
+{['goal', 'point', 'two_pointer'].includes(event.event_type) &&
+  event.score_type && (
+    <span style={{ color: '#aebdb4' }}>
+      {' · '}
+      {{
+        play: 'From play',
+        free: 'Free',
+        '45': '45',
+        '50': '50',
+        penalty: 'Penalty',
+        mark: 'Mark',
+        sideline: 'Sideline'
+      }[event.score_type] || event.score_type}
+    </span>
+  )}
+
+</>
   )}
 
   {event.event_type !== 'manual_update' && (

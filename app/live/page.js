@@ -157,12 +157,53 @@ setLoading(false)
   useEffect(() => {
   if (match?.id) return
 
-  const checkForMatch = setInterval(() => {
-    loadLatestMatch()
+useEffect(() => {
+  let refreshRunning = false
+
+  const refreshLiveScreen = async () => {
+    if (document.visibilityState === 'hidden' || refreshRunning) return
+
+    refreshRunning = true
+
+    try {
+      await Promise.all([
+        loadLatestMatch(),
+        loadUpcomingFixture()
+      ])
+    } finally {
+      refreshRunning = false
+    }
+  }
+
+  const handleVisibilityChange = () => {
+    if (document.visibilityState === 'visible') {
+      refreshLiveScreen()
+    }
+  }
+
+  const handlePageShow = () => {
+    refreshLiveScreen()
+  }
+
+  const handleFocus = () => {
+    refreshLiveScreen()
+  }
+
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+  window.addEventListener('pageshow', handlePageShow)
+  window.addEventListener('focus', handleFocus)
+
+  const refreshInterval = window.setInterval(() => {
+    refreshLiveScreen()
   }, 5000)
 
-  return () => clearInterval(checkForMatch)
-}, [match?.id])
+  return () => {
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
+    window.removeEventListener('pageshow', handlePageShow)
+    window.removeEventListener('focus', handleFocus)
+    window.clearInterval(refreshInterval)
+  }
+}, [])
   useEffect(() => {
   if (!match?.id) return
 

@@ -9,7 +9,11 @@ const defaultCustom = {
   points: false,
   matchMilestones: true,
   manualUpdates: true,
-  matchUpdates: true
+  matchUpdates: true,
+  blackCards: false,
+  yellowCards: false,
+  redCards: false,
+  substitutions: false
 }
 
 function convertPublicKey(value) {
@@ -330,6 +334,14 @@ export default function NotificationButton() {
                       checked={custom.matchMilestones} disabled={saving} onChange={chooseCustom} />
                     <CustomChoice label="Selected score updates" name="manualUpdates"
                       checked={custom.manualUpdates} disabled={saving} onChange={chooseCustom} />
+                 <CustomChoice label="Black cards" name="blackCards"
+                        checked={custom.blackCards} disabled={saving} onChange={chooseCustom} />
+                  <CustomChoice label="Yellow cards" name="yellowCards"
+                        checked={custom.yellowCards} disabled={saving} onChange={chooseCustom} />
+                  <CustomChoice label="Red cards" name="redCards"
+                        checked={custom.redCards} disabled={saving} onChange={chooseCustom} />
+                  <CustomChoice label="Substitutions" name="substitutions"
+                        checked={custom.substitutions} disabled={saving} onChange={chooseCustom} />
                     <CustomChoice label="Match updates" name="matchUpdates"
                       checked={custom.matchUpdates} disabled={saving} onChange={chooseCustom} />
                     <button type="button" onClick={() => setSettingsOpen(false)}

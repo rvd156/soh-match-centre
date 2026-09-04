@@ -1166,6 +1166,43 @@ async function sendScoreUpdate() {
     setSendingScoreUpdate(false)
   }
 }
+
+  function postScoreToX() {
+  if (!matchId) {
+    alert('Start or resume the match before posting a score update.')
+    return
+  }
+
+  const minute = Math.floor(displaySeconds / 60)
+
+  const heading =
+    period === 'HALF TIME'
+      ? 'HALF TIME'
+      : period === 'FULL TIME'
+        ? 'FULL TIME'
+        : period === 'AET'
+          ? 'FULL TIME — AET'
+          : `SCORE UPDATE | ${minute}'`
+
+  const postText = [
+    heading,
+    '',
+    `${homeName} ${home.goals}-${String(home.points).padStart(2, '0')}`,
+    `${awayName} ${away.goals}-${String(away.points).padStart(2, '0')}`,
+    '',
+    'Follow live:',
+    'https://matchcentre.ballinamoreseanoheslinsgaa.com/live'
+  ].join('\n')
+
+  const xIntent =
+    `https://twitter.com/intent/tweet?text=${encodeURIComponent(postText)}`
+
+  const opened = window.open(xIntent, '_blank', 'noopener,noreferrer')
+
+  if (!opened) {
+    window.location.href = xIntent
+  }
+}
   
   async function resetMatch(){
   if(!window.confirm('Reset this match and return to match setup?')) return

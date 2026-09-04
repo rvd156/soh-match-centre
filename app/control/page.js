@@ -1232,7 +1232,9 @@ async function sendScoreUpdate() {
     `${awayName} ${away.goals}-${String(away.points).padStart(2, '0')}`,
     '',
     'Follow live:',
-    'https://matchcentre.ballinamoreseanoheslinsgaa.com/live'
+'https://matchcentre.ballinamoreseanoheslinsgaa.com/live',
+'',
+'@LeitrimGAA'
   )
 
   const postText = postLines.join('\n')

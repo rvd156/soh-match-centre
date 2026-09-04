@@ -404,6 +404,9 @@ const awayCrest = sohIsHome ? setup.oppositionCrest : sohCrest
 setScorerPicker({
   side,
   type,
+  scoreType: ['goals', 'points', 'two_pointer'].includes(type)
+  ? 'play'
+  : null,
   players,
   teamName: side === 'home' ? homeName : awayName,
   substitutionStep: type === 'substitution' ? 'off' : null,
@@ -472,7 +475,7 @@ if (scorerPicker.type === 'substitution') {
         player_off_id: scorerPicker.playerOff?.id || null,
         player_on_id: data.id,
         event_type: 'substitution',
-        score_type: 'play',
+        score_type: scorerPicker.scoreType || null,
         match_minute: Math.floor(displaySeconds / 60),
         clock_seconds: displaySeconds
       })
@@ -510,7 +513,7 @@ const { error: eventError } = await supabase
   : scorerPicker.type === 'black_card'
     ? 'black_card'
     : 'point',
-    score_type: 'play',
+    score_type: scorerPicker.scoreType || null,
     match_minute: Math.floor(displaySeconds / 60),
     clock_seconds: displaySeconds
   })
@@ -1830,7 +1833,7 @@ justifyContent: 'center',
             player_off_id: scorerPicker.playerOff?.id || null,
             player_on_id: null,
             event_type: 'substitution',
-            score_type: 'play',
+            score_type: scorerPicker.scoreType || null,
             match_minute: Math.floor(displaySeconds / 60),
             clock_seconds: displaySeconds
           })
@@ -1870,7 +1873,7 @@ justifyContent: 'center',
   : scorerPicker.type === 'black_card'
     ? 'black_card'
     : 'point',
-        score_type: 'play',
+        score_type: scorerPicker.scoreType || null,
         match_minute: Math.floor(displaySeconds / 60),
         clock_seconds: displaySeconds
       })
@@ -1949,7 +1952,7 @@ justifyContent: 'center',
       player_off_id: scorerPicker.playerOff?.id || null,
       player_on_id: player.id,
       event_type: 'substitution',
-      score_type: 'play',
+      score_type: scorerPicker.scoreType || null,
       match_minute: Math.floor(displaySeconds / 60),
       clock_seconds: displaySeconds
     })
@@ -1985,7 +1988,7 @@ const { error } = await supabase
   : scorerPicker.type === 'black_card'
     ? 'black_card'
     : 'point',
-    score_type: 'play',
+    score_type: scorerPicker.scoreType || null,
     match_minute: Math.floor(displaySeconds / 60),
     clock_seconds: displaySeconds
   })

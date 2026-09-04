@@ -303,7 +303,7 @@ export default function NotificationButton() {
                 <ChoiceButton
                   selected={level === 'key_updates'}
                   title="Key updates"
-              detail="Goals, two-pointers, milestones and selected match updates"
+              detail="Goals, two-pointers, black and red cards, milestones and selected updates"
                   disabled={saving}
                   onClick={() => chooseLevel('key_updates')}
                 />

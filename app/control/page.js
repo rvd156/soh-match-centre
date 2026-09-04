@@ -1353,7 +1353,7 @@ console.log('RESET RESULT:', data, error)
   <div
     style={{
       position: 'fixed',
-      top: '106px',
+      ttop: '61px',
       left: 0,
       right: 0,
       width: '100%',

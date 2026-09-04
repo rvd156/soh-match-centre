@@ -5,7 +5,15 @@ import { createHash, timingSafeEqual } from 'node:crypto'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const allowedScoreEvents = new Set(['goal', 'point', 'two_pointer'])
+const allowedEvents = new Set([
+  'goal',
+  'point',
+  'two_pointer',
+  'substitution',
+  'yellow_card',
+  'black_card',
+  'red_card'
+])
 
 const allowedHosts = new Set([
   'fcm.googleapis.com',
@@ -67,7 +75,7 @@ export async function POST(request) {
     payload?.type !== 'DELETE' ||
     payload?.schema !== 'public' ||
     payload?.table !== 'match_events' ||
-    !allowedScoreEvents.has(removedEvent?.event_type)
+    !allowedEvents.has(removedEvent?.event_type)
   ) {
     return reply({ ignored: true })
   }
@@ -106,9 +114,12 @@ export async function POST(request) {
       auth: { persistSession: false, autoRefreshToken: false }
     })
 
-    // The controller updates the match immediately after deleting the event.
+    const isScoreEvent = ['goal', 'point', 'two_pointer']
+      .includes(removedEvent.event_type)
+
+    // The controller updates the match immediately after deleting a score.
     // Allow that update to finish before reading the corrected score.
-    await pause(1500)
+    if (isScoreEvent) await pause(1500)
 
     const match = await requireResult(
       db.from('matches')
@@ -140,18 +151,65 @@ export async function POST(request) {
     const scoringTeamName = (teams?.find(team =>
       String(team.id) === teamId)?.name || 'Team').slice(0, 100)
 
-    const titleLabels = {
-      goal: `GOAL DISALLOWED — ${scoringTeamName}`,
-      two_pointer: `TWO-POINTER DISALLOWED — ${scoringTeamName}`,
-      point: `SCORE CORRECTION — ${scoringTeamName}`
-    }
+    const minute = removedEvent.match_minute == null
+      ? null
+      : Number(removedEvent.match_minute)
+    const minuteText = Number.isFinite(minute) && minute >= 0
+      ? `${minute} min`
+      : null
 
-    const title = titleLabels[removedEvent.event_type]
-    const body = [
-      'Score corrected',
-      `${homeName} ${match.home_goals}-${String(match.home_points).padStart(2, '0')}`,
-      `${awayName} ${match.away_goals}-${String(match.away_points).padStart(2, '0')}`
-    ].join('\n')
+    let title
+    let body
+
+    if (isScoreEvent) {
+      const titleLabels = {
+        goal: `GOAL DISALLOWED — ${scoringTeamName}`,
+        two_pointer: `TWO-POINTER DISALLOWED — ${scoringTeamName}`,
+        point: `SCORE CORRECTION — ${scoringTeamName}`
+      }
+
+      title = titleLabels[removedEvent.event_type]
+      body = [
+        'Score corrected',
+        `${homeName} ${match.home_goals}-${String(match.home_points).padStart(2, '0')}`,
+        `${awayName} ${match.away_goals}-${String(match.away_points).padStart(2, '0')}`
+      ].join('\n')
+    } else {
+      const playerIds = [
+        removedEvent.player_id,
+        removedEvent.player_off_id,
+        removedEvent.player_on_id
+      ].filter(value => value != null)
+
+      const players = playerIds.length
+        ? await requireResult(
+            db.from('players').select('id, name').in('id', playerIds)
+          )
+        : []
+      const playerName = id => players?.find(player =>
+        String(player.id) === String(id))?.name?.slice(0, 100)
+
+      const cardDetails = {
+        yellow_card: { symbol: '🟨', label: 'YELLOW CARD' },
+        black_card: { symbol: '⬛', label: 'BLACK CARD' },
+        red_card: { symbol: '🟥', label: 'RED CARD' }
+      }
+
+      if (removedEvent.event_type === 'substitution') {
+        title = `🔄 SUBSTITUTION CORRECTION — ${scoringTeamName}`
+        body = [
+          `${playerName(removedEvent.player_off_id) || 'Player'} off → ${playerName(removedEvent.player_on_id) || 'Player'} on removed`,
+          minuteText
+        ].filter(Boolean).join(' · ')
+      } else {
+        const card = cardDetails[removedEvent.event_type]
+        title = `${card.symbol} ${card.label} CORRECTION — ${scoringTeamName}`
+        body = [
+          `${playerName(removedEvent.player_id) || 'Player'} — card removed`,
+          minuteText
+        ].filter(Boolean).join(' · ')
+      }
+    }
 
     const notification = JSON.stringify({
       title,
@@ -238,7 +296,15 @@ export async function POST(request) {
       ? 'notify_goals'
       : removedEvent.event_type === 'two_pointer'
         ? 'notify_two_pointers'
-        : 'notify_points'
+        : removedEvent.event_type === 'point'
+          ? 'notify_points'
+          : removedEvent.event_type === 'substitution'
+            ? 'notify_substitutions'
+            : removedEvent.event_type === 'yellow_card'
+              ? 'notify_yellow_cards'
+              : removedEvent.event_type === 'black_card'
+                ? 'notify_black_cards'
+                : 'notify_red_cards'
 
     let cursor = null
     while (true) {

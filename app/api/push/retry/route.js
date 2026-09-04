@@ -82,7 +82,7 @@ export async function GET(request) {
           const results = await Promise.allSettled(
             records.slice(index, index + 2).map(async record => {
               const response = await handler(new Request(
-                `https://soh-match-centre.vercel.app${path}`,
+                `https://matchcentre.ballinamoreseanoheslinsgaa.com${path}`,
                 {
                   method: 'POST',
                   headers: {

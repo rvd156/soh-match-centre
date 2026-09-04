@@ -1002,10 +1002,11 @@ setRunning(true)
 const { data, error } = await supabase
   .from('matches')
   .update({
-    status: 'extra_time',
-    extra_time_seconds: 0,
-    extra_time_started_at: new Date().toISOString()
-  })
+  status: 'extra_time',
+  extra_time_seconds: 0,
+  extra_time_started_at: new Date().toISOString(),
+  result_published: false
+})
   .eq('id', matchId)
   .select()
   .single()

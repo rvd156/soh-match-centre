@@ -168,7 +168,7 @@ export async function POST(request) {
           keys: { p256dh: subscription.p256dh, auth: subscription.auth }
         }, notification, {
           vapidDetails: {
-            subject: 'https://soh-match-centre.vercel.app',
+            subject: 'https://matchcentre.ballinamoreseanoheslinsgaa.com',
             publicKey,
             privateKey
           },

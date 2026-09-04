@@ -1328,7 +1328,7 @@ console.log('RESET RESULT:', data, error)
   <div
     style={{
       position: 'fixed',
-      top: 'env(safe-area-inset-top, 0px)',
+      top: '106px',
       left: 0,
       right: 0,
       width: '100%',
@@ -1370,12 +1370,7 @@ console.log('RESET RESULT:', data, error)
 )}
 
 {!displayMode && (
-  <div
-    style={{
-      height: 'calc(64px + env(safe-area-inset-top, 0px))'
-    }}
-    aria-hidden="true"
-  />
+  <div style={{ height: '64px' }} aria-hidden="true" />
 )}
       
     <section className="scoreboard-card">

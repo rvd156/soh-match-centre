@@ -1175,14 +1175,26 @@ async function sendScoreUpdate() {
 
   const minute = Math.floor(displaySeconds / 60)
 
-  const heading =
-    period === 'HALF TIME'
-      ? 'HALF TIME'
-      : period === 'FULL TIME'
-        ? 'FULL TIME'
-        : period === 'AET'
-          ? 'FULL TIME — AET'
-          : `SCORE UPDATE | ${minute}'`
+  const phaseLabels = {
+  'FIRST HALF': 'FIRST HALF',
+  'HALF TIME': 'HALF-TIME',
+  'SECOND HALF': 'SECOND HALF',
+  'FULL TIME': 'FULL-TIME',
+  'EXTRA TIME': 'EXTRA TIME — FIRST HALF',
+  'ET HALF TIME': 'EXTRA-TIME HALF-TIME',
+  'EXTRA TIME 2ND HALF': 'EXTRA TIME — SECOND HALF',
+  'AET': 'FULL-TIME — AFTER EXTRA TIME'
+}
+
+const phaseLabel = phaseLabels[period] || 'SCORE UPDATE'
+
+const heading =
+  period === 'HALF TIME' ||
+  period === 'FULL TIME' ||
+  period === 'ET HALF TIME' ||
+  period === 'AET'
+    ? phaseLabel
+    : `${phaseLabel} | ${minute}'`
 
   const scoreLabels = {
     goal: 'GOAL',

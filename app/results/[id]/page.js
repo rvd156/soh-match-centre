@@ -76,6 +76,36 @@ function eventDescription(event) {
   return detail.join(' · ')
 }
 
+function aggregateScorers(events) {
+  const scorers = new Map()
+
+  events.forEach(event => {
+    if (!['goal', 'point', 'two_pointer'].includes(event.event_type)) return
+
+    const player = related(event.players)
+    const team = related(event.teams)
+    const name = player?.name || team?.name || 'Team'
+    const key = event.player_id
+      ? `player-${event.player_id}`
+      : `team-${event.team_id}-${name}`
+
+    if (!scorers.has(key)) {
+      scorers.set(key, { key, name, goals: 0, points: 0 })
+    }
+
+    const scorer = scorers.get(key)
+    if (event.event_type === 'goal') scorer.goals += 1
+    if (event.event_type === 'point') scorer.points += 1
+    if (event.event_type === 'two_pointer') scorer.points += 2
+  })
+
+  return Array.from(scorers.values()).sort((a, b) => {
+    const aTotal = (a.goals * 3) + a.points
+    const bTotal = (b.goals * 3) + b.points
+    return bTotal - aTotal || a.name.localeCompare(b.name)
+  })
+}
+
 function milestoneDescription(item) {
   const labels = {
     first_half: 'Match underway',
@@ -137,6 +167,7 @@ export default function MatchReportPage() {
             created_at,
             notes,
             team_id,
+            player_id,
             players!match_events_player_id_fkey (name),
             player_off:players!match_events_player_off_id_fkey (name),
             player_on:players!match_events_player_on_id_fkey (name),
@@ -222,6 +253,12 @@ export default function MatchReportPage() {
     const timeDifference = Date.parse(a.created_at) - Date.parse(b.created_at)
     return timeDifference || Number(a.id) - Number(b.id)
   })
+  const homeScorers = aggregateScorers(
+    events.filter(event => String(event.team_id) === String(home?.id))
+  )
+  const awayScorers = aggregateScorers(
+    events.filter(event => String(event.team_id) === String(away?.id))
+  )
 
   return (
     <main style={styles.page}>
@@ -256,6 +293,37 @@ export default function MatchReportPage() {
             <div style={styles.total}>{awayTotal} pts</div>
           </div>
         </section>
+
+        {(homeScorers.length > 0 || awayScorers.length > 0) && (
+          <section style={styles.scorersSection}>
+            <h2 style={styles.timelineTitle}>SCORERS</h2>
+            <div style={styles.scorersGrid}>
+              <div style={styles.scorerColumn}>
+                <h3 style={styles.scorerTeam}>{home?.name || 'Home'}</h3>
+                {homeScorers.length === 0 ? (
+                  <div style={styles.noScorers}>No scorers</div>
+                ) : homeScorers.map(scorer => (
+                  <div key={scorer.key} style={styles.scorerTotalRow}>
+                    <span>{scorer.name}</span>
+                    <strong>{scorer.goals}-{String(scorer.points).padStart(2, '0')}</strong>
+                  </div>
+                ))}
+              </div>
+
+              <div style={styles.scorerColumn}>
+                <h3 style={styles.scorerTeam}>{away?.name || 'Away'}</h3>
+                {awayScorers.length === 0 ? (
+                  <div style={styles.noScorers}>No scorers</div>
+                ) : awayScorers.map(scorer => (
+                  <div key={scorer.key} style={styles.scorerTotalRow}>
+                    <span>{scorer.name}</span>
+                    <strong>{scorer.goals}-{String(scorer.points).padStart(2, '0')}</strong>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section style={styles.timelineSection}>
           <h2 style={styles.timelineTitle}>MATCH ACTION</h2>
@@ -323,6 +391,12 @@ const styles = {
   score: { fontSize: 'clamp(32px, 10vw, 52px)', lineHeight: 1, fontWeight: '900', marginTop: '10px' },
   total: { color: '#f4c430', fontSize: '14px', fontWeight: '850', marginTop: '7px' },
   versus: { color: '#f4c430', fontSize: '20px', fontWeight: '900', textAlign: 'center' },
+  scorersSection: { marginTop: '28px' },
+  scorersGrid: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', border: '1px solid #1c4932', borderRadius: '18px', background: '#0b281c', padding: '16px 12px' },
+  scorerColumn: { minWidth: 0 },
+  scorerTeam: { color: '#fff', fontSize: '14px', lineHeight: 1.3, textAlign: 'center', margin: '0 0 10px' },
+  scorerTotalRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', gap: '7px', borderBottom: '1px solid #1c4932', padding: '8px 2px', color: '#fff', fontSize: '13px', lineHeight: 1.25 },
+  noScorers: { color: '#aebdb3', fontSize: '12px', textAlign: 'center', padding: '8px 0' },
   timelineSection: { marginTop: '28px' },
   timelineTitle: { color: '#f4c430', fontSize: '15px', fontWeight: '900', letterSpacing: '1.5px', textAlign: 'center', margin: '0 0 14px' },
   timeline: { overflow: 'hidden', border: '1px solid #1c4932', borderRadius: '18px', background: '#0b281c' },

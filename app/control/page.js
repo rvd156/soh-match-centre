@@ -44,6 +44,7 @@ const [manualUpdateText, setManualUpdateText] = useState('')
 const [upcomingFixture, setUpcomingFixture] = useState(null)
 const [sendingScoreUpdate, setSendingScoreUpdate] = useState(false)
 const [showFloatingScore, setShowFloatingScore] = useState(false)
+const [floatingScoreTop, setFloatingScoreTop] = useState(0)
 const controllerScoreRef = useRef(null)
   
   const intervalRef = useRef(null)
@@ -61,6 +62,25 @@ const controllerScoreRef = useRef(null)
     window.removeEventListener('pageshow', handlePageShow)
   }
 }, [matchId])
+
+  useEffect(() => {
+  const measureControlHeader = () => {
+    const header = document.getElementById('control-panel-header')
+
+    if (header) {
+      setFloatingScoreTop(header.getBoundingClientRect().bottom)
+    }
+  }
+
+  measureControlHeader()
+  window.addEventListener('resize', measureControlHeader)
+  window.addEventListener('pageshow', measureControlHeader)
+
+  return () => {
+    window.removeEventListener('resize', measureControlHeader)
+    window.removeEventListener('pageshow', measureControlHeader)
+  }
+}, [])
 
   useEffect(() => {
   if (!matchId) return
@@ -1353,8 +1373,8 @@ console.log('RESET RESULT:', data, error)
   <div
     style={{
       position: 'fixed',
-      ttop: '61px',
-      left: 0,
+      top: `${floatingScoreTop}px`,
+      zIndex: 1400,
       right: 0,
       width: '100%',
       boxSizing: 'border-box',

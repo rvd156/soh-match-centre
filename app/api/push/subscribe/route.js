@@ -60,13 +60,17 @@ function preferenceFields(preferences) {
   }
 
   const names = [
-    'goals',
-    'twoPointers',
-    'points',
-    'matchMilestones',
-    'manualUpdates',
-    'matchUpdates'
-  ]
+  'goals',
+  'twoPointers',
+  'points',
+  'matchMilestones',
+  'manualUpdates',
+  'matchUpdates',
+  'substitutions',
+  'yellowCards',
+  'blackCards',
+  'redCards'
+]
   if (names.some(name => typeof preferences[name] !== 'boolean')) {
     throw new Error('Invalid custom preferences.')
   }
@@ -78,7 +82,11 @@ function preferenceFields(preferences) {
     notify_points: preferences.points,
     notify_match_milestones: preferences.matchMilestones,
     notify_manual_updates: preferences.manualUpdates,
-    notify_match_updates: preferences.matchUpdates
+    notify_match_updates: preferences.matchUpdates,
+    notify_substitutions: preferences.substitutions,
+    notify_yellow_cards: preferences.yellowCards,
+    notify_black_cards: preferences.blackCards,
+    notify_red_cards: preferences.redCards
   }
 }
 

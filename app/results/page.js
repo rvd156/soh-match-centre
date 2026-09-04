@@ -114,7 +114,11 @@ export default function ResultsPage() {
           const awayTotal = (Number(result.away_goals) * 3) + Number(result.away_points)
 
           return (
-            <article key={result.id} style={styles.card}>
+            <a
+  key={result.id}
+  href={`/results/${result.id}`}
+  style={styles.card}
+>
               <div style={styles.cardTop}>
                 <span style={styles.finalBadge}>
                   {result.status === 'after_extra_time' ? 'FINAL · AET' : 'FINAL'}
@@ -157,7 +161,7 @@ export default function ResultsPage() {
                   {[result.venue, formatDate(result.match_date)].filter(Boolean).join(' · ')}
                 </div>
               )}
-            </article>
+            </a>
           )
         })}
       </section>
@@ -232,6 +236,9 @@ const styles = {
     background: '#0b281c',
     padding: '18px 16px',
     boxShadow: '0 10px 30px rgba(0,0,0,0.16)'
+    display: 'block',
+    color: 'inherit',
+    textDecoration: 'none',
   },
   cardTop: {
     display: 'flex',

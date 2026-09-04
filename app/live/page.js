@@ -154,8 +154,6 @@ setLoading(false)
     supabase.removeChannel(channel)
   }
 }, [])
-  useEffect(() => {
-  if (match?.id) return
 
 useEffect(() => {
   let refreshRunning = false

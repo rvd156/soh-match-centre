@@ -25,7 +25,7 @@ function convertPublicKey(value) {
 function loadPreferences() {
   try {
     const saved = JSON.parse(localStorage.getItem(storageKey))
-    if (!['key_updates', 'every_score', 'custom'].includes(saved?.level)) {
+   if (!['key_updates', 'every_score', 'all_updates', 'custom'].includes(saved?.level)) {
       return { level: 'key_updates', custom: defaultCustom }
     }
     return {
@@ -260,11 +260,12 @@ export default function NotificationButton() {
       ? 'Match notifications are unavailable in this browser.'
       : ''
 
-  const levelNames = {
-    key_updates: 'Key updates',
-    every_score: 'Every score',
-    custom: 'Custom'
-  }
+  const levelLabels = {
+  key_updates: 'Key updates',
+  every_score: 'Every score',
+  all_updates: 'All updates',
+  custom: 'Custom'
+}
 
   return (
     <div style={{ textAlign: 'center', margin: '0 auto 20px', maxWidth: '430px' }}>
@@ -313,6 +314,13 @@ export default function NotificationButton() {
                   detail="Everything in Key updates, plus every regular point"
                   disabled={saving}
                   onClick={() => chooseLevel('every_score')}
+                <ChoiceButton
+  selected={level === 'all_updates'}
+  title="All updates"
+  detail="Every score, card, substitution and match update"
+  disabled={saving}
+  onClick={() => chooseLevel('all_updates')}
+/>
                 />
                 <ChoiceButton
                   selected={level === 'custom'}

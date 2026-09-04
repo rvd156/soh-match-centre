@@ -308,20 +308,21 @@ export default function NotificationButton() {
                   disabled={saving}
                   onClick={() => chooseLevel('key_updates')}
                 />
-                <ChoiceButton
-                  selected={level === 'every_score'}
-                  title="Every score"
-                  detail="Everything in Key updates, plus every regular point"
-                  disabled={saving}
-                  onClick={() => chooseLevel('every_score')}
-                <ChoiceButton
+               <ChoiceButton
+  selected={level === 'every_score'}
+  title="Every score"
+  detail="Everything in Key updates, plus every regular point"
+  disabled={saving}
+  onClick={() => chooseLevel('every_score')}
+/>
+
+<ChoiceButton
   selected={level === 'all_updates'}
   title="All updates"
   detail="Every score, card, substitution and match update"
   disabled={saving}
   onClick={() => chooseLevel('all_updates')}
 />
-                />
                 <ChoiceButton
                   selected={level === 'custom'}
                   title="Custom"

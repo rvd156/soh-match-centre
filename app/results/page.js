@@ -178,13 +178,15 @@ const styles = {
     margin: '0 auto 26px'
   },
   backLink: {
-    display: 'inline-block',
-    color: '#f4c430',
-    fontSize: '14px',
-    fontWeight: '800',
-    textDecoration: 'none',
-    marginBottom: '22px'
-  },
+  display: 'inline-block',
+  color: '#f4c430',
+  fontSize: '18px',
+  fontWeight: '900',
+  lineHeight: 1.2,
+  textDecoration: 'none',
+  padding: '12px 4px',
+  marginBottom: '22px'
+},
   brand: {
     display: 'flex',
     alignItems: 'center',

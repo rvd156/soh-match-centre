@@ -911,6 +911,20 @@ const sohWon =
         {latestEvent.teams?.name && (
           <> · {latestEvent.teams.name}</>
         )}
+     {latestEvent.score_type && (
+  <span style={{ color: '#aebdb4' }}>
+    {' · '}
+    {{
+      play: 'From play',
+      free: 'Free',
+      '45': '45',
+      '50': '50',
+      penalty: 'Penalty',
+      mark: 'Mark',
+      sideline: 'Sideline'
+    }[latestEvent.score_type] || latestEvent.score_type}
+  </span>
+)}
       </>
     ) : latestEvent.event_type === 'manual_update' ? (
       <>

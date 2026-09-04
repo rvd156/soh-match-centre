@@ -979,6 +979,9 @@ async function secondHalf() {
 }
 
 async function fullTime() {
+  const publishResult = window.confirm(
+  'Publish this result to Previous Results?\n\nSelect Cancel for a test match or if extra time will follow.'
+)
   setRunning(false)
   setPeriod('FULL TIME')
 
@@ -989,7 +992,7 @@ async function fullTime() {
   status: 'full_time',
   clock_seconds: seconds,
   clock_started_at: null,
-  result_published: true
+  result_published: publishResult
 })
       .eq('id', matchId)
 
@@ -1067,6 +1070,9 @@ async function secondHalfExtraTime() {
 }
 
 async function extraTimeFullTime() {
+  const publishResult = window.confirm(
+  'Publish this final extra-time result to Previous Results?\n\nSelect Cancel if this is a test match.'
+)
   setRunning(false)
   setPeriod('AET')
 
@@ -1077,7 +1083,7 @@ async function extraTimeFullTime() {
   status: 'after_extra_time',
   extra_time_seconds: extraTimeSeconds,
   extra_time_started_at: null,
-  result_published: true
+  result_published: publishResult
 })
       .eq('id', matchId)
 

@@ -5,7 +5,16 @@ import { createHash, timingSafeEqual } from 'node:crypto'
 export const runtime = 'nodejs'
 export const maxDuration = 60
 
-const allowedScoreEvents = new Set(['goal', 'point', 'two_pointer', 'manual_update'])
+const allowedScoreEvents = new Set([
+  'goal',
+  'point',
+  'two_pointer',
+  'manual_update',
+  'substitution',
+  'yellow_card',
+  'black_card',
+  'red_card'
+])
 
 const allowedHosts = new Set([
   'fcm.googleapis.com',
@@ -97,6 +106,8 @@ export async function POST(request) {
         .select(`
           id, match_id, team_id, event_type, match_minute, notes, created_at,
           players!match_events_player_id_fkey (name),
+          player_off:players!match_events_player_off_id_fkey (name),
+          player_on:players!match_events_player_on_id_fkey (name),
           teams (name)
         `)
         .eq('id', eventId)
@@ -141,13 +152,20 @@ export async function POST(request) {
       String(team.id) === String(match.away_team_id))?.name || 'Away').slice(0, 100)
     const scoringTeam = Array.isArray(goal.teams) ? goal.teams[0] : goal.teams
     const player = Array.isArray(goal.players) ? goal.players[0] : goal.players
+    const playerOff = Array.isArray(goal.player_off) ? goal.player_off[0] : goal.player_off
+    const playerOn = Array.isArray(goal.player_on) ? goal.player_on[0] : goal.player_on
     const teamName = (scoringTeam?.name || 'Team').slice(0, 100)
     const scorerName = player?.name?.slice(0, 100)
     const minute = goal.match_minute == null ? null : Number(goal.match_minute)
-    const eventLabels = {
+    const scoreLabels = {
       goal: 'GOAL',
       point: 'POINT',
       two_pointer: 'TWO-POINTER'
+    }
+    const cardDetails = {
+      yellow_card: { symbol: '🟨', label: 'YELLOW CARD' },
+      black_card: { symbol: '⬛', label: 'BLACK CARD' },
+      red_card: { symbol: '🟥', label: 'RED CARD' }
     }
 
     let title
@@ -163,12 +181,26 @@ export async function POST(request) {
         ? `MATCH UPDATE · ${minute} min`
         : 'MATCH UPDATE'
       body = updateText
-    } else {
-      const scorerLine = [
-        scorerName || `${eventLabels[goal.event_type]} for ${teamName}`,
+    } else if (goal.event_type === 'substitution') {
+      title = `🔄 SUBSTITUTION — ${teamName}`
+      body = [
+        `${playerOn?.name?.slice(0, 100) || 'Player'} on`,
+        `${playerOff?.name?.slice(0, 100) || 'Player'} off`,
         Number.isFinite(minute) && minute >= 0 ? `${minute} min` : null
       ].filter(Boolean).join(' · ')
-      title = `${eventLabels[goal.event_type]} — ${teamName}`
+    } else if (cardDetails[goal.event_type]) {
+      const card = cardDetails[goal.event_type]
+      title = `${card.symbol} ${card.label} — ${teamName}`
+      body = [
+        scorerName || teamName,
+        Number.isFinite(minute) && minute >= 0 ? `${minute} min` : null
+      ].filter(Boolean).join(' · ')
+    } else {
+      const scorerLine = [
+        scorerName || `${scoreLabels[goal.event_type]} for ${teamName}`,
+        Number.isFinite(minute) && minute >= 0 ? `${minute} min` : null
+      ].filter(Boolean).join(' · ')
+      title = `${scoreLabels[goal.event_type]} — ${teamName}`
       body = [
         scorerLine,
         `${homeName} ${match.home_goals}-${String(match.home_points).padStart(2, '0')}`,
@@ -268,7 +300,15 @@ export async function POST(request) {
               ? 'notify_two_pointers'
               : goal.event_type === 'point'
                 ? 'notify_points'
-                : 'notify_match_updates',
+                : goal.event_type === 'substitution'
+                  ? 'notify_substitutions'
+                  : goal.event_type === 'yellow_card'
+                    ? 'notify_yellow_cards'
+                    : goal.event_type === 'black_card'
+                      ? 'notify_black_cards'
+                      : goal.event_type === 'red_card'
+                        ? 'notify_red_cards'
+                        : 'notify_match_updates',
           true
         )
         .lte('created_at', goal.created_at)

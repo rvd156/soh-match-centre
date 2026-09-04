@@ -104,7 +104,7 @@ export async function POST(request) {
     const goal = await requireResult(
       db.from('match_events')
         .select(`
-          id, match_id, team_id, event_type, match_minute, notes, created_at,
+          id, match_id, team_id, event_type, score_type, match_minute, notes, created_at,
           players!match_events_player_id_fkey (name),
           player_off:players!match_events_player_off_id_fkey (name),
           player_on:players!match_events_player_on_id_fkey (name),
@@ -162,6 +162,16 @@ export async function POST(request) {
       point: 'POINT',
       two_pointer: 'TWO-POINTER'
     }
+    const scoreSourceLabels = {
+  play: 'From play',
+  free: 'Free',
+  '45': '45',
+  '50': '50',
+  penalty: 'Penalty',
+  mark: 'Mark',
+  sideline: 'Sideline'
+}
+const scoreSource = scoreSourceLabels[goal.score_type] || null
     const cardDetails = {
       yellow_card: { symbol: '🟨', label: 'YELLOW CARD' },
       black_card: { symbol: '⬛', label: 'BLACK CARD' },
@@ -197,9 +207,10 @@ export async function POST(request) {
       ].filter(Boolean).join(' · ')
     } else {
       const scorerLine = [
-        scorerName || `${scoreLabels[goal.event_type]} for ${teamName}`,
-        Number.isFinite(minute) && minute >= 0 ? `${minute} min` : null
-      ].filter(Boolean).join(' · ')
+  scorerName || `${scoreLabels[goal.event_type]} for ${teamName}`,
+  scoreSource,
+  Number.isFinite(minute) && minute >= 0 ? `${minute} min` : null
+].filter(Boolean).join(' · ')
       title = `${scoreLabels[goal.event_type]} — ${teamName}`
       body = [
         scorerLine,

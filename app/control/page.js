@@ -43,6 +43,8 @@ const [manualUpdateOpen, setManualUpdateOpen] = useState(false)
 const [manualUpdateText, setManualUpdateText] = useState('')
 const [upcomingFixture, setUpcomingFixture] = useState(null)
 const [sendingScoreUpdate, setSendingScoreUpdate] = useState(false)
+const [showFloatingScore, setShowFloatingScore] = useState(false)
+const controllerScoreRef = useRef(null)
   
   const intervalRef = useRef(null)
 
@@ -345,6 +347,29 @@ useEffect(() => {
   return () => clearInterval(intervalRef.current)
 }, [running, period])
 
+useEffect(() => {
+  const scoreArea = controllerScoreRef.current
+
+  if (!setupComplete || !scoreArea) {
+    setShowFloatingScore(false)
+    return
+  }
+
+  const observer = new IntersectionObserver(
+    ([entry]) => {
+      setShowFloatingScore(!entry.isIntersecting)
+    },
+    {
+      threshold: 0.01,
+      rootMargin: '-106px 0px 0px 0px'
+    }
+  )
+
+  observer.observe(scoreArea)
+
+  return () => observer.disconnect()
+}, [setupComplete, matchId])
+  
 const isExtraTimePeriod = [
   'EXTRA TIME',
   'ET HALF TIME',
@@ -1324,7 +1349,7 @@ console.log('RESET RESULT:', data, error)
 )
   return <main className={displayMode ? 'display-page' : ''}>
 
-  {!displayMode && (
+  {!displayMode && showFloatingScore && (
   <div
     style={{
       position: 'fixed',
@@ -1368,10 +1393,6 @@ console.log('RESET RESULT:', data, error)
     </div>
   </div>
 )}
-
-{!displayMode && (
-  <div style={{ height: '64px' }} aria-hidden="true" />
-)}
       
     <section className="scoreboard-card">
       <div className="topbar">
@@ -1395,7 +1416,7 @@ console.log('RESET RESULT:', data, error)
   {setup.referee && <span>Referee: {setup.referee}</span>}
 </div>
 )}
-      <div className="teams">
+      <div className="teams" ref={controllerScoreRef}>
         <TeamPanel name={homeName} team={home} total={total(home)} crest={homeCrest} />
         <div className="divider">V</div>
         <TeamPanel name={awayName} team={away} total={total(away)} crest={awayCrest} />

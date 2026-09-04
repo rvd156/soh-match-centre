@@ -1184,15 +1184,58 @@ async function sendScoreUpdate() {
           ? 'FULL TIME — AET'
           : `SCORE UPDATE | ${minute}'`
 
-  const postText = [
+  const scoreLabels = {
+    goal: 'GOAL',
+    point: 'POINT',
+    two_pointer: 'TWO-POINTER'
+  }
+
+  const latestScore = matchEvents.find(event =>
+    event.event_type === 'goal' ||
+    event.event_type === 'point' ||
+    event.event_type === 'two_pointer'
+  )
+
+  let latestScoreLine = null
+
+  if (latestScore) {
+    const scorer =
+      latestScore.players?.name ||
+      latestScore.teams?.name ||
+      'Team'
+
+    const scoringTeam =
+      latestScore.players?.name && latestScore.teams?.name
+        ? latestScore.teams.name
+        : null
+
+    latestScoreLine = [
+      `${scoreLabels[latestScore.event_type]}: ${scorer}`,
+      scoringTeam,
+      latestScore.match_minute != null
+        ? `${latestScore.match_minute}'`
+               : null
+    ].filter(Boolean).join(' · ')
+  }
+
+  const postLines = [
     heading,
-    '',
+    ''
+  ]
+
+  if (latestScoreLine) {
+    postLines.push(latestScoreLine, '')
+  }
+
+  postLines.push(
     `${homeName} ${home.goals}-${String(home.points).padStart(2, '0')}`,
     `${awayName} ${away.goals}-${String(away.points).padStart(2, '0')}`,
     '',
     'Follow live:',
     'https://matchcentre.ballinamoreseanoheslinsgaa.com/live'
-  ].join('\n')
+  )
+
+  const postText = postLines.join('\n')
 
   const xIntent =
     `https://twitter.com/intent/tweet?text=${encodeURIComponent(postText)}`

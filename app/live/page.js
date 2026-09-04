@@ -53,8 +53,9 @@ async function loadMatchEvents(matchId) {
   'goal',
   'point',
   'two_pointer',
-  'yellow_card',
-  'red_card',
+'black_card',
+'yellow_card',
+'red_card',
   'substitution',
   'manual_update'
 ])
@@ -940,8 +941,9 @@ const sohWon =
   ? matchEvents.filter(event =>
       event.event_type === 'goal' ||
       event.event_type === 'point' ||
-      event.event_type === 'two_pointer' ||
-      event.event_type === 'yellow_card' ||
+     event.event_type === 'two_pointer' ||
+    event.event_type === 'black_card' ||
+    event.event_type === 'yellow_card' ||
       event.event_type === 'red_card' ||
       event.event_type === 'substitution' ||
       event.event_type === 'manual_update'
@@ -951,6 +953,7 @@ const sohWon =
         event.event_type === 'goal' ||
         event.event_type === 'point' ||
         event.event_type === 'two_pointer' ||
+        event.event_type === 'black_card' ||
         event.event_type === 'yellow_card' ||
         event.event_type === 'red_card' ||
         event.event_type === 'substitution' ||
@@ -1032,6 +1035,7 @@ const sohWon =
   event.event_type === 'goal' ||
   event.event_type === 'point' ||
   event.event_type === 'two_pointer' ||
+  event.event_type === 'black_card' ||
   event.event_type === 'yellow_card' ||
   event.event_type === 'red_card' ||
   event.event_type === 'substitution' ||

@@ -1327,8 +1327,12 @@ console.log('RESET RESULT:', data, error)
   {!displayMode && (
   <div
     style={{
-      position: 'sticky',
-      top: 0,
+      position: 'fixed',
+      top: 'env(safe-area-inset-top, 0px)',
+      left: 0,
+      right: 0,
+      width: '100%',
+      boxSizing: 'border-box',
       zIndex: 900,
       display: 'grid',
       gridTemplateColumns: '1fr auto 1fr',
@@ -1363,6 +1367,15 @@ console.log('RESET RESULT:', data, error)
       {awayName}
     </div>
   </div>
+)}
+
+{!displayMode && (
+  <div
+    style={{
+      height: 'calc(64px + env(safe-area-inset-top, 0px))'
+    }}
+    aria-hidden="true"
+  />
 )}
       
     <section className="scoreboard-card">

@@ -985,7 +985,8 @@ async function fullTime() {
 .update({
   status: 'full_time',
   clock_seconds: seconds,
-  clock_started_at: null
+  clock_started_at: null,
+  result_published: true
 })
       .eq('id', matchId)
 
@@ -1068,10 +1069,11 @@ async function extraTimeFullTime() {
   if (matchId) {
     const { error } = await supabase
       .from('matches')
-      .update({
+     .update({
   status: 'after_extra_time',
   extra_time_seconds: extraTimeSeconds,
-  extra_time_started_at: null
+  extra_time_started_at: null,
+  result_published: true
 })
       .eq('id', matchId)
 

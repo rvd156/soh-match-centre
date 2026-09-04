@@ -730,13 +730,19 @@ const sohWon =
       <NotificationButton />
 
         <div style={styles.liveBar}>
-         <span className="live-pulse" style={styles.liveDot}></span>
-          {match.status === 'full_time'
-  ? 'FULL TIME'
-  : match.status === 'after_extra_time'
-    ? 'FULL TIME - AET'
-    : 'LIVE'}
-        </div>
+  {matchFinished ? (
+    <>
+      🏁 {match.status === 'after_extra_time'
+        ? 'FINAL RESULT — AET'
+        : 'FINAL RESULT'}
+    </>
+  ) : (
+    <>
+      <span className="live-pulse" style={styles.liveDot}></span>
+      LIVE
+    </>
+  )}
+</div>
 
         <div style={styles.matchInfo}>
           {match.competition && (
@@ -744,12 +750,14 @@ const sohWon =
           )}
 
           <div style={styles.status}>
-            {formatStatus(match.status)}
-          </div>
+  {matchFinished ? 'MATCH ENDED' : formatStatus(match.status)}
+</div>
 
-          <div style={styles.clock}>
-            {formatClock(liveSeconds)}
-          </div>
+{!matchFinished && (
+  <div style={styles.clock}>
+    {formatClock(liveSeconds)}
+  </div>
+)}
         </div>
 
 <div

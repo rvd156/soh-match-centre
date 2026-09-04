@@ -61,7 +61,15 @@ function eventDescription(event) {
   const detail = [player || team || 'Team', labels[event.event_type] || 'Match event']
 
   if (['goal', 'point', 'two_pointer'].includes(event.event_type) && event.score_type) {
-    const scoreTypes = { play: 'from play', free: 'free', '45': "45", '50': "50" }
+    const scoreTypes = {
+  play: 'from play',
+  free: 'free',
+  '45': '45',
+  '50': '50',
+  penalty: 'penalty',
+  mark: 'mark',
+  sideline: 'sideline'
+}
     if (scoreTypes[event.score_type]) detail.push(scoreTypes[event.score_type])
   }
 

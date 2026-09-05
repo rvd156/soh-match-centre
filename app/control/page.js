@@ -846,6 +846,29 @@ async function resetExistingMatch() {
   setExistingMatch(null)
 }
 
+async function saveMatchSummary() {
+  if (!matchId || savingMatchSummary) return
+
+  setSavingMatchSummary(true)
+
+  const { error } = await supabase
+    .from('matches')
+    .update({
+      match_summary: matchSummary.trim() || null
+    })
+    .eq('id', matchId)
+
+  setSavingMatchSummary(false)
+
+  if (error) {
+    console.error('Error saving match summary:', error)
+    alert(`Could not save match summary: ${error.message}`)
+    return
+  }
+
+  alert('Match summary saved.')
+}
+  
 function selectMatchUpdatePreset(text) {
   if (!matchId || period === 'PRE-MATCH') {
     alert('This preset is available after the match begins. You can still type and post a pre-match update below.')

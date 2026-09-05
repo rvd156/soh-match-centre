@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import ServiceWorkerRegistration from './ServiceWorkerRegistration'
 
@@ -12,6 +13,7 @@ export default function RootLayout({ children }) {
       <body>
         <ServiceWorkerRegistration />
         {children}
+    <Analytics />
       </body>
     </html>
   )

@@ -1591,6 +1591,42 @@ console.log('RESET RESULT:', data, error)
   </button>
 
 </div>
+{(period === 'FULL TIME' || period === 'AET') && (
+  <div className="control-card" style={{ marginTop: '16px' }}>
+    <h3>Match Summary</h3>
+
+    <p style={{ color: '#b9c7be', lineHeight: 1.5 }}>
+      Review and edit this before it appears in the public match report.
+    </p>
+
+    <textarea
+      value={matchSummary}
+      onChange={(event) => setMatchSummary(event.target.value)}
+      placeholder="Enter the match summary..."
+      rows={7}
+      style={{
+        width: '100%',
+        boxSizing: 'border-box',
+        padding: '14px',
+        borderRadius: '12px',
+        fontSize: '16px',
+        lineHeight: 1.5,
+        marginBottom: '12px'
+      }}
+    />
+
+    <button
+      type="button"
+      className="primary"
+      onClick={saveMatchSummary}
+      disabled={savingMatchSummary}
+    >
+      {savingMatchSummary ? 'Saving…' : 'Save Match Summary'}
+    </button>
+  </div>
+)}
+
+{matchEvents.length > 0 && (
 {matchEvents.length > 0 && (
   <div className="control-card">
     <h3>Recent Events</h3>

@@ -156,8 +156,11 @@ export async function POST(request) {
     },
     body: JSON.stringify({
       model: 'gpt-5.4-mini',
-      store: false,
-      max_output_tokens: 500,
+store: false,
+reasoning: {
+  effort: 'none'
+},
+max_output_tokens: 800,
       instructions: [
   'Write one natural paragraph of no more than three short sentences for a Gaelic football match report.',
   'Use only the supplied final result, half-time result, competition and extra-time status.',

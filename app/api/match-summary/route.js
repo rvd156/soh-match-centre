@@ -112,11 +112,25 @@ export async function POST(request) {
       home: `${home} ${gaaScore(match.home_goals, match.home_points)}`,
       away: `${away} ${gaaScore(match.away_goals, match.away_points)}`
     },
-    milestones: (milestonesResult.data || []).map(item => ({
-      status: item.status,
-      home: gaaScore(item.home_goals, item.home_points),
-      away: gaaScore(item.away_goals, item.away_points)
-    })),
+    milestones: (milestonesResult.data || []).map(item => {
+  const homeTotal = (Number(item.home_goals) || 0) * 3 +
+    (Number(item.home_points) || 0)
+
+  const awayTotal = (Number(item.away_goals) || 0) * 3 +
+    (Number(item.away_points) || 0)
+
+  return {
+    status: item.status,
+    home: `${home} ${gaaScore(item.home_goals, item.home_points)}`,
+    away: `${away} ${gaaScore(item.away_goals, item.away_points)}`,
+    result:
+      homeTotal === awayTotal
+        ? 'Scores level'
+        : homeTotal > awayTotal
+          ? `${home} leading by ${homeTotal - awayTotal}`
+          : `${away} leading by ${awayTotal - homeTotal}`
+  }
+}),
     events: (eventsResult.data || []).map(item => ({
       minute: item.match_minute,
       type: item.event_type,
@@ -146,6 +160,8 @@ export async function POST(request) {
         'State the final score using traditional GAA notation and totals, for example: Team A 1-16 (19 pts) to Team B 0-17 (17 pts).',
         'Mention extra time only when the facts say it occurred.',
         'Mention scorers, milestones or incidents only when they appear in the supplied data.',
+        'Use the supplied milestone result when describing whether the teams were level or one team was leading.',
+        'Never describe two different totals as level and never contradict the supplied leader or margin.',
         'If the event record is sparse, keep the summary factual and brief.'
       ].join(' '),
       input: JSON.stringify(facts)

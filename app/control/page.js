@@ -569,7 +569,8 @@ if (eventError) {
   return
 }
 
-    if (
+   if (
+  scorerPicker.type !== 'black_card' &&
   scorerPicker.type !== 'yellow_card' &&
   scorerPicker.type !== 'red_card'
 ) {
@@ -2012,9 +2013,10 @@ justifyContent: 'center',
     loadMatchEvents(matchId)
 
     if (
-      scorerPicker.type !== 'yellow_card' &&
-      scorerPicker.type !== 'red_card'
-    ) {
+  scorerPicker.type !== 'black_card' &&
+  scorerPicker.type !== 'yellow_card' &&
+  scorerPicker.type !== 'red_card'
+) {
       changeScore(
         scorerPicker.side,
         scorerPicker.type === 'two_pointer' ? 'points' : scorerPicker.type,
@@ -2129,6 +2131,7 @@ console.log('SCORE EVENT SAVED')
 loadMatchEvents(matchId)
 
 if (
+  scorerPicker.type === 'black_card' ||
   scorerPicker.type === 'yellow_card' ||
   scorerPicker.type === 'red_card'
 ) {

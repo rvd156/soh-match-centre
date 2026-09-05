@@ -160,13 +160,16 @@ reasoning: {
 max_output_tokens: 800,
       instructions: [
   'Write one natural paragraph of no more than three short sentences for a Gaelic football match report.',
-  'Use only the supplied final result, half-time result, competition and extra-time status.',
+  'Use the supplied final result, half-time result, competition, extra-time status and Ballinamore SOH scoring events.',
   'Begin with the winner and final score using traditional GAA notation and totals.',
   'Example format: Team A defeated Team B 1-16 (19 pts) to 0-17 (17 pts).',
   'If a half-time result is supplied, state which team led, the score and the margin.',
   'Mention that the match finished after extra time only when supplied.',
   'Do not mention milestones, phases, event logs, early scores, lead changes or the start of a half.',
-  'Do not mention or list scorers, cards, substitutions or individual match events.',
+  'End with one brief sentence mentioning no more than three Ballinamore SOH scorers.',
+  'Prioritise the Ballinamore goal scorer and highest-scoring Ballinamore players when they can be established from the supplied events.',
+  'Do not mention opposition scorers, cards, substitutions or other individual match events.',
+  'Do not invent player totals, and omit the scorer sentence if the recorded information is unclear.',
   'Do not invent momentum, performances, atmosphere, tactics or descriptions of how a team played.',
   'Use ordinary sporting language and keep the summary factual.'
 ].join(' '),

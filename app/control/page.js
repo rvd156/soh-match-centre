@@ -41,6 +41,8 @@ const [matchEvents, setMatchEvents] = useState([])
 const [showAllEvents, setShowAllEvents] = useState(false)
 const [manualUpdateOpen, setManualUpdateOpen] = useState(false)
 const [manualUpdateText, setManualUpdateText] = useState('')
+const [matchSummary, setMatchSummary] = useState('')
+const [savingMatchSummary, setSavingMatchSummary] = useState(false)  
 const [upcomingFixture, setUpcomingFixture] = useState(null)
 const [sendingScoreUpdate, setSendingScoreUpdate] = useState(false)
 const [showFloatingScore, setShowFloatingScore] = useState(false)
@@ -778,6 +780,7 @@ if (isExtraTime) {
   }
 
   setMatchId(matchToResume.id)
+  setMatchSummary(matchToResume.match_summary || '') 
 
   setHome({
     goals: matchToResume.home_goals || 0,

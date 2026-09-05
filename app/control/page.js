@@ -1627,7 +1627,6 @@ console.log('RESET RESULT:', data, error)
 )}
 
 {matchEvents.length > 0 && (
-{matchEvents.length > 0 && (
   <div className="control-card">
     <h3>Recent Events</h3>
 

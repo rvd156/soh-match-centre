@@ -141,6 +141,7 @@ export default function MatchReportPage() {
           .select(`
             id,
             competition,
+            match_summary,
             venue,
             referee,
             match_date,
@@ -294,6 +295,15 @@ export default function MatchReportPage() {
           </div>
         </section>
 
+{match.match_summary && (
+  <section style={styles.summarySection}>
+    <h2 style={styles.timelineTitle}>MATCH SUMMARY</h2>
+    <div style={styles.summaryBox}>
+      {match.match_summary}
+    </div>
+  </section>
+)}
+
         {(homeScorers.length > 0 || awayScorers.length > 0) && (
           <section style={styles.scorersSection}>
             <h2 style={styles.timelineTitle}>SCORERS</h2>
@@ -391,6 +401,20 @@ const styles = {
   score: { fontSize: 'clamp(32px, 10vw, 52px)', lineHeight: 1, fontWeight: '900', marginTop: '10px' },
   total: { color: '#f4c430', fontSize: '14px', fontWeight: '850', marginTop: '7px' },
   versus: { color: '#f4c430', fontSize: '20px', fontWeight: '900', textAlign: 'center' },
+  summarySection: {
+  marginTop: '28px'
+},
+summaryBox: {
+  border: '1px solid #1c4932',
+  borderRadius: '18px',
+  background: '#0b281c',
+  color: '#e7eee9',
+  padding: '18px 16px',
+  fontSize: '15px',
+  fontWeight: '600',
+  lineHeight: 1.65,
+  whiteSpace: 'pre-wrap'
+},
   scorersSection: { marginTop: '28px' },
   scorersGrid: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)', gap: '12px', border: '1px solid #1c4932', borderRadius: '18px', background: '#0b281c', padding: '16px 12px' },
   scorerColumn: { minWidth: 0 },

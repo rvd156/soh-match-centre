@@ -42,7 +42,8 @@ const [showAllEvents, setShowAllEvents] = useState(false)
 const [manualUpdateOpen, setManualUpdateOpen] = useState(false)
 const [manualUpdateText, setManualUpdateText] = useState('')
 const [matchSummary, setMatchSummary] = useState('')
-const [savingMatchSummary, setSavingMatchSummary] = useState(false)  
+const [savingMatchSummary, setSavingMatchSummary] = useState(false)
+const [generatingMatchSummary, setGeneratingMatchSummary] = useState(false)
 const [upcomingFixture, setUpcomingFixture] = useState(null)
 const [sendingScoreUpdate, setSendingScoreUpdate] = useState(false)
 const [showFloatingScore, setShowFloatingScore] = useState(false)
@@ -846,6 +847,45 @@ async function resetExistingMatch() {
   setExistingMatch(null)
 }
 
+async function generateMatchSummary() {
+  if (!matchId || generatingMatchSummary) return
+
+  setGeneratingMatchSummary(true)
+
+  try {
+    const { data: sessionData } = await supabase.auth.getSession()
+    const accessToken = sessionData?.session?.access_token
+
+    if (!accessToken) {
+      alert('Your admin session has expired. Please sign in again.')
+      return
+    }
+
+    const response = await fetch('/api/match-summary', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${accessToken}`
+      },
+      body: JSON.stringify({ matchId })
+    })
+
+    const result = await response.json()
+
+    if (!response.ok || !result.summary) {
+      alert(result.error || 'Could not generate the match summary.')
+      return
+    }
+
+    setMatchSummary(result.summary)
+  } catch (error) {
+    console.error('Error generating match summary:', error)
+    alert('Could not generate the match summary.')
+  } finally {
+    setGeneratingMatchSummary(false)
+  }
+}
+  
 async function saveMatchSummary() {
   if (!matchId || savingMatchSummary) return
 

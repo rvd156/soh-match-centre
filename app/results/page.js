@@ -161,6 +161,10 @@ export default function ResultsPage() {
                   {[result.venue, formatDate(result.match_date)].filter(Boolean).join(' · ')}
                 </div>
               )}
+
+<div style={styles.reportLink}>
+  View match report <span aria-hidden="true">→</span>
+</div>
             </a>
           )
         })}
@@ -320,5 +324,13 @@ const styles = {
     textAlign: 'center',
     marginTop: '18px',
     paddingTop: '13px'
-  }
+  },
+reportLink: {
+  color: '#f4c430',
+  fontSize: '15px',
+  fontWeight: '900',
+  textAlign: 'center',
+  marginTop: '14px',
+  padding: '12px 8px 2px'
+}
 }

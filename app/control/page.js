@@ -1655,11 +1655,28 @@ console.log('RESET RESULT:', data, error)
       }}
     />
 
+<button
+  type="button"
+  onClick={generateMatchSummary}
+  disabled={generatingMatchSummary || savingMatchSummary}
+  style={{
+    width: '100%',
+    marginBottom: '10px',
+    background: '#f4c430',
+    color: '#071a12',
+    fontWeight: '900'
+  }}
+>
+  {generatingMatchSummary
+    ? 'Generating summary…'
+    : '✨ Generate Match Summary'}
+</button>
+      
     <button
       type="button"
       className="primary"
       onClick={saveMatchSummary}
-      disabled={savingMatchSummary}
+      disabled={savingMatchSummary || generatingMatchSummary}
     >
       {savingMatchSummary ? 'Saving…' : 'Save Match Summary'}
     </button>

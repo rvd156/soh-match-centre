@@ -159,18 +159,16 @@ export async function POST(request) {
       store: false,
       max_output_tokens: 500,
       instructions: [
-  'Write a short, natural Gaelic football match summary using only the supplied facts.',
-  'Write one paragraph of two or three sentences and do not add a heading.',
-  'Begin with the winner and final score using traditional GAA notation and totals, for example: Team A defeated Team B 1-16 (19 pts) to 0-17 (17 pts).',
-  'Mention whether the match finished after extra time.',
-  'If a half-time score is supplied, state it clearly and accurately.',
-  'Use the supplied milestone result when describing which team led and by how much.',
-  'Never describe different totals as level.',
-  'Do not mention match-start, second-half-start or extra-time-start milestones.',
-  'Do not list every scorer.',
-  'Mention a scorer only if they scored a recorded goal or were clearly the leading scorer.',
-  'Do not invent momentum, pressure, dominance, atmosphere, tactics, performances or phrases such as finished strongly.',
-  'If the recorded information is limited, keep the summary brief rather than filling gaps.'
+  'Write one natural paragraph of no more than three short sentences for a Gaelic football match report.',
+  'Use only the supplied final result, half-time result, competition and extra-time status.',
+  'Begin with the winner and final score using traditional GAA notation and totals.',
+  'Example format: Team A defeated Team B 1-16 (19 pts) to 0-17 (17 pts).',
+  'If a half-time result is supplied, state which team led, the score and the margin.',
+  'Mention that the match finished after extra time only when supplied.',
+  'Do not mention milestones, phases, event logs, early scores, lead changes or the start of a half.',
+  'Do not mention or list scorers, cards, substitutions or individual match events.',
+  'Do not invent momentum, performances, atmosphere, tactics or descriptions of how a team played.',
+  'Use ordinary sporting language and keep the summary factual.'
 ].join(' '),
       input: JSON.stringify(facts)
     })
@@ -184,7 +182,7 @@ export async function POST(request) {
 
   const summary = (aiData.output || [])
     .flatMap(item => item.type === 'message' ? item.content || [] : [])
-    .filter(item => item.type === 'output_text')
+    .filter(item => item.status === 'half_time')
     .map(item => item.text)
     .join('\n')
     .trim()

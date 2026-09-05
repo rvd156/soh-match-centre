@@ -113,10 +113,7 @@ export async function POST(request) {
       away: `${away} ${gaaScore(match.away_goals, match.away_points)}`
     },
     milestones: (milestonesResult.data || [])
-  .filter(item =>
-    ['half_time', 'full_time', 'extra_time_half_time', 'after_extra_time']
-      .includes(item.status)
-  )
+  .filter(item => item.status === 'half_time')
   .map(item => {
   const homeTotal = (Number(item.home_goals) || 0) * 3 +
     (Number(item.home_points) || 0)
@@ -185,7 +182,7 @@ max_output_tokens: 800,
 
   const summary = (aiData.output || [])
     .flatMap(item => item.type === 'message' ? item.content || [] : [])
-    .filter(item => item.status === 'half_time')
+    .filter(item => item.type === 'output_text')
     .map(item => item.text)
     .join('\n')
     .trim()

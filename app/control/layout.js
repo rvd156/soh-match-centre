@@ -83,15 +83,40 @@ export default function ControlLayout({ children }) {
           alignItems: 'center'
         }}
       >
-        <span
-          style={{
-            color: '#f4c430',
-            fontSize: '13px',
-            fontWeight: '900'
-          }}
-        >
-          SOH CONTROL PANEL
-        </span>
+        <div
+  style={{
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    minWidth: 0
+  }}
+>
+  <a
+    href="/control"
+    style={{
+      color: '#f4c430',
+      fontSize: '13px',
+      fontWeight: '900',
+      textDecoration: 'none'
+    }}
+  >
+    SOH CONTROL PANEL
+  </a>
+
+  <a
+    href="/control/results"
+    style={{
+      color: '#ffffff',
+      fontSize: '12px',
+      fontWeight: '800',
+      textDecoration: 'none',
+      borderLeft: '1px solid #52645b',
+      paddingLeft: '12px'
+    }}
+  >
+    Match Reports
+  </a>
+</div>
 
         <button
           type="button"

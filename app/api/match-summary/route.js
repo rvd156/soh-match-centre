@@ -112,7 +112,12 @@ export async function POST(request) {
       home: `${home} ${gaaScore(match.home_goals, match.home_points)}`,
       away: `${away} ${gaaScore(match.away_goals, match.away_points)}`
     },
-    milestones: (milestonesResult.data || []).map(item => {
+    milestones: (milestonesResult.data || [])
+  .filter(item =>
+    ['half_time', 'full_time', 'extra_time_half_time', 'after_extra_time']
+      .includes(item.status)
+  )
+  .map(item => {
   const homeTotal = (Number(item.home_goals) || 0) * 3 +
     (Number(item.home_points) || 0)
 
@@ -154,16 +159,19 @@ export async function POST(request) {
       store: false,
       max_output_tokens: 500,
       instructions: [
-        'Write a concise Gaelic football match summary for a club match report.',
-        'Use only the supplied recorded facts. Never invent incidents, momentum, atmosphere, tactics or player performances.',
-        'Use two or three short paragraphs and no heading.',
-        'State the final score using traditional GAA notation and totals, for example: Team A 1-16 (19 pts) to Team B 0-17 (17 pts).',
-        'Mention extra time only when the facts say it occurred.',
-        'Mention scorers, milestones or incidents only when they appear in the supplied data.',
-        'Use the supplied milestone result when describing whether the teams were level or one team was leading.',
-        'Never describe two different totals as level and never contradict the supplied leader or margin.',
-        'If the event record is sparse, keep the summary factual and brief.'
-      ].join(' '),
+  'Write a short, natural Gaelic football match summary using only the supplied facts.',
+  'Write one paragraph of two or three sentences and do not add a heading.',
+  'Begin with the winner and final score using traditional GAA notation and totals, for example: Team A defeated Team B 1-16 (19 pts) to 0-17 (17 pts).',
+  'Mention whether the match finished after extra time.',
+  'If a half-time score is supplied, state it clearly and accurately.',
+  'Use the supplied milestone result when describing which team led and by how much.',
+  'Never describe different totals as level.',
+  'Do not mention match-start, second-half-start or extra-time-start milestones.',
+  'Do not list every scorer.',
+  'Mention a scorer only if they scored a recorded goal or were clearly the leading scorer.',
+  'Do not invent momentum, pressure, dominance, atmosphere, tactics, performances or phrases such as finished strongly.',
+  'If the recorded information is limited, keep the summary brief rather than filling gaps.'
+].join(' '),
       input: JSON.stringify(facts)
     })
   })

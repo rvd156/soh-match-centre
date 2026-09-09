@@ -417,6 +417,14 @@ const clock = useMemo(
 const homeCrest = sohIsHome ? sohCrest : setup.oppositionCrest
 const awayCrest = sohIsHome ? setup.oppositionCrest : sohCrest
 
+function confirmMatchStage(action) {
+  return window.confirm(
+    `${action}\n\nCurrent score:\n` +
+    `${homeName} ${home.goals}-${String(home.points).padStart(2, '0')}\n` +
+    `${awayName} ${away.goals}-${String(away.points).padStart(2, '0')}`
+  )
+}
+
   function changeScore(side, type, delta) {
   const setter = side === 'home' ? setHome : setAway
 
@@ -983,6 +991,11 @@ async function ensureMatchRecord() {
 }
 
 async function startMatch() {
+  if (
+    period === 'PRE-MATCH' &&
+    !confirmMatchStage('Are you sure you want to start the match?')
+  ) return
+
   let currentMatchId = matchId
 
   if (period === 'PRE-MATCH' && !currentMatchId) {
@@ -1052,7 +1065,9 @@ async function startMatch() {
     }
   }
 }
-  async function halfTime() {
+ async function halfTime() {
+  if (!confirmMatchStage('Are you sure you want to end the first half?')) return
+
   setRunning(false)
   setPeriod('HALF TIME')
 
@@ -1071,6 +1086,8 @@ async function startMatch() {
 }
 
 async function secondHalf() {
+  if (!confirmMatchStage('Are you sure you want to start the second half?')) return
+
   const secondHalfStart = Number(setup.halfLength) * 60
 
   setSeconds(secondHalfStart)
@@ -1092,6 +1109,8 @@ async function secondHalf() {
 }
 
 async function fullTime() {
+  if (!confirmMatchStage('Are you sure you want to end the match at full time?')) return
+
   const publishResult = window.confirm(
   'Publish this result to Previous Results?\n\nSelect Cancel for a test match or if extra time will follow.'
 )
@@ -1113,6 +1132,8 @@ async function fullTime() {
   }
 }
   async function startExtraTime() {
+  if (!confirmMatchStage('Are you sure you want to start extra time?')) return
+
   setExtraTimeSeconds(0)
 setPeriod('EXTRA TIME')
 setRunning(true)
@@ -1140,6 +1161,8 @@ console.log('START EXTRA TIME RESULT:', { data, error })
 
 }
   async function extraTimeHalfTime() {
+  if (!confirmMatchStage('Are you sure you want to end the first half of extra time?')) return
+
   setRunning(false)
   setPeriod('ET HALF TIME')
 
@@ -1160,6 +1183,8 @@ console.log('START EXTRA TIME RESULT:', { data, error })
 }
 
 async function secondHalfExtraTime() {
+  if (!confirmMatchStage('Are you sure you want to start the second half of extra time?')) return
+
   const secondExtraTimeStart = 10 * 60
 
   setExtraTimeSeconds(secondExtraTimeStart)
@@ -1183,6 +1208,8 @@ async function secondHalfExtraTime() {
 }
 
 async function extraTimeFullTime() {
+  if (!confirmMatchStage('Are you sure you want to end the match after extra time?')) return
+
   const publishResult = window.confirm(
   'Publish this final extra-time result to Previous Results?\n\nSelect Cancel if this is a test match.'
 )

@@ -101,6 +101,17 @@ export async function POST(request) {
 
     if (!scoreUpdate) return reply({ ignored: true })
 
+    const match = await requireResult(
+      db.from('matches')
+        .select('id, active, notifications_enabled')
+        .eq('id', scoreUpdate.match_id)
+        .maybeSingle()
+    )
+
+    if (!match?.active || match.notifications_enabled === false) {
+      return reply({ ignored: true, reason: 'Notifications are disabled for this match.' })
+    }
+
     const age = Date.now() - Date.parse(scoreUpdate.created_at)
     if (!Number.isFinite(age) || age < -60000 || age > 300000) {
       return reply({ ignored: true, reason: 'Score update is outside the alert window.' })

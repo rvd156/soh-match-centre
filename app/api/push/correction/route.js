@@ -124,7 +124,7 @@ export async function POST(request) {
     const match = await requireResult(
       db.from('matches')
         .select(`
-          id, active, home_team_id, away_team_id,
+          id, active, notifications_enabled, home_team_id, away_team_id,
           home_goals, home_points, away_goals, away_points
         `)
         .eq('id', matchId)
@@ -133,6 +133,7 @@ export async function POST(request) {
 
     if (
       !match?.active ||
+      match.notifications_enabled === false ||
       ![String(match.home_team_id), String(match.away_team_id)].includes(teamId)
     ) {
       return reply({ ignored: true, reason: 'No matching active fixture.' })

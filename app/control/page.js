@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { getCrestSrc } from '../../lib/crest'
 const emptyTeam = { goals: 0, points: 0 }
-const defaultSetup = { opposition: '', oppositionTeamId: '', oppositionCrest: '', competition: '', venue: '', referee: '', date: '', throwIn: '', halfLength: '30', sohSide: 'home' }
+const defaultSetup = { opposition: '', oppositionTeamId: '', oppositionCrest: '', competition: '', venue: '', referee: '', date: '', throwIn: '', halfLength: '30', sohSide: 'home', notificationsEnabled: true }
 
 function formatDate(value) {
   if (!value) return ''
@@ -827,7 +827,8 @@ if (isExtraTime) {
     date: matchToResume.match_date || '',
     throwIn: matchToResume.throw_in?.slice(0, 5) || '',
     halfLength: String(matchToResume.half_length || 30),
-    sohSide
+    sohSide,
+    notificationsEnabled: matchToResume.notifications_enabled !== false
   }))
 
   setPeriod(periodMap[matchToResume.status] || 'PRE-MATCH')
@@ -982,6 +983,7 @@ async function ensureMatchRecord() {
       match_date: setup.date,
       throw_in: setup.throwIn || null,
       half_length: Number(setup.halfLength),
+      notifications_enabled: setup.notificationsEnabled !== false,
       status: 'pre_match',
       active: true,
       home_goals: 0,
@@ -1002,6 +1004,31 @@ async function ensureMatchRecord() {
 
   setMatchId(data.id)
   return data.id
+}
+
+async function toggleMatchNotifications() {
+  const currentlyEnabled = setup.notificationsEnabled !== false
+  const nextEnabled = !currentlyEnabled
+  const action = nextEnabled
+    ? 'turn notifications on for this match'
+    : 'switch this match to Test Mode and stop all notifications'
+
+  if (!window.confirm(`Are you sure you want to ${action}?`)) return
+
+  if (matchId) {
+    const { error } = await supabase
+      .from('matches')
+      .update({ notifications_enabled: nextEnabled })
+      .eq('id', matchId)
+
+    if (error) {
+      console.error('Error changing notification mode:', error)
+      alert('Could not change the notification mode.')
+      return
+    }
+  }
+
+  setSetup(current => ({ ...current, notificationsEnabled: nextEnabled }))
 }
 
 function parseLineup(value) {
@@ -1611,6 +1638,31 @@ console.log('RESET RESULT:', data, error)
         <TeamPanel name={awayName} team={away} total={total(away)} crest={awayCrest} />
       </div>
       {!displayMode && <>
+<div
+  className="control-card"
+  style={{
+    marginBottom: '16px',
+    borderColor: setup.notificationsEnabled !== false ? '#2f6f4e' : '#d19a22'
+  }}
+>
+  <button
+    type="button"
+    onClick={toggleMatchNotifications}
+    style={{
+      background: setup.notificationsEnabled !== false ? '#174e35' : '#8a5a00',
+      color: '#ffffff'
+    }}
+  >
+    {setup.notificationsEnabled !== false
+      ? '🔔 Notifications On'
+      : '🧪 Test Mode — Notifications Off'}
+  </button>
+  <small style={{ display: 'block', marginTop: '8px', color: '#b9c7be', textAlign: 'center' }}>
+    {setup.notificationsEnabled !== false
+      ? 'Match events will notify subscribed supporters.'
+      : 'Scores and events can be tested without sending push notifications.'}
+  </small>
+</div>
 {matchId && (
   <div className="admin-grid">
     <ScoreControls
@@ -2694,6 +2746,26 @@ onChange={e => {
       <label className="field"><span>Throw-in</span><input type="time" value={setup.throwIn} onChange={e=>update('throwIn',e.target.value)}/></label>
       <label className="field"><span>Half Length</span><select value={setup.halfLength} onChange={e=>update('halfLength',e.target.value)}><option value="30">30 minutes</option><option value="35">35 minutes</option><option value="20">20 minutes</option></select></label>
       <div className="field"><span>SOH Playing</span><div className="side-picker"><button className={setup.sohSide==='home'?'selected':''} onClick={()=>update('sohSide','home')}>Home</button><button className={setup.sohSide==='away'?'selected':''} onClick={()=>update('sohSide','away')}>Away</button></div></div>
+      <div className="field">
+        <span>Notification Mode</span>
+        <div className="side-picker">
+          <button
+            type="button"
+            className={setup.notificationsEnabled !== false ? 'selected' : ''}
+            onClick={() => update('notificationsEnabled', true)}
+          >
+            🔔 Live
+          </button>
+          <button
+            type="button"
+            className={setup.notificationsEnabled === false ? 'selected' : ''}
+            onClick={() => update('notificationsEnabled', false)}
+          >
+            🧪 Test
+          </button>
+        </div>
+        <small>Test mode blocks every push notification.</small>
+      </div>
     </div>
     <button
   className="start-setup"

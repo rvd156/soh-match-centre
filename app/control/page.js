@@ -413,7 +413,7 @@ const clock = useMemo(
   const sohIsHome = setup.sohSide === 'home'
   const homeName = sohIsHome ? 'Ballinamore SOH' : (setup.opposition || 'Opposition')
   const awayName = sohIsHome ? (setup.opposition || 'Opposition') : 'Ballinamore SOH'
-  const sohCrest = '/soh-crest.png'
+  const sohCrest = getCrestSrc('', 1)
 const homeCrest = sohIsHome ? sohCrest : setup.oppositionCrest
 const awayCrest = sohIsHome ? setup.oppositionCrest : sohCrest
 
@@ -2486,7 +2486,7 @@ if (upcomingFixture) {
     <div className="setup-brand"><img src="/soh-crest.png" alt="SOH crest"/><div><p>SEÁN O'HESLIN'S GAA</p><h1>Match Centre</h1></div></div>
     <div className="setup-heading"><span>NEW MATCH</span><h2>Match Setup</h2><p>Enter the match details before throw-in.</p></div>
     <div className="team-setup-row">
-     <div className="crest-preview-card soh-crest-card"><span>SOH</span><img src="/soh-crest.png" alt="SOH crest"/></div>
+     <div className="crest-preview-card soh-crest-card"><span>SOH</span><img src={getCrestSrc('', 1)} alt="SOH crest"/></div>
       <div className="crest-preview-card"><span>{setup.opposition || 'Opposition'}</span>
         {setup.oppositionCrest ? <img src={getCrestSrc(setup.oppositionCrest)} alt="Opposition crest"/> : <div className="crest-placeholder">?</div>}
         <label className="upload-button">Upload Crest<input type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadCrest}/></label>

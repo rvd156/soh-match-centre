@@ -497,7 +497,7 @@ function formatStatus(status = '') {
     <img
       src={
         upcomingFixture.soh_side === 'home'
-          ? '/soh-crest.png'
+          ? getCrestSrc('', 1)
           : getCrestSrc(upcomingFixture.opposition_crest)
       }
       alt="Home team crest"
@@ -517,7 +517,7 @@ function formatStatus(status = '') {
     <img
       src={
         upcomingFixture.soh_side === 'away'
-          ? '/soh-crest.png'
+          ? getCrestSrc('', 1)
           : getCrestSrc(upcomingFixture.opposition_crest)
       }
       alt="Away team crest"

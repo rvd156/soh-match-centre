@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 import { getCrestSrc } from '../../../lib/crest'
+import TeamLineup from '../../TeamLineup'
 
 function related(value) {
   return Array.isArray(value) ? value[0] : value
@@ -143,6 +144,7 @@ export default function MatchReportPage() {
             id,
             competition,
             match_summary,
+            soh_lineup,
             venue,
             referee,
             match_date,
@@ -295,6 +297,8 @@ export default function MatchReportPage() {
             <div style={styles.total}>{awayTotal} pts</div>
           </div>
         </section>
+
+        <TeamLineup lineup={match.soh_lineup} />
 
 {match.match_summary && (
   <section style={styles.summarySection}>

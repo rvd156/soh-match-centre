@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { getCrestSrc } from '../../lib/crest'
 import NotificationButton from '../NotificationButton'
+import TeamLineup from '../TeamLineup'
 
 export default function LiveMatchPage() {
   const [match, setMatch] = useState(null)
@@ -876,6 +877,7 @@ const sohWon =
           </div>
 
         </section>
+        <TeamLineup lineup={match.soh_lineup} />
 {latestEvent && (
   <div
     style={{

@@ -45,6 +45,9 @@ const [manualUpdateText, setManualUpdateText] = useState('')
 const [matchSummary, setMatchSummary] = useState('')
 const [savingMatchSummary, setSavingMatchSummary] = useState(false)
 const [generatingMatchSummary, setGeneratingMatchSummary] = useState(false)
+const [lineupStarters, setLineupStarters] = useState('')
+const [lineupSubstitutes, setLineupSubstitutes] = useState('')
+const [savingLineup, setSavingLineup] = useState(false)
 const [upcomingFixture, setUpcomingFixture] = useState(null)
 const [sendingScoreUpdate, setSendingScoreUpdate] = useState(false)
 const [showFloatingScore, setShowFloatingScore] = useState(false)
@@ -108,6 +111,8 @@ const controllerScoreRef = useRef(null)
   setSetupComplete(false)
   setHome(emptyTeam)
   setAway(emptyTeam)
+  setLineupStarters('')
+  setLineupSubstitutes('')
   return
 }
 
@@ -120,6 +125,11 @@ const controllerScoreRef = useRef(null)
           goals: updatedMatch.away_goals || 0,
           points: updatedMatch.away_points || 0
         })
+
+        if (updatedMatch.soh_lineup) {
+          setLineupStarters(lineupToText(updatedMatch.soh_lineup.starters))
+          setLineupSubstitutes(lineupToText(updatedMatch.soh_lineup.substitutes))
+        }
 
         setPeriod(
           updatedMatch.status === 'first_half'
@@ -791,6 +801,8 @@ if (isExtraTime) {
 
   setMatchId(matchToResume.id)
   setMatchSummary(matchToResume.match_summary || '') 
+  setLineupStarters(lineupToText(matchToResume.soh_lineup?.starters))
+  setLineupSubstitutes(lineupToText(matchToResume.soh_lineup?.substitutes))
 
   setHome({
     goals: matchToResume.home_goals || 0,
@@ -988,6 +1000,62 @@ async function ensureMatchRecord() {
 
   setMatchId(data.id)
   return data.id
+}
+
+function parseLineup(value) {
+  return value
+    .split('\n')
+    .map(line => line.trim())
+    .filter(Boolean)
+    .map(line => {
+      const match = line.match(/^(?:#?(\d{1,2})[.)\s-]+)?(.+)$/)
+      return {
+        number: match?.[1] ? Number(match[1]) : null,
+        name: (match?.[2] || line).trim()
+      }
+    })
+}
+
+function lineupToText(players) {
+  if (!Array.isArray(players)) return ''
+  return players
+    .map(player => `${player.number ? `${player.number}. ` : ''}${player.name || ''}`.trim())
+    .filter(Boolean)
+    .join('\n')
+}
+
+async function saveLineup() {
+  if (savingLineup) return
+
+  const starters = parseLineup(lineupStarters)
+  const substitutes = parseLineup(lineupSubstitutes)
+
+  if (starters.length === 0 && substitutes.length === 0) {
+    alert('Enter at least one player before publishing the lineup.')
+    return
+  }
+
+  setSavingLineup(true)
+
+  try {
+    const currentMatchId = await ensureMatchRecord()
+    if (!currentMatchId) return
+
+    const { error } = await supabase
+      .from('matches')
+      .update({ soh_lineup: { starters, substitutes } })
+      .eq('id', currentMatchId)
+
+    if (error) {
+      console.error('Error saving lineup:', error)
+      alert('Could not publish the team lineup.')
+      return
+    }
+
+    alert('Team lineup published.')
+  } finally {
+    setSavingLineup(false)
+  }
 }
 
 async function startMatch() {
@@ -1444,6 +1512,8 @@ console.log('RESET RESULT:', data, error)
   setSetupComplete(false)
   setDisplayMode(false)
   setMatchId(null)
+  setLineupStarters('')
+  setLineupSubstitutes('')
 }
 
  if (!setupComplete) return (
@@ -1537,7 +1607,7 @@ console.log('RESET RESULT:', data, error)
         <TeamPanel name={awayName} team={away} total={total(away)} crest={awayCrest} />
       </div>
       {!displayMode && <>
-       {matchId && (
+{matchId && (
   <div className="admin-grid">
     <ScoreControls
       label={homeName}
@@ -1550,6 +1620,43 @@ console.log('RESET RESULT:', data, error)
     />
   </div>
 )}
+
+<div className="control-card" style={{ marginTop: '16px' }}>
+  <h3>Ballinamore SOH Team Lineup</h3>
+  <p style={{ color: '#b9c7be', lineHeight: 1.5 }}>
+    Enter one player per line. Add the jersey number first, for example: 1. Player Name.
+  </p>
+
+  <label style={{ display: 'block', marginBottom: '14px' }}>
+    <strong style={{ display: 'block', marginBottom: '7px', color: '#f4c430' }}>
+      Starting 15
+    </strong>
+    <textarea
+      value={lineupStarters}
+      onChange={event => setLineupStarters(event.target.value)}
+      placeholder={'1. Player Name\n2. Player Name'}
+      rows={8}
+      style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '10px', fontSize: '16px', lineHeight: 1.5 }}
+    />
+  </label>
+
+  <label style={{ display: 'block', marginBottom: '14px' }}>
+    <strong style={{ display: 'block', marginBottom: '7px', color: '#f4c430' }}>
+      Substitutes
+    </strong>
+    <textarea
+      value={lineupSubstitutes}
+      onChange={event => setLineupSubstitutes(event.target.value)}
+      placeholder={'16. Player Name\n17. Player Name'}
+      rows={5}
+      style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '10px', fontSize: '16px', lineHeight: 1.5 }}
+    />
+  </label>
+
+  <button type="button" className="primary" onClick={saveLineup} disabled={savingLineup}>
+    {savingLineup ? 'Publishing…' : 'Publish Team Lineup'}
+  </button>
+</div>
 
         <div className="match-controls">
 

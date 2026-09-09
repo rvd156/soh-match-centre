@@ -48,6 +48,7 @@ const [generatingMatchSummary, setGeneratingMatchSummary] = useState(false)
 const [lineupStarters, setLineupStarters] = useState('')
 const [lineupSubstitutes, setLineupSubstitutes] = useState('')
 const [savingLineup, setSavingLineup] = useState(false)
+const [lineupEditorOpen, setLineupEditorOpen] = useState(false)
 const [upcomingFixture, setUpcomingFixture] = useState(null)
 const [sendingScoreUpdate, setSendingScoreUpdate] = useState(false)
 const [showFloatingScore, setShowFloatingScore] = useState(false)
@@ -113,6 +114,7 @@ const controllerScoreRef = useRef(null)
   setAway(emptyTeam)
   setLineupStarters('')
   setLineupSubstitutes('')
+  setLineupEditorOpen(false)
   return
 }
 
@@ -1052,6 +1054,7 @@ async function saveLineup() {
       return
     }
 
+    setLineupEditorOpen(false)
     alert('Team lineup published.')
   } finally {
     setSavingLineup(false)
@@ -1514,6 +1517,7 @@ console.log('RESET RESULT:', data, error)
   setMatchId(null)
   setLineupStarters('')
   setLineupSubstitutes('')
+  setLineupEditorOpen(false)
 }
 
  if (!setupComplete) return (
@@ -1622,40 +1626,59 @@ console.log('RESET RESULT:', data, error)
 )}
 
 <div className="control-card" style={{ marginTop: '16px' }}>
-  <h3>Ballinamore SOH Team Lineup</h3>
-  <p style={{ color: '#b9c7be', lineHeight: 1.5 }}>
-    Enter one player per line. Add the jersey number first, for example: 1. Player Name.
-  </p>
+  {!lineupEditorOpen ? (
+    <button
+      type="button"
+      className="primary"
+      onClick={() => setLineupEditorOpen(true)}
+    >
+      {lineupStarters.trim() || lineupSubstitutes.trim()
+        ? 'Edit Team Lineup'
+        : 'Add Team Lineup'}
+    </button>
+  ) : (
+    <>
+      <h3>Ballinamore SOH Team Lineup</h3>
+      <p style={{ color: '#b9c7be', lineHeight: 1.5 }}>
+        Enter one player per line. Add the jersey number first, for example: 1. Player Name.
+      </p>
 
-  <label style={{ display: 'block', marginBottom: '14px' }}>
-    <strong style={{ display: 'block', marginBottom: '7px', color: '#f4c430' }}>
-      Starting 15
-    </strong>
-    <textarea
-      value={lineupStarters}
-      onChange={event => setLineupStarters(event.target.value)}
-      placeholder={'1. Player Name\n2. Player Name'}
-      rows={8}
-      style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '10px', fontSize: '16px', lineHeight: 1.5 }}
-    />
-  </label>
+      <label style={{ display: 'block', marginBottom: '14px' }}>
+        <strong style={{ display: 'block', marginBottom: '7px', color: '#f4c430' }}>
+          Starting 15
+        </strong>
+        <textarea
+          value={lineupStarters}
+          onChange={event => setLineupStarters(event.target.value)}
+          placeholder={'1. Player Name\n2. Player Name'}
+          rows={8}
+          style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '10px', fontSize: '16px', lineHeight: 1.5 }}
+        />
+      </label>
 
-  <label style={{ display: 'block', marginBottom: '14px' }}>
-    <strong style={{ display: 'block', marginBottom: '7px', color: '#f4c430' }}>
-      Substitutes
-    </strong>
-    <textarea
-      value={lineupSubstitutes}
-      onChange={event => setLineupSubstitutes(event.target.value)}
-      placeholder={'16. Player Name\n17. Player Name'}
-      rows={5}
-      style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '10px', fontSize: '16px', lineHeight: 1.5 }}
-    />
-  </label>
+      <label style={{ display: 'block', marginBottom: '14px' }}>
+        <strong style={{ display: 'block', marginBottom: '7px', color: '#f4c430' }}>
+          Substitutes
+        </strong>
+        <textarea
+          value={lineupSubstitutes}
+          onChange={event => setLineupSubstitutes(event.target.value)}
+          placeholder={'16. Player Name\n17. Player Name'}
+          rows={5}
+          style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '10px', fontSize: '16px', lineHeight: 1.5 }}
+        />
+      </label>
 
-  <button type="button" className="primary" onClick={saveLineup} disabled={savingLineup}>
-    {savingLineup ? 'Publishing…' : 'Publish Team Lineup'}
-  </button>
+      <div className="button-row">
+        <button type="button" className="primary" onClick={saveLineup} disabled={savingLineup}>
+          {savingLineup ? 'Publishing…' : 'Publish Team Lineup'}
+        </button>
+        <button type="button" onClick={() => setLineupEditorOpen(false)} disabled={savingLineup}>
+          Close
+        </button>
+      </div>
+    </>
+  )}
 </div>
 
         <div className="match-controls">

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { getCrestSrc } from '../../lib/crest'
 import NotificationButton from '../NotificationButton'
 
 export default function LiveMatchPage() {
@@ -191,9 +192,11 @@ useEffect(() => {
   window.addEventListener('pageshow', handlePageShow)
   window.addEventListener('focus', handleFocus)
 
+  // Realtime subscriptions handle normal match updates. This slower poll is only
+  // a safety net for mobile browsers that temporarily suspend the connection.
   const refreshInterval = window.setInterval(() => {
     refreshLiveScreen()
-  }, 5000)
+  }, 30000)
 
   return () => {
     document.removeEventListener('visibilitychange', handleVisibilityChange)
@@ -494,8 +497,8 @@ function formatStatus(status = '') {
     <img
       src={
         upcomingFixture.soh_side === 'home'
-          ? 'https://fmbvqrjkyiuacymhulql.supabase.co/storage/v1/object/public/club-crests/SOH_Logo.png?v=2'
-          : upcomingFixture.opposition_crest
+          ? '/soh-crest.png'
+          : getCrestSrc(upcomingFixture.opposition_crest)
       }
       alt="Home team crest"
       style={styles.upcomingCrest}
@@ -514,8 +517,8 @@ function formatStatus(status = '') {
     <img
       src={
         upcomingFixture.soh_side === 'away'
-          ? 'https://fmbvqrjkyiuacymhulql.supabase.co/storage/v1/object/public/club-crests/SOH_Logo.png?v=2'
-          : upcomingFixture.opposition_crest
+          ? '/soh-crest.png'
+          : getCrestSrc(upcomingFixture.opposition_crest)
       }
       alt="Away team crest"
       style={styles.upcomingCrest}
@@ -827,9 +830,9 @@ const sohWon =
         <section ref={scoreboardRef} style={styles.scoreboard}>
 
           <div style={styles.team}>
-            {homeTeam?.crest_url && (
+            {(homeTeam?.id === 1 || homeTeam?.crest_url) && (
               <img
-                src={homeTeam.crest_url}
+                src={getCrestSrc(homeTeam.crest_url, homeTeam.id)}
                 alt=""
                 style={styles.crest}
               />
@@ -851,9 +854,9 @@ const sohWon =
           <div style={styles.versus}>V</div>
 
           <div style={styles.team}>
-            {awayTeam?.crest_url && (
+            {(awayTeam?.id === 1 || awayTeam?.crest_url) && (
               <img
-                src={awayTeam.crest_url}
+                src={getCrestSrc(awayTeam.crest_url, awayTeam.id)}
                 alt=""
                 style={styles.crest}
               />

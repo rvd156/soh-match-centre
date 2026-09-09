@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
+import { getCrestSrc } from '../../../lib/crest'
 
 function related(value) {
   return Array.isArray(value) ? value[0] : value
@@ -281,14 +282,14 @@ export default function MatchReportPage() {
 
         <section style={styles.scoreCard} aria-label="Final score">
           <div style={styles.team}>
-            {home?.crest_url && <img src={home.crest_url} alt="" style={styles.crest} />}
+            {(home?.id === 1 || home?.crest_url) && <img src={getCrestSrc(home.crest_url, home.id)} alt="" style={styles.crest} />}
             <div style={styles.teamName}>{home?.name || 'Home'}</div>
             <div style={styles.score}>{match.home_goals}-{String(match.home_points).padStart(2, '0')}</div>
             <div style={styles.total}>{homeTotal} pts</div>
           </div>
           <div style={styles.versus}>V</div>
           <div style={styles.team}>
-            {away?.crest_url && <img src={away.crest_url} alt="" style={styles.crest} />}
+            {(away?.id === 1 || away?.crest_url) && <img src={getCrestSrc(away.crest_url, away.id)} alt="" style={styles.crest} />}
             <div style={styles.teamName}>{away?.name || 'Away'}</div>
             <div style={styles.score}>{match.away_goals}-{String(match.away_points).padStart(2, '0')}</div>
             <div style={styles.total}>{awayTotal} pts</div>

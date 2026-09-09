@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { getCrestSrc } from '../../lib/crest'
 const emptyTeam = { goals: 0, points: 0 }
 const defaultSetup = { opposition: '', oppositionTeamId: '', oppositionCrest: '', competition: '', venue: '', referee: '', date: '', throwIn: '', halfLength: '30', sohSide: 'home' }
 
@@ -412,7 +413,7 @@ const clock = useMemo(
   const sohIsHome = setup.sohSide === 'home'
   const homeName = sohIsHome ? 'Ballinamore SOH' : (setup.opposition || 'Opposition')
   const awayName = sohIsHome ? (setup.opposition || 'Opposition') : 'Ballinamore SOH'
-  const sohCrest = 'https://fmbvqrjkyiuacymhulql.supabase.co/storage/v1/object/public/club-crests/SOH_Logo.png?v=2'
+  const sohCrest = '/soh-crest.png'
 const homeCrest = sohIsHome ? sohCrest : setup.oppositionCrest
 const awayCrest = sohIsHome ? setup.oppositionCrest : sohCrest
 
@@ -2485,9 +2486,9 @@ if (upcomingFixture) {
     <div className="setup-brand"><img src="/soh-crest.png" alt="SOH crest"/><div><p>SEÁN O'HESLIN'S GAA</p><h1>Match Centre</h1></div></div>
     <div className="setup-heading"><span>NEW MATCH</span><h2>Match Setup</h2><p>Enter the match details before throw-in.</p></div>
     <div className="team-setup-row">
-     <div className="crest-preview-card soh-crest-card"><span>SOH</span><img src="https://fmbvqrjkyiuacymhulql.supabase.co/storage/v1/object/public/club-crests/SOH_Logo.png?v=2"/></div>
+     <div className="crest-preview-card soh-crest-card"><span>SOH</span><img src="/soh-crest.png" alt="SOH crest"/></div>
       <div className="crest-preview-card"><span>{setup.opposition || 'Opposition'}</span>
-        {setup.oppositionCrest ? <img src={setup.oppositionCrest} alt="Opposition crest"/> : <div className="crest-placeholder">?</div>}
+        {setup.oppositionCrest ? <img src={getCrestSrc(setup.oppositionCrest)} alt="Opposition crest"/> : <div className="crest-placeholder">?</div>}
         <label className="upload-button">Upload Crest<input type="file" accept="image/png,image/jpeg,image/webp" onChange={uploadCrest}/></label>
         {setup.oppositionCrest && <button className="remove-crest" onClick={()=>update('oppositionCrest','')}>Remove</button>}
         <small>Transparent PNG works best.</small>
@@ -2548,7 +2549,7 @@ onChange={e => {
   </section></main>
 }
 
-function TeamPanel({name,team,total,crest}){return <div className="team-panel">{crest&&<img className="team-crest" src={crest} alt={`${name} crest`}/>}<h2>{name}</h2><div className="gaa-score">{team.goals}-{String(team.points).padStart(2,'0')}</div><div className="points-total">{total} pts</div></div>}
+function TeamPanel({name,team,total,crest}){return <div className="team-panel">{crest&&<img className="team-crest" src={getCrestSrc(crest)} alt={`${name} crest`}/>}<h2>{name}</h2><div className="gaa-score">{team.goals}-{String(team.points).padStart(2,'0')}</div><div className="points-total">{total} pts</div></div>}
 function ScoreControls({label,onChange}){
   return (
     <div className="control-card">

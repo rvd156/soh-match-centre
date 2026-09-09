@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
+import { getCrestSrc } from '../../lib/crest'
 
 function formatDate(value) {
   if (!value) return ''
@@ -42,10 +43,12 @@ export default function ResultsPage() {
           away_points,
           created_at,
           home_team:teams!matches_home_team_id_fkey (
+            id,
             name,
             crest_url
           ),
           away_team:teams!matches_away_team_id_fkey (
+            id,
             name,
             crest_url
           )
@@ -132,8 +135,8 @@ export default function ResultsPage() {
 
               <div style={styles.teams}>
                 <div style={styles.team}>
-                  {homeTeam?.crest_url && (
-                    <img src={homeTeam.crest_url} alt="" style={styles.teamCrest} />
+                  {(homeTeam?.id === 1 || homeTeam?.crest_url) && (
+                    <img src={getCrestSrc(homeTeam.crest_url, homeTeam.id)} alt="" style={styles.teamCrest} />
                   )}
                   <div style={styles.teamName}>{homeTeam?.name || 'Home'}</div>
                   <div style={styles.score}>
@@ -145,8 +148,8 @@ export default function ResultsPage() {
                 <div style={styles.versus}>V</div>
 
                 <div style={styles.team}>
-                  {awayTeam?.crest_url && (
-                    <img src={awayTeam.crest_url} alt="" style={styles.teamCrest} />
+                  {(awayTeam?.id === 1 || awayTeam?.crest_url) && (
+                    <img src={getCrestSrc(awayTeam.crest_url, awayTeam.id)} alt="" style={styles.teamCrest} />
                   )}
                   <div style={styles.teamName}>{awayTeam?.name || 'Away'}</div>
                   <div style={styles.score}>

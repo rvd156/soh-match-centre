@@ -70,7 +70,7 @@ function Pitch({ players }) {
         boxShadow: 'inset 0 0 28px rgba(0,0,0,0.2)'
       }}
     >
-      {[20, 39, 50, 61, 80].map(position => (
+      {[20, 39, 50, 66, 80].map(position => (
         <div
           key={position}
           aria-hidden="true"

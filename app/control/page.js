@@ -957,24 +957,24 @@ function selectMatchUpdatePreset(text) {
   setManualUpdateText(text)
 }  
   
-async function ensureMatchRecord() {
+async function ensureMatchRecord(matchSetup = setup) {
   if (matchId) return matchId
 
-  if (!setup.date) {
+  if (!matchSetup.date) {
     alert('Please choose a match date first.')
     return null
   }
 
-  if (!setup.throwIn) {
+  if (!matchSetup.throwIn) {
     alert('Please choose a throw-in time first.')
     return null
   }
 
   const homeTeamId =
-    setup.sohSide === 'home' ? 1 : Number(setup.oppositionTeamId)
+    matchSetup.sohSide === 'home' ? 1 : Number(matchSetup.oppositionTeamId)
 
   const awayTeamId =
-    setup.sohSide === 'away' ? 1 : Number(setup.oppositionTeamId)
+    matchSetup.sohSide === 'away' ? 1 : Number(matchSetup.oppositionTeamId)
 
   const { error: deactivateError } = await supabase
     .from('matches')
@@ -992,13 +992,13 @@ async function ensureMatchRecord() {
     .insert({
       home_team_id: homeTeamId,
       away_team_id: awayTeamId,
-      competition: setup.competition || null,
-      venue: setup.venue || null,
-      referee: setup.referee || null,
-      match_date: setup.date,
-      throw_in: setup.throwIn || null,
-      half_length: Number(setup.halfLength),
-      notifications_enabled: setup.notificationsEnabled !== false,
+      competition: matchSetup.competition || null,
+      venue: matchSetup.venue || null,
+      referee: matchSetup.referee || null,
+      match_date: matchSetup.date,
+      throw_in: matchSetup.throwIn || null,
+      half_length: Number(matchSetup.halfLength || 30),
+      notifications_enabled: matchSetup.notificationsEnabled !== false,
       status: 'pre_match',
       active: true,
       home_goals: 0,
@@ -1402,6 +1402,84 @@ async function resetUpcomingFixture() {
 
   alert('Upcoming fixture reset.')
 }
+
+function detailsForUpcomingFixture() {
+  return {
+    ...setup,
+    opposition: upcomingFixture?.opposition || '',
+    oppositionTeamId: upcomingFixture?.opposition_team_id || '',
+    oppositionCrest: upcomingFixture?.opposition_crest || '',
+    competition: upcomingFixture?.competition || '',
+    venue: upcomingFixture?.venue || '',
+    referee: upcomingFixture?.referee || '',
+    date: upcomingFixture?.match_date || '',
+    throwIn: upcomingFixture?.throw_in || '',
+    sohSide: upcomingFixture?.soh_side || 'home'
+  }
+}
+
+async function prepareUpcomingMatch() {
+  if (!upcomingFixture) return null
+  const details = detailsForUpcomingFixture()
+  setSetup(details)
+  return ensureMatchRecord(details)
+}
+
+async function saveUpcomingLineup() {
+  if (savingLineup) return false
+
+  const starters = parseLineup(lineupStarters)
+  const substitutes = parseLineup(lineupSubstitutes)
+  if (!starters.length && !substitutes.length) {
+    alert('Enter at least one player before publishing the lineup.')
+    return false
+  }
+
+  setSavingLineup(true)
+  try {
+    const currentMatchId = await prepareUpcomingMatch()
+    if (!currentMatchId) return false
+    const { error } = await supabase
+      .from('matches')
+      .update({ soh_lineup: { starters, substitutes } })
+      .eq('id', currentMatchId)
+
+    if (error) {
+      alert(`Could not publish the team lineup: ${error.message}`)
+      return false
+    }
+    alert('Team lineup published.')
+    return true
+  } finally {
+    setSavingLineup(false)
+  }
+}
+
+async function sendUpcomingNotice(title, message) {
+  const currentMatchId = await prepareUpcomingMatch()
+  if (!currentMatchId) return null
+
+  const { data: sessionData } = await supabase.auth.getSession()
+  const accessToken = sessionData?.session?.access_token
+  if (!accessToken) throw new Error('Your admin session has expired. Please sign in again.')
+
+  const response = await fetch('/api/push/match-notice', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${accessToken}`
+    },
+    body: JSON.stringify({
+      matchId: currentMatchId,
+      title,
+      message,
+      noticeId: crypto.randomUUID()
+    })
+  })
+  const result = await response.json()
+  if (!response.ok) throw new Error(result.error || 'Could not send the match notice.')
+  return result
+}
 async function sendScoreUpdate() {
   if (!matchId || sendingScoreUpdate) return
 
@@ -1576,6 +1654,13 @@ console.log('RESET RESULT:', data, error)
     onPublishFixture={publishUpcomingFixture}
     upcomingFixture={upcomingFixture}
     onResetUpcomingFixture={resetUpcomingFixture}
+    lineupStarters={lineupStarters}
+    setLineupStarters={setLineupStarters}
+    lineupSubstitutes={lineupSubstitutes}
+    setLineupSubstitutes={setLineupSubstitutes}
+    savingLineup={savingLineup}
+    onSaveUpcomingLineup={saveUpcomingLineup}
+    onSendUpcomingNotice={sendUpcomingNotice}
   />
 )
   return <main className={displayMode ? 'display-page' : ''}>
@@ -2681,9 +2766,22 @@ function Setup({
   onResumeMatch,
   onResetExistingMatch,
   onResetUpcomingFixture,
-  upcomingFixture
+  upcomingFixture,
+  lineupStarters,
+  setLineupStarters,
+  lineupSubstitutes,
+  setLineupSubstitutes,
+  savingLineup,
+  onSaveUpcomingLineup,
+  onSendUpcomingNotice
 }) {
   const update = (key,value) => setSetup(s=>({...s,[key]:value}))
+  const [noticeOpen, setNoticeOpen] = useState(false)
+  const [noticeTitle, setNoticeTitle] = useState('MATCH TODAY')
+  const [noticeMessage, setNoticeMessage] = useState('')
+  const [sendingNotice, setSendingNotice] = useState(false)
+  const [upcomingLineupOpen, setUpcomingLineupOpen] = useState(false)
+  const [lastNoticeSentAt, setLastNoticeSentAt] = useState(null)
   function uploadCrest(event) {
   const file = event.target.files?.[0]
   if (!file) return
@@ -2802,6 +2900,174 @@ if (upcomingFixture) {
         >
           Continue to Scoreboard →
         </button>
+
+        <div style={{ display: 'grid', gap: '10px', marginTop: '12px' }}>
+          <button
+            type="button"
+            className="start-setup"
+            style={{ background: '#174e35' }}
+            onClick={() => setNoticeOpen(open => !open)}
+          >
+            📣 {noticeOpen ? 'Close Match Notice' : 'Send Match Notice'}
+          </button>
+
+          {noticeOpen && (
+            <div className="control-card" style={{ textAlign: 'left', margin: 0 }}>
+              <h3 style={{ marginTop: 0 }}>Match Notice</h3>
+              <p style={{ color: '#b9c7be', lineHeight: 1.5 }}>
+                Choose a starting point, then edit the title and message before sending.
+              </p>
+
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
+                {[
+                  {
+                    label: 'Match today',
+                    title: 'MATCH TODAY',
+                    message: `Ballinamore SOH face ${upcomingFixture.opposition} today. Throw-in is at ${upcomingFixture.throw_in?.slice(0, 5) || 'the advertised time'}${upcomingFixture.venue ? ` in ${upcomingFixture.venue}` : ''}.`
+                  },
+                  {
+                    label: 'Ticket only',
+                    title: 'TICKET-ONLY MATCH',
+                    message: `A reminder that today’s match against ${upcomingFixture.opposition} is ticket only. Please have your ticket ready before arriving.`
+                  },
+                  {
+                    label: 'Throw-in reminder',
+                    title: 'THROW-IN REMINDER',
+                    message: `Ballinamore SOH v ${upcomingFixture.opposition} throws in at ${upcomingFixture.throw_in?.slice(0, 5) || 'the advertised time'} today${upcomingFixture.venue ? ` at ${upcomingFixture.venue}` : ''}.`
+                  }
+                ].map(template => (
+                  <button
+                    key={template.label}
+                    type="button"
+                    onClick={() => {
+                      setNoticeTitle(template.title)
+                      setNoticeMessage(template.message)
+                    }}
+                    style={{ padding: '9px 11px', width: 'auto', fontSize: '13px' }}
+                  >
+                    {template.label}
+                  </button>
+                ))}
+              </div>
+
+              <label style={{ display: 'block', marginBottom: '12px' }}>
+                <strong style={{ display: 'block', marginBottom: '6px', color: '#f4c430' }}>Title</strong>
+                <input
+                  value={noticeTitle}
+                  onChange={event => setNoticeTitle(event.target.value.slice(0, 60))}
+                  maxLength={60}
+                  style={{ width: '100%', boxSizing: 'border-box' }}
+                />
+                <small>{noticeTitle.length}/60</small>
+              </label>
+
+              <label style={{ display: 'block', marginBottom: '14px' }}>
+                <strong style={{ display: 'block', marginBottom: '6px', color: '#f4c430' }}>Message</strong>
+                <textarea
+                  value={noticeMessage}
+                  onChange={event => setNoticeMessage(event.target.value.slice(0, 220))}
+                  maxLength={220}
+                  rows={4}
+                  placeholder="Write the notification message…"
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '10px', fontSize: '16px', lineHeight: 1.45 }}
+                />
+                <small>{noticeMessage.length}/220</small>
+              </label>
+
+              <div style={{ padding: '13px', border: '1px solid #42594d', borderRadius: '13px', background: '#0d1d16', marginBottom: '14px' }}>
+                <small style={{ color: '#f4c430', fontWeight: '900' }}>NOTIFICATION PREVIEW</small>
+                <strong style={{ display: 'block', marginTop: '7px' }}>{noticeTitle || 'Notification title'}</strong>
+                <div style={{ marginTop: '4px', color: '#d4ddd7', whiteSpace: 'pre-wrap' }}>{noticeMessage || 'Your message will appear here.'}</div>
+              </div>
+
+              <button
+                type="button"
+                className="primary"
+                disabled={sendingNotice || !noticeTitle.trim() || !noticeMessage.trim()}
+                onClick={async () => {
+                  const confirmed = window.confirm(
+                    `Send this notification to subscribed supporters?\n\n${noticeTitle.trim()}\n${noticeMessage.trim()}`
+                  )
+                  if (!confirmed) return
+                  setSendingNotice(true)
+                  try {
+                    const result = await onSendUpcomingNotice(noticeTitle.trim(), noticeMessage.trim())
+                    if (!result) return
+                    setLastNoticeSentAt(new Date())
+                    alert(
+                      `Match notice sent to ${result.sent || 0} subscriber${result.sent === 1 ? '' : 's'}.` +
+                      (result.failed ? ` ${result.failed} delivery attempt${result.failed === 1 ? '' : 's'} failed.` : '')
+                    )
+                  } catch (error) {
+                    alert(error.message || 'Could not send the match notice.')
+                  } finally {
+                    setSendingNotice(false)
+                  }
+                }}
+              >
+                {sendingNotice ? 'Sending…' : 'Review & Send Notification'}
+              </button>
+              {lastNoticeSentAt && (
+                <small style={{ display: 'block', marginTop: '9px', textAlign: 'center', color: '#b9c7be' }}>
+                  Last sent at {lastNoticeSentAt.toLocaleTimeString('en-IE', { hour: '2-digit', minute: '2-digit' })}
+                </small>
+              )}
+            </div>
+          )}
+
+          <button
+            type="button"
+            className="start-setup"
+            style={{ background: '#24382f' }}
+            onClick={() => setUpcomingLineupOpen(open => !open)}
+          >
+            👥 {upcomingLineupOpen
+              ? 'Close Team Line-up'
+              : lineupStarters.trim() || lineupSubstitutes.trim()
+                ? 'Edit Team Line-up'
+                : 'Add Team Line-up'}
+          </button>
+
+          {upcomingLineupOpen && (
+            <div className="control-card" style={{ textAlign: 'left', margin: 0 }}>
+              <h3 style={{ marginTop: 0 }}>Ballinamore SOH Team Line-up</h3>
+              <p style={{ color: '#b9c7be', lineHeight: 1.5 }}>
+                Enter one player per line, beginning with the jersey number.
+              </p>
+              <label style={{ display: 'block', marginBottom: '13px' }}>
+                <strong style={{ display: 'block', marginBottom: '6px', color: '#f4c430' }}>Starting 15</strong>
+                <textarea
+                  value={lineupStarters}
+                  onChange={event => setLineupStarters(event.target.value)}
+                  placeholder={'1. Player Name\n2. Player Name'}
+                  rows={8}
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '10px', fontSize: '16px', lineHeight: 1.5 }}
+                />
+              </label>
+              <label style={{ display: 'block', marginBottom: '13px' }}>
+                <strong style={{ display: 'block', marginBottom: '6px', color: '#f4c430' }}>Substitutes</strong>
+                <textarea
+                  value={lineupSubstitutes}
+                  onChange={event => setLineupSubstitutes(event.target.value)}
+                  placeholder={'16. Player Name\n17. Player Name'}
+                  rows={5}
+                  style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '10px', fontSize: '16px', lineHeight: 1.5 }}
+                />
+              </label>
+              <button
+                type="button"
+                className="primary"
+                disabled={savingLineup}
+                onClick={async () => {
+                  const saved = await onSaveUpcomingLineup()
+                  if (saved) setUpcomingLineupOpen(false)
+                }}
+              >
+                {savingLineup ? 'Publishing…' : 'Publish Team Line-up'}
+              </button>
+            </div>
+          )}
+        </div>
             
 <button
   className="start-setup"

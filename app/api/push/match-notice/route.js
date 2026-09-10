@@ -64,11 +64,11 @@ export async function POST(request) {
     return reply({ error: 'Invalid request.' }, 400)
   }
 
-  const matchId = Number(body?.matchId)
+  const fixtureId = Number(body?.fixtureId)
   const title = typeof body?.title === 'string' ? body.title.trim() : ''
   const message = typeof body?.message === 'string' ? body.message.trim() : ''
   const noticeId = typeof body?.noticeId === 'string' ? body.noticeId.trim() : ''
-  if (!Number.isSafeInteger(matchId) || matchId < 1) return reply({ error: 'Invalid match.' }, 400)
+  if (!Number.isSafeInteger(fixtureId) || fixtureId < 1) return reply({ error: 'Invalid fixture.' }, 400)
   if (!title || title.length > 60) return reply({ error: 'Enter a title of 60 characters or fewer.' }, 400)
   if (!message || message.length > 220) return reply({ error: 'Enter a message of 220 characters or fewer.' }, 400)
   if (!/^[a-f0-9-]{20,50}$/i.test(noticeId)) return reply({ error: 'Invalid notification request.' }, 400)
@@ -83,13 +83,10 @@ export async function POST(request) {
     )
     if (!isAdmin) return reply({ error: 'Admin access is required.' }, 403)
 
-    const match = await requireResult(
-      db.from('matches').select('id, active, notifications_enabled').eq('id', matchId).maybeSingle()
+    const fixture = await requireResult(
+      db.from('upcoming_fixtures').select('id, active').eq('id', fixtureId).maybeSingle()
     )
-    if (!match?.active) return reply({ error: 'This match is no longer active.' }, 409)
-    if (match.notifications_enabled === false) {
-      return reply({ error: 'Test Mode is on. No notification was sent.' }, 409)
-    }
+    if (!fixture?.active) return reply({ error: 'This upcoming fixture is no longer active.' }, 409)
 
     const deliveryId = `notice:${noticeId}`
     const audienceCutoff = new Date().toISOString()

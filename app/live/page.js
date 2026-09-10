@@ -123,7 +123,13 @@ async function loadMatchEvents(matchId) {
       return
     }
 
-    if (!matchData || (matchData.notifications_enabled === false && !isAdmin)) {
+    if (
+      !matchData ||
+      (!isAdmin && (
+        matchData.status === 'pre_match' ||
+        matchData.notifications_enabled === false
+      ))
+    ) {
   setMatch(null)
   setHomeTeam(null)
   setAwayTeam(null)

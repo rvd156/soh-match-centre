@@ -1458,8 +1458,9 @@ async function saveUpcomingLineup() {
 }
 
 async function sendUpcomingNotice(title, message) {
-  const currentMatchId = await prepareUpcomingMatch()
-  if (!currentMatchId) return null
+  if (!upcomingFixture?.id) {
+    throw new Error('There is no published upcoming fixture for this notice.')
+  }
 
   const { data: sessionData } = await supabase.auth.getSession()
   const accessToken = sessionData?.session?.access_token
@@ -1472,7 +1473,7 @@ async function sendUpcomingNotice(title, message) {
       Authorization: `Bearer ${accessToken}`
     },
     body: JSON.stringify({
-      matchId: currentMatchId,
+      fixtureId: upcomingFixture.id,
       title,
       message,
       noticeId: crypto.randomUUID()

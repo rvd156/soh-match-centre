@@ -20,6 +20,21 @@ export default function LiveMatchPage() {
   const [showAllMatchEvents, setShowAllMatchEvents] = useState(false)
   const [showStickyScore, setShowStickyScore] = useState(false)
   const scoreboardRef = useRef(null)
+  const viewerIsAdminRef = useRef(null)
+
+async function viewerIsAdmin() {
+  if (viewerIsAdminRef.current !== null) return viewerIsAdminRef.current
+
+  const { data: userData } = await supabase.auth.getUser()
+  if (!userData?.user) {
+    viewerIsAdminRef.current = false
+    return false
+  }
+
+  const { data: isAdmin, error } = await supabase.rpc('is_match_admin')
+  viewerIsAdminRef.current = !error && isAdmin === true
+  return viewerIsAdminRef.current
+}
 
 async function loadMatchEvents(matchId) {
   if (!matchId) {
@@ -91,13 +106,16 @@ async function loadMatchEvents(matchId) {
 }
   
   async function loadLatestMatch() {
-    const { data: matchData, error: matchError } = await supabase
+    const [{ data: matchData, error: matchError }, isAdmin] = await Promise.all([
+      supabase
   .from('matches')
   .select('*')
   .eq('active', true)
   .order('id', { ascending: false })
   .limit(1)
-  .maybeSingle()
+  .maybeSingle(),
+      viewerIsAdmin()
+    ])
 
     if (matchError) {
       console.error('Error loading live match:', matchError)
@@ -105,7 +123,7 @@ async function loadMatchEvents(matchId) {
       return
     }
 
-    if (!matchData) {
+    if (!matchData || (matchData.notifications_enabled === false && !isAdmin)) {
   setMatch(null)
   setHomeTeam(null)
   setAwayTeam(null)
@@ -135,6 +153,14 @@ setLoading(false)
   useEffect(() => {
   loadLatestMatch()
   loadUpcomingFixture()
+}, [])
+  useEffect(() => {
+  const { data: authListener } = supabase.auth.onAuthStateChange(() => {
+    viewerIsAdminRef.current = null
+    window.setTimeout(loadLatestMatch, 0)
+  })
+
+  return () => authListener.subscription.unsubscribe()
 }, [])
   useEffect(() => {
   const channel = supabase
@@ -226,6 +252,18 @@ useEffect(() => {
     setMatch(null)
     setHomeTeam(null)
     setAwayTeam(null)
+    loadUpcomingFixture()
+    return
+  }
+
+  if (
+    payload.new.notifications_enabled === false &&
+    viewerIsAdminRef.current !== true
+  ) {
+    setMatch(null)
+    setHomeTeam(null)
+    setAwayTeam(null)
+    setMatchEvents([])
     loadUpcomingFixture()
     return
   }

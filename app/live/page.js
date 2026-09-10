@@ -160,6 +160,29 @@ setLoading(false)
   loadLatestMatch()
   loadUpcomingFixture()
 }, [])
+
+  useEffect(() => {
+    let viewerId = window.localStorage.getItem('soh-live-viewer-id')
+    if (!viewerId) {
+      viewerId = crypto.randomUUID()
+      window.localStorage.setItem('soh-live-viewer-id', viewerId)
+    }
+
+    const presenceChannel = supabase.channel('live-page-viewers', {
+      config: { presence: { key: viewerId } }
+    })
+
+    presenceChannel.subscribe(status => {
+      if (status === 'SUBSCRIBED') {
+        presenceChannel.track({ page: 'live', onlineAt: new Date().toISOString() })
+      }
+    })
+
+    return () => {
+      presenceChannel.untrack()
+      supabase.removeChannel(presenceChannel)
+    }
+  }, [])
   useEffect(() => {
   const { data: authListener } = supabase.auth.onAuthStateChange(() => {
     viewerIsAdminRef.current = null

@@ -36,6 +36,7 @@ const [scorerPicker, setScorerPicker] = useState(null)
 const [addingPlayer, setAddingPlayer] = useState(false)
 const [newPlayerName, setNewPlayerName] = useState('')
 const [newPlayerNumber, setNewPlayerNumber] = useState('')  
+const [playerSearch, setPlayerSearch] = useState('')
 const [matchId, setMatchId] = useState(null)
 const [existingMatch, setExistingMatch] = useState(null)
 const [matchEvents, setMatchEvents] = useState([])
@@ -470,6 +471,8 @@ function confirmMatchStage(action) {
 
   const players = isSoh ? sohPlayers : oppositionPlayers
 
+setPlayerSearch('')
+setAddingPlayer(false)
 setScorerPicker({
   side,
   type,
@@ -487,6 +490,16 @@ setScorerPicker({
   const name = newPlayerName.trim()
 
   if (!name || !scorerPicker) return
+
+  if (
+    scorerPicker.type === 'substitution' &&
+    scorerPicker.substitutionStep === 'on'
+  ) {
+    const confirmed = window.confirm(
+      `Confirm substitution?\n\nOFF: ${scorerPicker.playerOff?.name || 'Player not listed'}\nON: ${name}`
+    )
+    if (!confirmed) return
+  }
 
   const teamId =
     scorerPicker.side === 'home'
@@ -521,6 +534,7 @@ if (scorerPicker.type === 'substitution') {
   }
 
   if (scorerPicker.substitutionStep === 'off') {
+    setPlayerSearch('')
     setScorerPicker({
       ...scorerPicker,
       players: [...scorerPicker.players, data],
@@ -560,6 +574,7 @@ if (scorerPicker.type === 'substitution') {
     setAddingPlayer(false)
     setNewPlayerName('')
     setNewPlayerNumber('')
+    setPlayerSearch('')
     setScorerPicker(null)
     return
   }
@@ -2140,7 +2155,7 @@ console.log('RESET RESULT:', data, error)
     display: 'flex',
    alignItems: 'center',
 justifyContent: 'center',
-    background: '#111a16',
+    background: 'rgba(3, 12, 8, 0.94)',
     padding: '16px'
   }}
 >
@@ -2148,22 +2163,68 @@ justifyContent: 'center',
   className="scorer-picker-card"
   style={{
   width: '100%',
-  maxWidth: '500px',
-  maxHeight: '70vh',
+  maxWidth: '560px',
+  maxHeight: 'calc(100vh - 32px)',
   overflowY: 'auto',
   borderRadius: '20px',
-  padding: '24px',
+  padding: '20px',
   marginBottom: '0',
  background: '#14231d',
-  transform: 'translateY(18vh)'
+ border: '1px solid #30493d'
 }}
 >
-      <h2>
-  {scorerPicker.type === 'substitution'
-    ? scorerPicker.substitutionStep === 'off'
-      ? 'Player Going Off'
-      : 'Player Coming On'
-    : scorerPicker.type === 'goals'
+      {scorerPicker.type === 'substitution' ? (
+        <>
+          <div
+            style={{
+              padding: '14px 16px',
+              marginBottom: '14px',
+              borderRadius: '16px',
+              border: scorerPicker.substitutionStep === 'off'
+                ? '3px solid #ef4444'
+                : '3px solid #22c55e',
+              background: scorerPicker.substitutionStep === 'off'
+                ? '#471919'
+                : '#123d24',
+              textAlign: 'center'
+            }}
+          >
+            <div style={{ fontSize: '12px', fontWeight: '900', letterSpacing: '1.2px', opacity: 0.85 }}>
+              STEP {scorerPicker.substitutionStep === 'off' ? '1 OF 2' : '2 OF 2'}
+            </div>
+            <h2 style={{ margin: '5px 0 3px', color: '#ffffff' }}>
+              {scorerPicker.substitutionStep === 'off' ? '🔴 PLAYER OFF' : '🟢 PLAYER ON'}
+            </h2>
+            <div style={{ fontWeight: '700' }}>{scorerPicker.teamName}</div>
+          </div>
+
+          {scorerPicker.substitutionStep === 'on' && (
+            <div
+              style={{
+                marginBottom: '14px',
+                padding: '11px 13px',
+                borderRadius: '12px',
+                borderLeft: '5px solid #ef4444',
+                background: '#2b1919'
+              }}
+            >
+              <div style={{ color: '#fca5a5', fontSize: '11px', fontWeight: '900', letterSpacing: '1px' }}>
+                GOING OFF
+              </div>
+              <strong>
+                {scorerPicker.playerOff
+                  ? `${scorerPicker.playerOff.jersey_number ? `${scorerPicker.playerOff.jersey_number}. ` : ''}${scorerPicker.playerOff.name}`
+                  : 'Player not listed'}
+              </strong>
+              <div style={{ marginTop: '3px', color: '#bbcabf', fontSize: '13px' }}>
+                Now choose the player coming on
+              </div>
+            </div>
+          )}
+        </>
+      ) : (
+        <>
+          <h2>{scorerPicker.type === 'goals'
       ? 'Goal Scorer'
       : scorerPicker.type === 'two_pointer'
         ? '2-Point Scorer'
@@ -2173,10 +2234,10 @@ justifyContent: 'center',
   ? 'Red Card'
   : scorerPicker.type === 'black_card'
     ? 'Black Card'
-    : 'Point Scorer'}
-</h2>
-
-      <p>{scorerPicker.teamName}</p>
+    : 'Point Scorer'}</h2>
+          <p>{scorerPicker.teamName}</p>
+        </>
+      )}
   {['goals', 'points', 'two_pointer'].includes(scorerPicker.type) && (
   <div style={{ margin: '16px 0 20px' }}>
     <div
@@ -2247,22 +2308,43 @@ justifyContent: 'center',
     </div>
   </div>
 )}
+{scorerPicker.players.length > 6 && (
+  <input
+    type="search"
+    value={playerSearch}
+    onChange={(event) => setPlayerSearch(event.target.value)}
+    placeholder="Search by player name or number"
+    autoComplete="off"
+    style={{
+      width: '100%',
+      marginBottom: '12px',
+      padding: '13px 14px',
+      borderRadius: '12px',
+      border: '1px solid #52645b',
+      background: '#0d1d16',
+      color: '#ffffff',
+      fontSize: '16px'
+    }}
+  />
+)}
 <button
   type="button"
   style={{
-    width: '100%',
-    marginBottom: '12px',
+    width: 'auto',
+    marginBottom: '14px',
     background: 'transparent',
-    color: '#ffffff',
+    color: '#c9d5ce',
     border: '1px solid #6b7a73',
-    borderRadius: '14px',
-    padding: '14px'
+    borderRadius: '10px',
+    padding: '8px 11px',
+    fontSize: '13px'
   }}
   onClick={async () => {
 
     if (scorerPicker.type === 'substitution') {
 
       if (scorerPicker.substitutionStep === 'off') {
+        setPlayerSearch('')
         setScorerPicker({
           ...scorerPicker,
           substitutionStep: 'on',
@@ -2273,6 +2355,11 @@ justifyContent: 'center',
       }
 
       if (scorerPicker.substitutionStep === 'on') {
+        const confirmed = window.confirm(
+          `Confirm substitution?\n\nOFF: ${scorerPicker.playerOff?.name || 'Player not listed'}\nON: Player not listed`
+        )
+        if (!confirmed) return
+
         const teamId =
           scorerPicker.side === 'home'
             ? (setup.sohSide === 'home' ? 1 : Number(setup.oppositionTeamId))
@@ -2299,6 +2386,7 @@ justifyContent: 'center',
         }
 
         loadMatchEvents(matchId)
+        setPlayerSearch('')
         setScorerPicker(null)
         return
       }
@@ -2355,27 +2443,56 @@ justifyContent: 'center',
     setScorerPicker(null)
   }}
 >
-  ? Unknown / Team Only
+  {scorerPicker.type === 'substitution'
+    ? scorerPicker.substitutionStep === 'off'
+      ? 'Player going off not listed'
+      : 'Player coming on not listed'
+    : '? Unknown / Team Only'}
 </button>
 
 <div
   className="player-picker-buttons"
   style={{
-    maxHeight: '30vh',
+    maxHeight: '44vh',
     overflowY: 'auto',
-    paddingRight: '4px'
+    paddingRight: '4px',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))',
+    gap: '9px'
   }}
 >
 
-  {scorerPicker.players.map(player => (
+  {[...scorerPicker.players]
+    .filter(player => {
+      const query = playerSearch.trim().toLowerCase()
+      if (!query) return true
+      return `${player.jersey_number || ''} ${player.name || ''}`.toLowerCase().includes(query)
+    })
+    .sort((first, second) => {
+      const firstNumber = Number(first.jersey_number)
+      const secondNumber = Number(second.jersey_number)
+      const firstHasNumber = Number.isFinite(firstNumber) && first.jersey_number !== null
+      const secondHasNumber = Number.isFinite(secondNumber) && second.jersey_number !== null
+      if (firstHasNumber && secondHasNumber && firstNumber !== secondNumber) return firstNumber - secondNumber
+      if (firstHasNumber !== secondHasNumber) return firstHasNumber ? -1 : 1
+      return (first.name || '').localeCompare(second.name || '')
+    })
+    .map(player => (
     <button
   key={player.id}
   type="button"
   style={{
-    background: '#24382f',
+    background: scorerPicker.type === 'substitution'
+      ? scorerPicker.substitutionStep === 'off' ? '#321d1d' : '#153522'
+      : '#24382f',
     color: '#ffffff',
-    border: '1px solid #30493d',
-    borderRadius: '14px'
+    border: scorerPicker.type === 'substitution'
+      ? scorerPicker.substitutionStep === 'off' ? '1px solid #a84444' : '1px solid #2f8f52'
+      : '1px solid #30493d',
+    borderRadius: '12px',
+    padding: '13px 14px',
+    textAlign: 'left',
+    minHeight: '52px'
   }}
      onClick={async () => {
 
@@ -2385,6 +2502,7 @@ justifyContent: 'center',
     scorerPicker.type === 'substitution' &&
     scorerPicker.substitutionStep === 'off'
   ) {
+    setPlayerSearch('')
     setScorerPicker({
       ...scorerPicker,
       substitutionStep: 'on',
@@ -2398,6 +2516,11 @@ justifyContent: 'center',
   scorerPicker.type === 'substitution' &&
   scorerPicker.substitutionStep === 'on'
 ) {
+  const confirmed = window.confirm(
+    `Confirm substitution?\n\nOFF: ${scorerPicker.playerOff?.name || 'Player not listed'}\nON: ${player.name}`
+  )
+  if (!confirmed) return
+
   const { error } = await supabase
     .from('match_events')
     .insert({
@@ -2421,6 +2544,7 @@ justifyContent: 'center',
   console.log('SUBSTITUTION SAVED')
 
   loadMatchEvents(matchId)
+  setPlayerSearch('')
   setScorerPicker(null)
   return
 }
@@ -2533,7 +2657,10 @@ setScorerPicker(null)
   style={{
     marginTop: '12px'
   }}
-  onClick={() => setScorerPicker(null)}
+  onClick={() => {
+    setPlayerSearch('')
+    setScorerPicker(null)
+  }}
 >
   Cancel
 </button>

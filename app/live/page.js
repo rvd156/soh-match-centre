@@ -596,6 +596,12 @@ function formatStatus(status = '') {
   </div>
 )}
 
+{upcomingFixture.supporter_info && (
+  <div style={styles.supporterInfo}>
+    ℹ️ {upcomingFixture.supporter_info}
+  </div>
+)}
+
 <section style={styles.sponsorSection}>
   <div style={styles.sponsorLabel}>
     Match Coverage Sponsored By
@@ -865,7 +871,7 @@ const sohWon =
     .filter(Boolean)
     .join('  •  ')}
 </div>
-            
+
         <section ref={scoreboardRef} style={styles.scoreboard}>
 
           <div style={styles.team}>
@@ -1301,7 +1307,20 @@ const sohWon =
 }
 
 const styles = {
-page: {
+  supporterInfo: {
+    maxWidth: '560px',
+    margin: '16px auto 20px',
+    padding: '13px 15px',
+    borderRadius: '12px',
+    border: '1px solid #9d7a16',
+    background: '#3b2e0b',
+    color: '#fff3bf',
+    fontSize: '15px',
+    fontWeight: '800',
+    lineHeight: 1.45,
+    textAlign: 'center'
+  },
+  page: {
   minHeight: '100vh',
   background: '#071a12',
   color: '#ffffff',

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { getCrestSrc } from '../../lib/crest'
 const emptyTeam = { goals: 0, points: 0 }
-const defaultSetup = { opposition: '', oppositionTeamId: '', oppositionCrest: '', competition: '', venue: '', referee: '', date: '', throwIn: '', halfLength: '30', sohSide: 'home', notificationsEnabled: true }
+const defaultSetup = { opposition: '', oppositionTeamId: '', oppositionCrest: '', competition: '', venue: '', referee: '', supporterInfo: '', date: '', throwIn: '', halfLength: '30', sohSide: 'home', notificationsEnabled: true }
 
 function formatDate(value) {
   if (!value) return ''
@@ -1369,6 +1369,7 @@ if (deactivateError) {
       competition: setup.competition || null,
       venue: setup.venue || null,
       referee: setup.referee || null,
+      supporter_info: setup.supporterInfo?.trim() || null,
       match_date: setup.date,
       throw_in: setup.throwIn,
       soh_side: setup.sohSide,
@@ -1412,6 +1413,7 @@ function detailsForUpcomingFixture() {
     competition: upcomingFixture?.competition || '',
     venue: upcomingFixture?.venue || '',
     referee: upcomingFixture?.referee || '',
+    supporterInfo: upcomingFixture?.supporter_info || '',
     date: upcomingFixture?.match_date || '',
     throwIn: upcomingFixture?.throw_in || '',
     sohSide: upcomingFixture?.soh_side || 'home'
@@ -2877,6 +2879,12 @@ if (upcomingFixture) {
           {upcomingFixture.referee && (
             <div>Referee: {upcomingFixture.referee}</div>
           )}
+
+          {upcomingFixture.supporter_info && (
+            <div style={{ marginTop: '12px', padding: '11px', borderRadius: '10px', background: '#3b2e0b', border: '1px solid #9d7a16', color: '#fff3bf', fontWeight: '800', lineHeight: 1.45 }}>
+              ℹ️ {upcomingFixture.supporter_info}
+            </div>
+          )}
         </div>
 
         <button
@@ -2890,6 +2898,7 @@ if (upcomingFixture) {
               competition: upcomingFixture.competition || '',
               venue: upcomingFixture.venue || '',
               referee: upcomingFixture.referee || '',
+              supporterInfo: upcomingFixture.supporter_info || '',
               date: upcomingFixture.match_date || '',
               throwIn: upcomingFixture.throw_in || '',
               sohSide: upcomingFixture.soh_side || 'home'
@@ -2928,7 +2937,7 @@ if (upcomingFixture) {
                   {
                     label: 'Ticket only',
                     title: 'TICKET-ONLY MATCH',
-                    message: `A reminder that today’s match against ${upcomingFixture.opposition} is ticket only. Please have your ticket ready before arriving.`
+                    message: upcomingFixture.supporter_info || `A reminder that today’s match against ${upcomingFixture.opposition} is ticket only. Please have your ticket ready before arriving.`
                   },
                   {
                     label: 'Throw-in reminder',
@@ -3135,6 +3144,18 @@ onChange={e => {
     onChange={e=>update('referee',e.target.value)}
   />
 </label>  
+    <label className="field full">
+      <span>Supporter Information</span>
+      <textarea
+        placeholder="e.g. Ticket-only match — please have your tickets ready before arrival."
+        value={setup.supporterInfo}
+        maxLength={280}
+        rows={3}
+        onChange={e => update('supporterInfo', e.target.value)}
+        style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '10px', fontSize: '16px', lineHeight: 1.45 }}
+      />
+      <small>{setup.supporterInfo.length}/280 · Optional</small>
+    </label>
     <label className="field"><span>Date</span><input type="date" value={setup.date} onChange={e=>update('date',e.target.value)}/>{setup.date && <small className="date-preview">{formatDate(setup.date)}</small>}</label>
       <label className="field"><span>Throw-in</span><input type="time" value={setup.throwIn} onChange={e=>update('throwIn',e.target.value)}/></label>
       <label className="field"><span>Half Length</span><select value={setup.halfLength} onChange={e=>update('halfLength',e.target.value)}><option value="30">30 minutes</option><option value="35">35 minutes</option><option value="20">20 minutes</option></select></label>

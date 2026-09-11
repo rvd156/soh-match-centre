@@ -1132,6 +1132,8 @@ async function startMatch() {
   setRunning(true)
 }
  async function pauseMatch() {
+  if (!window.confirm('Are you sure you want to pause the match clock?')) return
+
   setRunning(false)
 
   if (matchId) {

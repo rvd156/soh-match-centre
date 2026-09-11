@@ -51,6 +51,7 @@ const [lineupSubstitutes, setLineupSubstitutes] = useState('')
 const [savingLineup, setSavingLineup] = useState(false)
 const [lineupEditorOpen, setLineupEditorOpen] = useState(false)
 const [upcomingFixture, setUpcomingFixture] = useState(null)
+const [testSetupMode, setTestSetupMode] = useState(false)
 const [sendingScoreUpdate, setSendingScoreUpdate] = useState(false)
 const [showFloatingScore, setShowFloatingScore] = useState(false)
 const [floatingScoreTop, setFloatingScoreTop] = useState(0)
@@ -108,6 +109,7 @@ const controllerScoreRef = useRef(null)
         const updatedMatch = payload.new
         if (updatedMatch.active === false) {
   setMatchId(null)
+  setTestSetupMode(false)
   setRunning(false)
   setPeriod('PRE-MATCH')
   setSetupComplete(false)
@@ -1021,31 +1023,6 @@ async function ensureMatchRecord(matchSetup = setup) {
   return data.id
 }
 
-async function toggleMatchNotifications() {
-  const currentlyEnabled = setup.notificationsEnabled !== false
-  const nextEnabled = !currentlyEnabled
-  const action = nextEnabled
-    ? 'turn notifications on for this match'
-    : 'switch this match to Test Mode and stop all notifications'
-
-  if (!window.confirm(`Are you sure you want to ${action}?`)) return
-
-  if (matchId) {
-    const { error } = await supabase
-      .from('matches')
-      .update({ notifications_enabled: nextEnabled })
-      .eq('id', matchId)
-
-    if (error) {
-      console.error('Error changing notification mode:', error)
-      alert('Could not change the notification mode.')
-      return
-    }
-  }
-
-  setSetup(current => ({ ...current, notificationsEnabled: nextEnabled }))
-}
-
 function parseLineup(value) {
   return value
     .split('\n')
@@ -1638,6 +1615,7 @@ console.log('RESET RESULT:', data, error)
   setSetupComplete(false)
   setDisplayMode(false)
   setMatchId(null)
+  setTestSetupMode(false)
   setLineupStarters('')
   setLineupSubstitutes('')
   setLineupEditorOpen(false)
@@ -1664,6 +1642,20 @@ console.log('RESET RESULT:', data, error)
     savingLineup={savingLineup}
     onSaveUpcomingLineup={saveUpcomingLineup}
     onSendUpcomingNotice={sendUpcomingNotice}
+    testSetupMode={testSetupMode}
+    onOpenTestSetup={() => {
+      setSetup({
+        ...defaultSetup,
+        competition: 'Test Match',
+        date: new Date().toLocaleDateString('en-CA'),
+        notificationsEnabled: false
+      })
+      setTestSetupMode(true)
+    }}
+    onCloseTestSetup={() => {
+      setSetup(defaultSetup)
+      setTestSetupMode(false)
+    }}
   />
 )
   return <main className={displayMode ? 'display-page' : ''}>
@@ -1748,23 +1740,22 @@ console.log('RESET RESULT:', data, error)
     borderColor: setup.notificationsEnabled !== false ? '#2f6f4e' : '#d19a22'
   }}
 >
-  <button
-    type="button"
-    onClick={toggleMatchNotifications}
-    style={{
-      background: setup.notificationsEnabled !== false ? '#174e35' : '#8a5a00',
-      color: '#ffffff'
-    }}
-  >
-    {setup.notificationsEnabled !== false
-      ? '🔔 Notifications On'
-      : '🧪 Test Mode — Notifications Off'}
-  </button>
+  <strong style={{ display: 'block', textAlign: 'center', color: setup.notificationsEnabled !== false ? '#8ee0ad' : '#ffd56a' }}>
+    {setup.notificationsEnabled !== false ? '🔔 Live Match' : '🧪 Test Match — Notifications Off'}
+  </strong>
   <small style={{ display: 'block', marginTop: '8px', color: '#b9c7be', textAlign: 'center' }}>
     {setup.notificationsEnabled !== false
       ? 'Match events will notify subscribed supporters.'
-      : 'Scores and events can be tested without sending push notifications.'}
+      : 'This match is hidden from supporters. Open the preview while logged in to watch it update.'}
   </small>
+  <a
+    href="/live"
+    target="_blank"
+    rel="noreferrer"
+    style={{ display: 'block', marginTop: '11px', padding: '10px 12px', borderRadius: '9px', background: '#174e35', color: '#fff', textAlign: 'center', fontWeight: '900', textDecoration: 'none' }}
+  >
+    Open Admin Live Preview ↗
+  </a>
 </div>
 {matchId && (
   <div className="admin-grid">
@@ -2776,7 +2767,10 @@ function Setup({
   setLineupSubstitutes,
   savingLineup,
   onSaveUpcomingLineup,
-  onSendUpcomingNotice
+  onSendUpcomingNotice,
+  testSetupMode,
+  onOpenTestSetup,
+  onCloseTestSetup
 }) {
   const update = (key,value) => setSetup(s=>({...s,[key]:value}))
   const [noticeOpen, setNoticeOpen] = useState(false)
@@ -2835,7 +2829,7 @@ function Setup({
   )
 }
 
-if (upcomingFixture) {
+if (upcomingFixture && !testSetupMode) {
   return (
     <main className="setup-page">
       <section className="setup-card">
@@ -3077,6 +3071,15 @@ if (upcomingFixture) {
               </button>
             </div>
           )}
+
+          <button
+            type="button"
+            className="start-setup"
+            style={{ background: '#6f4b0c', border: '1px solid #d19a22' }}
+            onClick={onOpenTestSetup}
+          >
+            🧪 Set Up a Test Match
+          </button>
         </div>
             
 <button
@@ -3096,7 +3099,16 @@ if (upcomingFixture) {
 }
   return <main className="setup-page"><section className="setup-card">
     <div className="setup-brand"><img src="/soh-crest.png" alt="SOH crest"/><div><p>SEÁN O'HESLIN'S GAA</p><h1>Match Centre</h1></div></div>
-    <div className="setup-heading"><span>NEW MATCH</span><h2>Match Setup</h2><p>Enter the match details before throw-in.</p></div>
+    <div className="setup-heading">
+      <span>{testSetupMode ? 'PRIVATE TEST' : 'NEW MATCH'}</span>
+      <h2>{testSetupMode ? 'Test Match Setup' : 'Match Setup'}</h2>
+      <p>{testSetupMode ? 'Run a complete private test with all supporter notifications disabled.' : 'Enter the match details before throw-in.'}</p>
+    </div>
+    {testSetupMode && (
+      <div style={{ marginBottom: '18px', padding: '13px', borderRadius: '12px', background: '#3b2e0b', border: '1px solid #d19a22', color: '#fff3bf', fontWeight: '800', lineHeight: 1.45 }}>
+        🧪 Supporters will not see this match or receive any notifications. You can view it through the Admin Live Preview while logged in.
+      </div>
+    )}
     <div className="team-setup-row">
      <div className="crest-preview-card soh-crest-card"><span>SOH</span><img src={getCrestSrc('', 1)} alt="SOH crest"/></div>
       <div className="crest-preview-card"><span>{setup.opposition || 'Opposition'}</span>
@@ -3161,35 +3173,22 @@ onChange={e => {
       <label className="field"><span>Throw-in</span><input type="time" value={setup.throwIn} onChange={e=>update('throwIn',e.target.value)}/></label>
       <label className="field"><span>Half Length</span><select value={setup.halfLength} onChange={e=>update('halfLength',e.target.value)}><option value="30">30 minutes</option><option value="35">35 minutes</option><option value="20">20 minutes</option></select></label>
       <div className="field"><span>SOH Playing</span><div className="side-picker"><button className={setup.sohSide==='home'?'selected':''} onClick={()=>update('sohSide','home')}>Home</button><button className={setup.sohSide==='away'?'selected':''} onClick={()=>update('sohSide','away')}>Away</button></div></div>
-      <div className="field">
-        <span>Notification Mode</span>
-        <div className="side-picker">
-          <button
-            type="button"
-            className={setup.notificationsEnabled !== false ? 'selected' : ''}
-            onClick={() => update('notificationsEnabled', true)}
-          >
-            🔔 Live
-          </button>
-          <button
-            type="button"
-            className={setup.notificationsEnabled === false ? 'selected' : ''}
-            onClick={() => update('notificationsEnabled', false)}
-          >
-            🧪 Test
-          </button>
-        </div>
-        <small>Test mode blocks every push notification.</small>
-      </div>
     </div>
-    <button
+    {!testSetupMode && <button
   className="start-setup"
   disabled={!setup.opposition.trim() || !setup.date || !setup.throwIn}
   onClick={onPublishFixture}
 >
   Publish Upcoming Fixture
-</button>
-    <button className="start-setup" disabled={!setup.opposition.trim() || !setup.date || !setup.throwIn} onClick={onStart}>Continue to Scoreboard →</button>
+</button>}
+    <button className="start-setup" disabled={!setup.opposition.trim() || !setup.date || !setup.throwIn} onClick={onStart}>
+      {testSetupMode ? 'Start Test Match →' : 'Continue to Scoreboard →'}
+    </button>
+    {testSetupMode && (
+      <button type="button" className="start-setup" onClick={onCloseTestSetup} style={{ marginTop: '12px', background: '#24382f' }}>
+        Cancel Test Setup
+      </button>
+    )}
   </section></main>
 }
 

@@ -1081,6 +1081,8 @@ async function saveLineup() {
 }
 
 async function startMatch() {
+  if (running && period !== 'PRE-MATCH') return
+
   if (
     period === 'PRE-MATCH' &&
     !confirmMatchStage('Are you sure you want to start the match?')
@@ -1836,15 +1838,12 @@ console.log('RESET RESULT:', data, error)
   )}
 
   {(period === 'FIRST HALF' || period === 'SECOND HALF' || period === 'EXTRA TIME' || period === 'EXTRA TIME 2ND HALF') && (
-    <>
-      <button onClick={startMatch} className="primary">
-        {running ? 'Running' : 'Resume'}
-      </button>
-
-      <button onClick={pauseMatch}>
-        Pause
-      </button>
-    </>
+    <button
+      onClick={running ? pauseMatch : startMatch}
+      className={running ? '' : 'primary'}
+    >
+      {running ? 'Pause Clock' : 'Resume Clock'}
+    </button>
   )}
 
   {period === 'FIRST HALF' && (

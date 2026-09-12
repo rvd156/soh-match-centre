@@ -1557,6 +1557,18 @@ const heading =
     ].filter(Boolean).join(' · ')
   }
 
+  const homeTotal = Number(home.goals) * 3 + Number(home.points)
+  const awayTotal = Number(away.goals) * 3 + Number(away.points)
+  const margin = setup.sohSide === 'home'
+    ? homeTotal - awayTotal
+    : awayTotal - homeTotal
+  const marginLabel = `${Math.abs(margin)} ${Math.abs(margin) === 1 ? 'point' : 'points'}`
+  const scoreSummary = margin === 0
+    ? 'Both sides are level.'
+    : margin > 0
+      ? `Ballinamore SOH lead by ${marginLabel}.`
+      : `Ballinamore SOH trail by ${marginLabel}.`
+
   const postLines = [
     heading,
     ''
@@ -1570,10 +1582,13 @@ const heading =
     `${homeName} ${home.goals}-${String(home.points).padStart(2, '0')}`,
     `${awayName} ${away.goals}-${String(away.points).padStart(2, '0')}`,
     '',
+    scoreSummary,
+    '',
     'Follow live:',
 'https://matchcentre.ballinamoreseanoheslinsgaa.com/live',
 '',
-'@LeitrimGAA'
+'@LeitrimGAA',
+'#SOHMatchCentre #LeitrimClubChamp'
   )
 
   const postText = postLines.join('\n')

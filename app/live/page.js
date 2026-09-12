@@ -1,6 +1,6 @@
 'use client'
 
-import { getAddedTime } from '../../lib/added-time'
+import { getAddedTime, isPastHalfEnd, addedTimeStyle } from '../../lib/added-time'
 
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
@@ -774,8 +774,8 @@ const sohWon =
             fontWeight: '900'
           }}
         >
-          {formatClock(liveSeconds)}
-    {getAddedTime(matchEvents, match.status) > 0 && <div style={{ fontSize: '12px', color: '#f4c430', fontWeight: 800 }}>+{getAddedTime(matchEvents, match.status)} MIN ADDED TIME</div>}
+          <span style={{ color: isPastHalfEnd(liveSeconds, match.status, match.half_length || 30) ? '#ef4444' : undefined }}>{formatClock(liveSeconds)}</span>
+    {getAddedTime(matchEvents, match.status) > 0 && <div style={addedTimeStyle}>+{getAddedTime(matchEvents, match.status)} MIN ADDED TIME</div>}
         </div>
       </div>
 
@@ -874,8 +874,8 @@ const sohWon =
 
 {!matchFinished && (
   <div style={styles.clock}>
-    {formatClock(liveSeconds)}
-    {getAddedTime(matchEvents, match.status) > 0 && <div style={{ fontSize: '12px', color: '#f4c430', fontWeight: 800 }}>+{getAddedTime(matchEvents, match.status)} MIN ADDED TIME</div>}
+    <span style={{ color: isPastHalfEnd(liveSeconds, match.status, match.half_length || 30) ? '#ef4444' : undefined }}>{formatClock(liveSeconds)}</span>
+    {getAddedTime(matchEvents, match.status) > 0 && <div style={addedTimeStyle}>+{getAddedTime(matchEvents, match.status)} MIN ADDED TIME</div>}
   </div>
 )}
         </div>

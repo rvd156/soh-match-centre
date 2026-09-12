@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { getCrestSrc } from '../../lib/crest'
-import { addedTimePeriod, getAddedTime } from '../../lib/added-time'
+import { addedTimePeriod, getAddedTime, isPastHalfEnd, addedTimeStyle } from '../../lib/added-time'
 const emptyTeam = { goals: 0, points: 0 }
 const defaultSetup = { opposition: '', oppositionTeamId: '', oppositionCrest: '', competition: '', venue: '', referee: '', supporterInfo: '', date: '', throwIn: '', halfLength: '30', sohSide: 'home', notificationsEnabled: true }
 
@@ -1740,8 +1740,8 @@ console.log('RESET RESULT:', data, error)
         {period}
       </div>
       <div style={{ fontSize: '20px', fontWeight: 800 }}>
-        {clock}
-        {addedTime > 0 && <div style={{ fontSize: '12px', color: '#f4c430' }}>+{addedTime} MIN ADDED TIME</div>}
+        <span style={{ color: isPastHalfEnd(displaySeconds, period, setup.halfLength) ? '#ef4444' : undefined }}>{clock}</span>
+        {addedTime > 0 && <div style={addedTimeStyle}>+{addedTime} MIN ADDED TIME</div>}
       </div>
     </div>
 
@@ -1758,7 +1758,7 @@ console.log('RESET RESULT:', data, error)
       <div className="topbar">
         <img className="crest-small" src="/soh-crest.png" alt="SOH crest" />
         <div className="match-status"><strong>{period}</strong><span>{setup.competition || 'SOH MATCH CENTRE'}</span></div>
-        <div className="clock">{clock}{addedTime > 0 && <div style={{ fontSize: '12px', color: '#f4c430' }}>+{addedTime} MIN ADDED TIME</div>}</div>
+        <div className="clock"><span style={{ color: isPastHalfEnd(displaySeconds, period, setup.halfLength) ? '#ef4444' : undefined }}>{clock}</span>{addedTime > 0 && <div style={addedTimeStyle}>+{addedTime} MIN ADDED TIME</div>}</div>
       </div>
       {(setup.venue || setup.date || setup.throwIn || setup.referee) && (
   <div

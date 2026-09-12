@@ -1740,7 +1740,7 @@ console.log('RESET RESULT:', data, error)
         {period}
       </div>
       <div style={{ fontSize: '20px', fontWeight: 800 }}>
-        <span style={{ color: isPastHalfEnd(displaySeconds, period, setup.halfLength) ? '#ef4444' : undefined }}>{clock}</span>
+        <span style={{ display: 'block', color: isPastHalfEnd(displaySeconds, period, setup.halfLength) ? '#ef4444' : undefined }}>{clock}</span>
         {addedTime > 0 && <div style={addedTimeStyle}>+{addedTime} MIN ADDED TIME</div>}
       </div>
     </div>
@@ -1758,7 +1758,7 @@ console.log('RESET RESULT:', data, error)
       <div className="topbar">
         <img className="crest-small" src="/soh-crest.png" alt="SOH crest" />
         <div className="match-status"><strong>{period}</strong><span>{setup.competition || 'SOH MATCH CENTRE'}</span></div>
-        <div className="clock"><span style={{ color: isPastHalfEnd(displaySeconds, period, setup.halfLength) ? '#ef4444' : undefined }}>{clock}</span>{addedTime > 0 && <div style={addedTimeStyle}>+{addedTime} MIN ADDED TIME</div>}</div>
+        <div className="clock"><span style={{ display: 'block', color: isPastHalfEnd(displaySeconds, period, setup.halfLength) ? '#ef4444' : undefined }}>{clock}</span>{addedTime > 0 && <div style={addedTimeStyle}>+{addedTime} MIN ADDED TIME</div>}</div>
       </div>
       {(setup.venue || setup.date || setup.throwIn || setup.referee) && (
   <div

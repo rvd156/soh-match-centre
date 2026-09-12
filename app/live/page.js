@@ -774,7 +774,7 @@ const sohWon =
             fontWeight: '900'
           }}
         >
-          <span style={{ color: isPastHalfEnd(liveSeconds, match.status, match.half_length || 30) ? '#ef4444' : undefined }}>{formatClock(liveSeconds)}</span>
+          <span style={{ display: 'block', color: isPastHalfEnd(liveSeconds, match.status, match.half_length || 30) ? '#ef4444' : undefined }}>{formatClock(liveSeconds)}</span>
     {getAddedTime(matchEvents, match.status) > 0 && <div style={addedTimeStyle}>+{getAddedTime(matchEvents, match.status)} MIN ADDED TIME</div>}
         </div>
       </div>
@@ -874,7 +874,7 @@ const sohWon =
 
 {!matchFinished && (
   <div style={styles.clock}>
-    <span style={{ color: isPastHalfEnd(liveSeconds, match.status, match.half_length || 30) ? '#ef4444' : undefined }}>{formatClock(liveSeconds)}</span>
+    <span style={{ display: 'block', color: isPastHalfEnd(liveSeconds, match.status, match.half_length || 30) ? '#ef4444' : undefined }}>{formatClock(liveSeconds)}</span>
     {getAddedTime(matchEvents, match.status) > 0 && <div style={addedTimeStyle}>+{getAddedTime(matchEvents, match.status)} MIN ADDED TIME</div>}
   </div>
 )}

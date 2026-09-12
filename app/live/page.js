@@ -1,5 +1,7 @@
 'use client'
 
+import { getAddedTime } from '../../lib/added-time'
+
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { getCrestSrc } from '../../lib/crest'
@@ -773,6 +775,7 @@ const sohWon =
           }}
         >
           {formatClock(liveSeconds)}
+    {getAddedTime(matchEvents, match.status) > 0 && <div style={{ fontSize: '12px', color: '#f4c430', fontWeight: 800 }}>+{getAddedTime(matchEvents, match.status)} MIN ADDED TIME</div>}
         </div>
       </div>
 
@@ -872,6 +875,7 @@ const sohWon =
 {!matchFinished && (
   <div style={styles.clock}>
     {formatClock(liveSeconds)}
+    {getAddedTime(matchEvents, match.status) > 0 && <div style={{ fontSize: '12px', color: '#f4c430', fontWeight: 800 }}>+{getAddedTime(matchEvents, match.status)} MIN ADDED TIME</div>}
   </div>
 )}
         </div>

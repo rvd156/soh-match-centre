@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { getCrestSrc } from '../../lib/crest'
+import { addedTimePeriod, getAddedTime } from '../../lib/added-time'
 const emptyTeam = { goals: 0, points: 0 }
 const defaultSetup = { opposition: '', oppositionTeamId: '', oppositionCrest: '', competition: '', venue: '', referee: '', supporterInfo: '', date: '', throwIn: '', halfLength: '30', sohSide: 'home', notificationsEnabled: true }
 
@@ -1494,6 +1495,34 @@ async function sendScoreUpdate() {
   }
 }
 
+  const addedTime = getAddedTime(matchEvents, period)
+
+  async function announceAddedTime() {
+    const entered = window.prompt('How many minutes of added time? Enter 0 to clear.', String(addedTime))
+    if (entered === null) return
+    const minutes = Number(entered)
+    if (!entered.trim() || !Number.isInteger(minutes) || minutes < 0 || minutes > 30) {
+      alert('Enter a whole number between 0 and 30.')
+      return
+    }
+    if (!window.confirm(`Announce ${minutes} minutes of added time for ${period.toLowerCase()}?`)) return
+    const { error } = await supabase.from('match_events').insert({
+      match_id: matchId,
+      team_id: null,
+      player_id: null,
+      event_type: 'manual_update',
+      score_type: null,
+      match_minute: Math.floor(displaySeconds / 60),
+      clock_seconds: displaySeconds,
+      notes: `Added time (${addedTimePeriod(period)}): ${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`
+    })
+    if (error) {
+      alert(`Could not save added time: ${error.message}`)
+      return
+    }
+    await loadMatchEvents(matchId)
+  }
+
   function postScoreToX() {
   if (!matchId) {
     alert('Start or resume the match before posting a score update.')
@@ -1712,6 +1741,7 @@ console.log('RESET RESULT:', data, error)
       </div>
       <div style={{ fontSize: '20px', fontWeight: 800 }}>
         {clock}
+        {addedTime > 0 && <div style={{ fontSize: '12px', color: '#f4c430' }}>+{addedTime} MIN ADDED TIME</div>}
       </div>
     </div>
 
@@ -1728,7 +1758,7 @@ console.log('RESET RESULT:', data, error)
       <div className="topbar">
         <img className="crest-small" src="/soh-crest.png" alt="SOH crest" />
         <div className="match-status"><strong>{period}</strong><span>{setup.competition || 'SOH MATCH CENTRE'}</span></div>
-        <div className="clock">{clock}</div>
+        <div className="clock">{clock}{addedTime > 0 && <div style={{ fontSize: '12px', color: '#f4c430' }}>+{addedTime} MIN ADDED TIME</div>}</div>
       </div>
       {(setup.venue || setup.date || setup.throwIn || setup.referee) && (
   <div
@@ -1847,6 +1877,9 @@ console.log('RESET RESULT:', data, error)
 </div>
 
         <div className="match-controls">
+  {matchId && ['FIRST HALF', 'SECOND HALF', 'EXTRA TIME', 'EXTRA TIME 2ND HALF'].includes(period) && (
+    <button type="button" onClick={announceAddedTime}>⏱️ {addedTime > 0 ? 'Edit Added Time' : 'Add Added Time'}</button>
+  )}
 
   {period === 'PRE-MATCH' && (
     <button onClick={startMatch} className="primary">

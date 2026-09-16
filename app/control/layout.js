@@ -168,6 +168,17 @@ export default function ControlLayout({ children }) {
   >
     Match Reports
   </a>
+  <a
+    href="/control/players"
+    style={{
+      color: '#ffffff',
+      fontSize: '12px',
+      fontWeight: '800',
+      textDecoration: 'none'
+    }}
+  >
+    Players
+  </a>
 </div>
 
         <div style={{ display: 'flex', gap: '7px', alignItems: 'center' }}>

@@ -42,6 +42,7 @@ const [matchId, setMatchId] = useState(null)
 const [existingMatch, setExistingMatch] = useState(null)
 const [matchEvents, setMatchEvents] = useState([])
 const [showAllEvents, setShowAllEvents] = useState(false)
+const [undoingEventId, setUndoingEventId] = useState(null)
 const [manualUpdateOpen, setManualUpdateOpen] = useState(false)
 const [manualUpdateText, setManualUpdateText] = useState('')
 const [matchSummary, setMatchSummary] = useState('')
@@ -674,7 +675,20 @@ async function loadMatchEvents(currentMatchId) {
 
   setMatchEvents(data || [])
 }
-  async function removeMatchEvent(event) {
+  function describeMatchEvent(event) {
+    if (!event) return 'Last action'
+    if (event.event_type === 'manual_update') return event.notes || 'Match update'
+    if (event.event_type === 'substitution') {
+      return `Substitution: ${event.player_off?.name || 'player'} off, ${event.player_on?.name || 'player'} on`
+    }
+    const labels = {
+      goal: 'Goal', point: 'Point', two_pointer: '2-pointer',
+      black_card: 'Black card', yellow_card: 'Yellow card', red_card: 'Red card'
+    }
+    return `${labels[event.event_type] || 'Match event'} — ${event.players?.name || event.teams?.name || 'Team'}`
+  }
+
+  async function removeMatchEvent(event, skipConfirmation = false) {
 const eventName =
   event.event_type === 'goal'
     ? 'goal'
@@ -692,12 +706,12 @@ const eventName =
               ? 'substitution'
               : 'event'
 
-  if (
+  if (!skipConfirmation &&
     !window.confirm(
       `Remove this ${eventName} for ${event.players?.name || 'this player'}?`
     )
   ) {
-    return
+    return false
   }
 
   const isScoreEvent =
@@ -718,7 +732,7 @@ const eventName =
   if (error) {
   console.error('Error removing match event:', error)
   alert('Could not remove the match event.')
-  return
+  return false
 }
 
   setMatchEvents(prev =>
@@ -734,8 +748,19 @@ if (isScoreEvent) {
 
   changeScore(eventSide, scoreType, scoreAmount)
 }
-    
+  return true
 }
+
+  async function undoLastAction() {
+    const event = matchEvents[0]
+    if (!event || undoingEventId) return
+    const description = describeMatchEvent(event)
+    if (!window.confirm(`Undo the last action?\n\n${description}\n${event.match_minute ?? 0}'`)) return
+    setUndoingEventId(event.id)
+    const removed = await removeMatchEvent(event, true)
+    setUndoingEventId(null)
+    if (removed) alert(`Undone: ${description}`)
+  }
   
   async function checkForExistingMatch() {
   const { data, error } = await supabase
@@ -1984,6 +2009,25 @@ console.log('RESET RESULT:', data, error)
   </button>
 
 </div>
+{matchId && matchEvents.length > 0 && period !== 'PRE-MATCH' && (
+  <button
+    type="button"
+    onClick={undoLastAction}
+    disabled={Boolean(undoingEventId)}
+    style={{
+      width: '100%',
+      marginTop: '12px',
+      padding: '13px',
+      border: '2px solid #f4c430',
+      borderRadius: '12px',
+      background: '#30290e',
+      color: '#ffffff',
+      fontWeight: '900'
+    }}
+  >
+    {undoingEventId ? 'Undoing…' : `↶ Undo Last: ${describeMatchEvent(matchEvents[0])}`}
+  </button>
+)}
 {(period === 'FULL TIME' || period === 'AET') && (
   <div className="control-card" style={{ marginTop: '16px' }}>
     <h3>Match Summary</h3>

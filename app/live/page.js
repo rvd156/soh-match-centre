@@ -636,18 +636,21 @@ function formatStatus(status = '') {
 
 </div>
 <div style={styles.upcomingDetails}>
-  <div style={styles.upcomingDate}>
+  {upcomingFixture.match_date && <div style={styles.upcomingDate}>
     {new Date(`${upcomingFixture.match_date}T12:00:00`).toLocaleDateString('en-IE', {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
       year: 'numeric'
     })}
-  </div>
+  </div>}
 
-  <div style={styles.upcomingTime}>
+  {upcomingFixture.throw_in && <div style={styles.upcomingTime}>
     Throw-in: {upcomingFixture.throw_in?.slice(0, 5)}
-  </div>
+  </div>}
+  {!upcomingFixture.match_date && !upcomingFixture.throw_in && (
+    <div style={styles.upcomingMeta}>Date and throw-in time to be confirmed</div>
+  )}
     {upcomingFixture.venue && (
   <div style={styles.upcomingMeta}>
     📍 {upcomingFixture.venue}
@@ -690,7 +693,7 @@ function formatStatus(status = '') {
 </div>
 </>
 ) : (
-  <div style={styles.message}>No match available.</div>
+  <div style={styles.message}>No upcoming fixture confirmed — check back later.</div>
 )}
 
       </div>

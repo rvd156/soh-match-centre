@@ -53,6 +53,7 @@ const [lineupSubstitutes, setLineupSubstitutes] = useState('')
 const [savingLineup, setSavingLineup] = useState(false)
 const [lineupEditorOpen, setLineupEditorOpen] = useState(false)
 const [upcomingFixture, setUpcomingFixture] = useState(null)
+const [editingUpcomingFixture, setEditingUpcomingFixture] = useState(false)
 const [testSetupMode, setTestSetupMode] = useState(false)
 const [sendingScoreUpdate, setSendingScoreUpdate] = useState(false)
 const [showFloatingScore, setShowFloatingScore] = useState(false)
@@ -1353,10 +1354,36 @@ async function extraTimeFullTime() {
   }
 }
   async function publishUpcomingFixture() {
-  if (!setup.opposition.trim() || !setup.date || !setup.throwIn) {
-    alert('Please enter the opposition, date and throw-in time.')
+  if (!setup.opposition.trim()) {
+    alert('Please select the opposition.')
     return
   }
+const fixturePayload = {
+  opposition: setup.opposition,
+  opposition_team_id: setup.oppositionTeamId || null,
+  competition: setup.competition || null,
+  venue: setup.venue || null,
+  referee: setup.referee || null,
+  supporter_info: setup.supporterInfo?.trim() || null,
+  match_date: setup.date || null,
+  throw_in: setup.throwIn || null,
+  soh_side: setup.sohSide,
+  opposition_crest: setup.oppositionCrest || null,
+  active: true
+}
+
+if (editingUpcomingFixture && upcomingFixture) {
+  const { error } = await supabase.from('upcoming_fixtures')
+    .update(fixturePayload).eq('id', upcomingFixture.id)
+  if (error) {
+    alert(`Could not update fixture: ${error.message}`)
+    return
+  }
+  setEditingUpcomingFixture(false)
+  await loadUpcomingFixture()
+  alert('Upcoming fixture updated!')
+  return
+}
 const { error: deactivateError } = await supabase
   .from('upcoming_fixtures')
   .update({ active: false })
@@ -1370,18 +1397,7 @@ if (deactivateError) {
     
   const { error } = await supabase
     .from('upcoming_fixtures')
-    .insert({
-      opposition: setup.opposition,
-      opposition_team_id: setup.oppositionTeamId || null,
-      competition: setup.competition || null,
-      venue: setup.venue || null,
-      referee: setup.referee || null,
-      supporter_info: setup.supporterInfo?.trim() || null,
-      match_date: setup.date,
-      throw_in: setup.throwIn,
-      soh_side: setup.sohSide,
-      opposition_crest: setup.oppositionCrest || null
-    })
+    .insert(fixturePayload)
 
   if (error) {
     console.error('Error publishing upcoming fixture:', error)
@@ -1389,7 +1405,14 @@ if (deactivateError) {
     return
   }
 
+  await loadUpcomingFixture()
   alert('Upcoming fixture published!')
+}
+
+function editUpcomingFixture() {
+  if (!upcomingFixture) return
+  setSetup(detailsForUpcomingFixture())
+  setEditingUpcomingFixture(true)
 }
 
 async function resetUpcomingFixture() {
@@ -1708,6 +1731,9 @@ console.log('RESET RESULT:', data, error)
     onPublishFixture={publishUpcomingFixture}
     upcomingFixture={upcomingFixture}
     onResetUpcomingFixture={resetUpcomingFixture}
+    editingUpcomingFixture={editingUpcomingFixture}
+    onEditUpcomingFixture={editUpcomingFixture}
+    onCancelEditUpcomingFixture={() => setEditingUpcomingFixture(false)}
     lineupStarters={lineupStarters}
     setLineupStarters={setLineupStarters}
     lineupSubstitutes={lineupSubstitutes}
@@ -2853,6 +2879,9 @@ function Setup({
   onResumeMatch,
   onResetExistingMatch,
   onResetUpcomingFixture,
+  editingUpcomingFixture,
+  onEditUpcomingFixture,
+  onCancelEditUpcomingFixture,
   upcomingFixture,
   lineupStarters,
   setLineupStarters,
@@ -2922,7 +2951,7 @@ function Setup({
   )
 }
 
-if (upcomingFixture && !testSetupMode) {
+if (upcomingFixture && !testSetupMode && !editingUpcomingFixture) {
   return (
     <main className="setup-page">
       <section className="setup-card">
@@ -2999,6 +3028,14 @@ if (upcomingFixture && !testSetupMode) {
         </button>
 
         <div style={{ display: 'grid', gap: '10px', marginTop: '12px' }}>
+          <button
+            type="button"
+            className="start-setup"
+            style={{ background: '#24382f' }}
+            onClick={onEditUpcomingFixture}
+          >
+            ✏️ Edit Fixture Details
+          </button>
           <button
             type="button"
             className="start-setup"
@@ -3195,7 +3232,7 @@ if (upcomingFixture && !testSetupMode) {
     <div className="setup-heading">
       <span>{testSetupMode ? 'PRIVATE TEST' : 'NEW MATCH'}</span>
       <h2>{testSetupMode ? 'Test Match Setup' : 'Match Setup'}</h2>
-      <p>{testSetupMode ? 'Run a complete private test with all supporter notifications disabled.' : 'Enter the match details before throw-in.'}</p>
+      <p>{testSetupMode ? 'Run a complete private test with all supporter notifications disabled.' : editingUpcomingFixture ? 'Update the details that have now been confirmed.' : 'Publish the opposition now and add other details when confirmed.'}</p>
     </div>
     {testSetupMode && (
       <div style={{ marginBottom: '18px', padding: '13px', borderRadius: '12px', background: '#3b2e0b', border: '1px solid #d19a22', color: '#fff3bf', fontWeight: '800', lineHeight: 1.45 }}>
@@ -3269,10 +3306,10 @@ onChange={e => {
     </div>
     {!testSetupMode && <button
   className="start-setup"
-  disabled={!setup.opposition.trim() || !setup.date || !setup.throwIn}
+  disabled={!setup.opposition.trim()}
   onClick={onPublishFixture}
 >
-  Publish Upcoming Fixture
+  {editingUpcomingFixture ? 'Save Fixture Details' : 'Publish Upcoming Fixture'}
 </button>}
     <button className="start-setup" disabled={!setup.opposition.trim() || !setup.date || !setup.throwIn} onClick={onStart}>
       {testSetupMode ? 'Start Test Match →' : 'Continue to Scoreboard →'}
@@ -3280,6 +3317,11 @@ onChange={e => {
     {testSetupMode && (
       <button type="button" className="start-setup" onClick={onCloseTestSetup} style={{ marginTop: '12px', background: '#24382f' }}>
         Cancel Test Setup
+      </button>
+    )}
+    {editingUpcomingFixture && (
+      <button type="button" className="start-setup" onClick={onCancelEditUpcomingFixture} style={{ marginTop: '12px', background: '#24382f' }}>
+        Cancel Editing
       </button>
     )}
   </section></main>

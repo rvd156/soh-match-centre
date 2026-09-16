@@ -9,6 +9,28 @@ import NotificationButton from '../NotificationButton'
 import TeamLineup from '../TeamLineup'
 import MatchStats from '../MatchStats'
 
+function ScorelessBadge({ minutes, compact = false }) {
+  if (minutes < 10) return null
+  const extended = minutes >= 15
+  return (
+    <div style={{
+      display: 'inline-block',
+      marginTop: compact ? '4px' : '10px',
+      padding: compact ? '2px 5px' : '5px 8px',
+      border: `2px solid ${extended ? '#ef4444' : '#f59e0b'}`,
+      borderRadius: '6px',
+      background: extended ? '#7f1d1d' : '#78350f',
+      color: '#ffffff',
+      fontSize: compact ? '9px' : '11px',
+      fontWeight: '900',
+      lineHeight: 1.15,
+      whiteSpace: 'nowrap'
+    }}>
+      {compact ? `${minutes}m scoreless` : `${minutes} MINUTES SCORELESS`}
+    </div>
+  )
+}
+
 export default function LiveMatchPage() {
   const [match, setMatch] = useState(null)
   const [homeTeam, setHomeTeam] = useState(null)
@@ -693,6 +715,21 @@ const awayEvents = matchEvents.filter(
     scoringEventTypes.includes(event.event_type)
 )
 
+const scorelessActive = ['first_half', 'second_half'].includes(match.status)
+function teamScorelessMinutes(teamId) {
+  if (!scorelessActive) return 0
+  const teamScores = matchEvents.filter(event =>
+    String(event.team_id) === String(teamId) && scoringEventTypes.includes(event.event_type)
+  )
+  const lastScoreSeconds = teamScores.reduce(
+    (latest, event) => Math.max(latest, Number(event.clock_seconds) || 0),
+    0
+  )
+  return Math.max(0, Math.floor((liveSeconds - lastScoreSeconds) / 60))
+}
+const homeScorelessMinutes = teamScorelessMinutes(match.home_team_id)
+const awayScorelessMinutes = teamScorelessMinutes(match.away_team_id)
+
 const matchFinished =
   match.status === 'full_time' ||
   match.status === 'after_extra_time'
@@ -767,6 +804,7 @@ const sohWon =
         >
           {match.home_goals}-{String(match.home_points).padStart(2, '0')}
         </div>
+        <ScorelessBadge minutes={homeScorelessMinutes} compact />
       </div>
 
       <div
@@ -802,6 +840,7 @@ const sohWon =
         >
           {match.away_goals}-{String(match.away_points).padStart(2, '0')}
         </div>
+        <ScorelessBadge minutes={awayScorelessMinutes} compact />
       </div>
     </div>
   </div>
@@ -940,6 +979,7 @@ const sohWon =
             <div style={styles.points}>
               {homeTotal} pts
             </div>
+            <ScorelessBadge minutes={homeScorelessMinutes} />
           </div>
 
           <div style={styles.versus}>V</div>
@@ -964,6 +1004,7 @@ const sohWon =
             <div style={styles.points}>
               {awayTotal} pts
             </div>
+            <ScorelessBadge minutes={awayScorelessMinutes} />
           </div>
 
         </section>

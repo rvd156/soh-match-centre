@@ -170,11 +170,22 @@ export default function ControlMatchReportsPage() {
   async function changeScorer(matchId, eventId, playerId) {
     if (!playerId || savingEventId) return
     setSavingEventId(eventId)
-    const { error: updateError } = await supabase.from('match_events')
-      .update({ player_id: Number(playerId) }).eq('id', eventId)
+    const { data: sessionData } = await supabase.auth.getSession()
+    const accessToken = sessionData?.session?.access_token
+    if (!accessToken) {
+      setSavingEventId(null)
+      alert('Your admin session has expired. Please sign in again.')
+      return
+    }
+    const response = await fetch('/api/admin/correct-scorer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+      body: JSON.stringify({ eventId, playerId: Number(playerId) })
+    })
+    const result = await response.json()
     setSavingEventId(null)
-    if (updateError) {
-      alert(`Could not update the scorer: ${updateError.message}`)
+    if (!response.ok) {
+      alert(`Could not update the scorer: ${result.error || 'Unknown error.'}`)
       return
     }
     setCorrections(current => ({

@@ -30,6 +30,9 @@ export default function ControlMatchReportsPage() {
   const [error, setError] = useState('')
   const [savingId, setSavingId] = useState(null)
   const [generatingId, setGeneratingId] = useState(null)
+  const [corrections, setCorrections] = useState({})
+  const [loadingCorrectionsId, setLoadingCorrectionsId] = useState(null)
+  const [savingEventId, setSavingEventId] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -43,6 +46,8 @@ export default function ControlMatchReportsPage() {
           match_date,
           status,
           match_summary,
+          home_team_id,
+          away_team_id,
           home_goals,
           home_points,
           away_goals,
@@ -137,6 +142,53 @@ export default function ControlMatchReportsPage() {
     alert('Match summary saved.')
   }
 
+
+  async function toggleCorrections(match) {
+    if (corrections[match.id]) {
+      setCorrections(current => ({ ...current, [match.id]: null }))
+      return
+    }
+    setLoadingCorrectionsId(match.id)
+    const [{ data: events, error: eventsError }, { data: players, error: playersError }] = await Promise.all([
+      supabase.from('match_events').select(`
+        id, team_id, player_id, event_type, score_type, match_minute,
+        players!match_events_player_id_fkey (name)
+      `).eq('match_id', match.id).in('event_type', ['goal', 'point', 'two_pointer']).order('clock_seconds', { ascending: false }),
+      supabase.from('players').select('id, team_id, name, jersey_number')
+        .in('team_id', [match.home_team_id, match.away_team_id])
+        .order('jersey_number', { ascending: true })
+        .order('name', { ascending: true })
+    ])
+    setLoadingCorrectionsId(null)
+    if (eventsError || playersError) {
+      alert('Could not load the scoring events for this match.')
+      return
+    }
+    setCorrections(current => ({ ...current, [match.id]: { events: events || [], players: players || [] } }))
+  }
+
+  async function changeScorer(matchId, eventId, playerId) {
+    if (!playerId || savingEventId) return
+    setSavingEventId(eventId)
+    const { error: updateError } = await supabase.from('match_events')
+      .update({ player_id: Number(playerId) }).eq('id', eventId)
+    setSavingEventId(null)
+    if (updateError) {
+      alert(`Could not update the scorer: ${updateError.message}`)
+      return
+    }
+    setCorrections(current => ({
+      ...current,
+      [matchId]: {
+        ...current[matchId],
+        events: current[matchId].events.map(event =>
+          event.id === eventId ? { ...event, player_id: Number(playerId) } : event
+        )
+      }
+    }))
+    alert('Scorer corrected. The public match report has been updated.')
+  }
+
   return (
     <main style={styles.page}>
       <div style={styles.container}>
@@ -220,6 +272,49 @@ export default function ControlMatchReportsPage() {
                   </button>
                 </div>
 
+                <button
+                  type="button"
+                  onClick={() => toggleCorrections(match)}
+                  disabled={loadingCorrectionsId === match.id}
+                  style={{ ...styles.button, ...styles.correctionButton }}
+                >
+                  {loadingCorrectionsId === match.id
+                    ? 'Loading scores…'
+                    : corrections[match.id] ? 'Close Score Corrections' : 'Correct a Scorer'}
+                </button>
+
+                {corrections[match.id] && (
+                  <div style={styles.correctionsPanel}>
+                    <h3 style={styles.correctionsTitle}>Scoring events</h3>
+                    <p style={styles.correctionsHelp}>Choose the correct player. This will not alter the final score.</p>
+                    {corrections[match.id].events.map(event => {
+                      const teamPlayers = corrections[match.id].players.filter(player =>
+                        String(player.team_id) === String(event.team_id)
+                      )
+                      const label = event.event_type === 'goal' ? 'Goal' : event.event_type === 'two_pointer' ? '2PT' : 'Point'
+                      return (
+                        <label key={event.id} style={styles.eventCorrection}>
+                          <span><strong>{event.match_minute}′ · {label}</strong></span>
+                          <select
+                            value={event.player_id || ''}
+                            disabled={savingEventId === event.id}
+                            onChange={change => changeScorer(match.id, event.id, change.target.value)}
+                            style={styles.select}
+                          >
+                            <option value="">Select scorer…</option>
+                            {teamPlayers.map(player => (
+                              <option key={player.id} value={player.id}>
+                                {player.jersey_number ? `${player.jersey_number}. ` : ''}{player.name}
+                              </option>
+                            ))}
+                          </select>
+                        </label>
+                      )
+                    })}
+                    {corrections[match.id].events.length === 0 && <div>No scoring events were recorded.</div>}
+                  </div>
+                )}
+
                 <a href={`/results/${match.id}`} style={styles.reportLink}>
                   Open public match report →
                 </a>
@@ -256,6 +351,12 @@ const styles = {
   button: { border: 0, borderRadius: '13px', padding: '14px 12px', fontSize: '15px', fontWeight: '900', cursor: 'pointer' },
   generateButton: { background: '#f4c430', color: '#071a12' },
   saveButton: { background: '#24a861', color: '#fff' },
+  correctionButton: { width: '100%', marginTop: '14px', background: '#24382f', color: '#fff', border: '1px solid #52645b' },
+  correctionsPanel: { marginTop: '12px', padding: '14px', border: '1px solid #52645b', borderRadius: '13px', background: '#10251a' },
+  correctionsTitle: { margin: '0 0 4px', color: '#f4c430', fontSize: '17px' },
+  correctionsHelp: { margin: '0 0 12px', color: '#b9c7be', fontSize: '13px', lineHeight: 1.4 },
+  eventCorrection: { display: 'grid', gridTemplateColumns: '100px minmax(0, 1fr)', gap: '10px', alignItems: 'center', padding: '9px 0', borderBottom: '1px solid #294537' },
+  select: { width: '100%', padding: '10px', borderRadius: '9px', background: '#fff', color: '#111', fontSize: '15px' },
   reportLink: { display: 'inline-block', color: '#f4c430', fontSize: '14px', fontWeight: '900', textDecoration: 'none', marginTop: '16px' },
   message: { border: '1px solid #1c4932', borderRadius: '16px', background: '#0b281c', color: '#c4d0c8', padding: '28px 18px', textAlign: 'center', fontWeight: '700' },
   error: { border: '1px solid #7e3535', borderRadius: '16px', background: '#371919', color: '#ffd0d0', padding: '22px 18px', textAlign: 'center', fontWeight: '700' }

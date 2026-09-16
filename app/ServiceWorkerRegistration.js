@@ -13,8 +13,7 @@ export default function ServiceWorkerRegistration() {
       if (
         stopped ||
         checking ||
-        document.visibilityState !== 'visible' ||
-        !window.location.pathname.startsWith('/live')
+        document.visibilityState !== 'visible'
       ) return
 
       checking = true

@@ -13,6 +13,7 @@ export default function ControlLayout({ children }) {
   const [insightsLoading, setInsightsLoading] = useState(false)
   const [insightsError, setInsightsError] = useState('')
   const [insightsUpdatedAt, setInsightsUpdatedAt] = useState(null)
+  const [connectionStatus, setConnectionStatus] = useState('checking')
 
   useEffect(() => {
     let cancelled = false
@@ -63,6 +64,62 @@ export default function ControlLayout({ children }) {
 
     return () => {
       supabase.removeChannel(channel)
+    }
+  }, [allowed])
+
+  useEffect(() => {
+    if (!allowed) return
+    let stopped = false
+    let checking = false
+
+    async function checkConnection() {
+      if (stopped || checking) return
+      if (!navigator.onLine) {
+        setConnectionStatus('offline')
+        return
+      }
+
+      checking = true
+      setConnectionStatus(current => current === 'online' ? current : 'checking')
+      try {
+        const timeout = new Promise((_, reject) => {
+          window.setTimeout(() => reject(new Error('Connection timed out')), 6000)
+        })
+        const databaseCheck = supabase.from('teams').select('id').limit(1)
+        const websiteCheck = fetch(`/api/app-version?t=${Date.now()}`, { cache: 'no-store' })
+        const [databaseResult, websiteResponse] = await Promise.race([
+          Promise.all([databaseCheck, websiteCheck]),
+          timeout
+        ])
+        if (databaseResult.error || !websiteResponse.ok) throw new Error('Connection check failed')
+        if (!stopped) setConnectionStatus('online')
+      } catch {
+        if (!stopped) setConnectionStatus(navigator.onLine ? 'reconnecting' : 'offline')
+      } finally {
+        checking = false
+      }
+    }
+
+    function handleOffline() { setConnectionStatus('offline') }
+    function handleOnline() { setConnectionStatus('checking'); checkConnection() }
+    function handleVisibility() {
+      if (document.visibilityState === 'visible') checkConnection()
+    }
+
+    checkConnection()
+    const interval = window.setInterval(checkConnection, 10000)
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    window.addEventListener('focus', checkConnection)
+    document.addEventListener('visibilitychange', handleVisibility)
+
+    return () => {
+      stopped = true
+      window.clearInterval(interval)
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+      window.removeEventListener('focus', checkConnection)
+      document.removeEventListener('visibilitychange', handleVisibility)
     }
   }, [allowed])
 
@@ -121,6 +178,7 @@ export default function ControlLayout({ children }) {
 
   return (
     <>
+      <style>{`@media (max-width: 760px) { .connection-label { display: none; } }`}</style>
       <div
   id="control-panel-header"
   style={{
@@ -182,6 +240,28 @@ export default function ControlLayout({ children }) {
 </div>
 
         <div style={{ display: 'flex', gap: '7px', alignItems: 'center' }}>
+        <div
+          role="status"
+          aria-live="polite"
+          title={connectionStatus === 'online' ? 'Website and database connected' : connectionStatus === 'offline' ? 'This device is offline' : 'Checking the website and database connection'}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            border: `1px solid ${connectionStatus === 'online' ? '#2f6f4e' : connectionStatus === 'offline' ? '#dc2626' : '#d69e2e'}`,
+            borderRadius: '999px',
+            padding: '6px 8px',
+            color: '#ffffff',
+            fontSize: '11px',
+            fontWeight: '900',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          <span style={{ width: '9px', height: '9px', borderRadius: '50%', background: connectionStatus === 'online' ? '#22c55e' : connectionStatus === 'offline' ? '#ef4444' : '#f4c430', boxShadow: connectionStatus === 'online' ? '0 0 7px rgba(34,197,94,.8)' : 'none' }} />
+          <span className="connection-label">
+            {connectionStatus === 'online' ? 'Connected' : connectionStatus === 'offline' ? 'Offline' : 'Reconnecting'}
+          </span>
+        </div>
         <button
           type="button"
           onClick={openInsights}

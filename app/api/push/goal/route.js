@@ -186,6 +186,9 @@ const scoreSource = scoreSourceLabels[goal.score_type] || null
         ? goal.notes.trim().slice(0, 240)
         : ''
       if (!updateText) return reply({ ignored: true })
+      if (/^(Wide for |Free awarded to )/.test(updateText)) {
+        return reply({ ignored: true, reason: 'Stat-only match event.' })
+      }
 
       title = Number.isFinite(minute) && minute >= 0
         ? `MATCH UPDATE · ${minute} min`

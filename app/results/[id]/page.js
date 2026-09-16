@@ -1,5 +1,6 @@
 'use client'
 
+import MatchStats from '../../MatchStats'
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
@@ -339,6 +340,8 @@ export default function MatchReportPage() {
             </div>
           </section>
         )}
+
+        <MatchStats events={events} home={home} away={away} />
 
         <section style={styles.timelineSection}>
           <h2 style={styles.timelineTitle}>MATCH ACTION</h2>

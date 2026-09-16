@@ -15,6 +15,7 @@ export default function LiveMatchPage() {
   const [loading, setLoading] = useState(true)
   const [liveSeconds, setLiveSeconds] = useState(0)
   const [upcomingFixture, setUpcomingFixture] = useState(null)
+  const [preMatchLineup, setPreMatchLineup] = useState(null)
   const [matchEvents, setMatchEvents] = useState([])
   const [showGoalCelebration, setShowGoalCelebration] = useState(false)
   const [latestEvent, setLatestEvent] = useState(null)
@@ -124,6 +125,15 @@ async function loadMatchEvents(matchId) {
       setLoading(false)
       return
     }
+
+    const publicPreMatchLineup =
+      !isAdmin &&
+      matchData?.status === 'pre_match' &&
+      matchData.notifications_enabled !== false
+        ? matchData.soh_lineup || null
+        : null
+
+    setPreMatchLineup(publicPreMatchLineup)
 
     if (
       !matchData ||
@@ -632,6 +642,8 @@ function formatStatus(status = '') {
     ℹ️ {upcomingFixture.supporter_info}
   </div>
 )}
+
+{preMatchLineup && <TeamLineup lineup={preMatchLineup} />}
 
 <section style={styles.sponsorSection}>
   <div style={styles.sponsorLabel}>

@@ -178,9 +178,42 @@ export default function ControlLayout({ children }) {
 
   return (
     <>
-      <style>{`@media (max-width: 760px) { .connection-label { display: none; } }`}</style>
+      <style>{`
+        .control-nav { display: flex; align-items: center; gap: 12px; }
+        @media (max-width: 760px) {
+          .connection-label { display: none; }
+          .control-header {
+            display: grid !important;
+            grid-template-columns: minmax(0, 1fr) auto !important;
+            gap: 8px 12px;
+            padding: 10px 12px !important;
+          }
+          .control-brand { grid-column: 1; }
+          .control-actions { grid-column: 2; }
+          .control-nav {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 7px;
+          }
+          .control-nav > a, .control-nav > button {
+            display: grid;
+            place-items: center;
+            min-height: 38px;
+            margin: 0;
+            padding: 7px 6px !important;
+            border: 1px solid #2f6f4e !important;
+            border-radius: 8px !important;
+            background: #174e35 !important;
+            text-align: center;
+            line-height: 1.15;
+          }
+        }
+      `}</style>
       <div
   id="control-panel-header"
+  className="control-header"
   style={{
           position: 'sticky',
           top: 0,
@@ -194,6 +227,7 @@ export default function ControlLayout({ children }) {
         }}
       >
         <div
+  className="control-brand"
   style={{
     display: 'flex',
     alignItems: 'center',
@@ -212,7 +246,9 @@ export default function ControlLayout({ children }) {
   >
     SOH CONTROL PANEL
   </a>
+</div>
 
+<div className="control-nav">
   <a
     href="/control/results"
     style={{
@@ -237,9 +273,24 @@ export default function ControlLayout({ children }) {
   >
     Players
   </a>
+  <button
+    type="button"
+    onClick={openInsights}
+    style={{
+      background: 'transparent',
+      border: 0,
+      color: '#ffffff',
+      padding: 0,
+      fontSize: '12px',
+      fontWeight: '800',
+      cursor: 'pointer'
+    }}
+  >
+    Live Insights
+  </button>
 </div>
 
-        <div style={{ display: 'flex', gap: '7px', alignItems: 'center' }}>
+        <div className="control-actions" style={{ display: 'flex', gap: '7px', alignItems: 'center' }}>
         <div
           role="status"
           aria-live="polite"
@@ -262,21 +313,6 @@ export default function ControlLayout({ children }) {
             {connectionStatus === 'online' ? 'Connected' : connectionStatus === 'offline' ? 'Offline' : 'Reconnecting'}
           </span>
         </div>
-        <button
-          type="button"
-          onClick={openInsights}
-          style={{
-            background: '#174e35',
-            border: '1px solid #2f6f4e',
-            color: '#ffffff',
-            borderRadius: '7px',
-            padding: '7px 10px',
-            fontWeight: '800',
-            cursor: 'pointer'
-          }}
-        >
-          Live Insights
-        </button>
         <button
           type="button"
           onClick={signOut}

@@ -50,6 +50,7 @@ const [savingMatchSummary, setSavingMatchSummary] = useState(false)
 const [generatingMatchSummary, setGeneratingMatchSummary] = useState(false)
 const [lineupStarters, setLineupStarters] = useState('')
 const [lineupSubstitutes, setLineupSubstitutes] = useState('')
+const [lineupPublished, setLineupPublished] = useState(false)
 const [savingLineup, setSavingLineup] = useState(false)
 const [lineupEditorOpen, setLineupEditorOpen] = useState(false)
 const [upcomingFixture, setUpcomingFixture] = useState(null)
@@ -137,6 +138,7 @@ const controllerScoreRef = useRef(null)
         if (updatedMatch.soh_lineup) {
           setLineupStarters(lineupToText(updatedMatch.soh_lineup.starters))
           setLineupSubstitutes(lineupToText(updatedMatch.soh_lineup.substitutes))
+          setLineupPublished(true)
         }
 
         setPeriod(
@@ -849,6 +851,7 @@ if (isExtraTime) {
   setMatchSummary(matchToResume.match_summary || '') 
   setLineupStarters(lineupToText(matchToResume.soh_lineup?.starters))
   setLineupSubstitutes(lineupToText(matchToResume.soh_lineup?.substitutes))
+  setLineupPublished(Boolean(matchToResume.soh_lineup))
 
   setHome({
     goals: matchToResume.home_goals || 0,
@@ -1101,6 +1104,7 @@ async function saveLineup() {
     }
 
     setLineupEditorOpen(false)
+    setLineupPublished(true)
     alert('Team lineup published.')
   } finally {
     setSavingLineup(false)
@@ -1480,6 +1484,7 @@ async function saveUpcomingLineup() {
       alert(`Could not publish the team lineup: ${error.message}`)
       return false
     }
+    setLineupPublished(true)
     alert('Team lineup published.')
     return true
   } finally {
@@ -1714,6 +1719,7 @@ console.log('RESET RESULT:', data, error)
   setTestSetupMode(false)
   setLineupStarters('')
   setLineupSubstitutes('')
+  setLineupPublished(false)
   setLineupEditorOpen(false)
 }
 
@@ -1738,6 +1744,8 @@ console.log('RESET RESULT:', data, error)
     setLineupStarters={setLineupStarters}
     lineupSubstitutes={lineupSubstitutes}
     setLineupSubstitutes={setLineupSubstitutes}
+    lineupPublished={lineupPublished}
+    onLineupChanged={() => setLineupPublished(false)}
     savingLineup={savingLineup}
     onSaveUpcomingLineup={saveUpcomingLineup}
     onSendUpcomingNotice={sendUpcomingNotice}
@@ -2887,6 +2895,8 @@ function Setup({
   setLineupStarters,
   lineupSubstitutes,
   setLineupSubstitutes,
+  lineupPublished,
+  onLineupChanged,
   savingLineup,
   onSaveUpcomingLineup,
   onSendUpcomingNotice,
@@ -3003,6 +3013,11 @@ if (upcomingFixture && !testSetupMode && !editingUpcomingFixture) {
             </div>
           )}
         </div>
+
+        <MatchDayChecklist
+          fixture={upcomingFixture}
+          lineupPublished={lineupPublished}
+        />
 
         <button
           className="start-setup"
@@ -3172,7 +3187,10 @@ if (upcomingFixture && !testSetupMode && !editingUpcomingFixture) {
                 <strong style={{ display: 'block', marginBottom: '6px', color: '#f4c430' }}>Starting 15</strong>
                 <textarea
                   value={lineupStarters}
-                  onChange={event => setLineupStarters(event.target.value)}
+                  onChange={event => {
+                    setLineupStarters(event.target.value)
+                    onLineupChanged()
+                  }}
                   placeholder={'1. Player Name\n2. Player Name'}
                   rows={8}
                   style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '10px', fontSize: '16px', lineHeight: 1.5 }}
@@ -3182,7 +3200,10 @@ if (upcomingFixture && !testSetupMode && !editingUpcomingFixture) {
                 <strong style={{ display: 'block', marginBottom: '6px', color: '#f4c430' }}>Substitutes</strong>
                 <textarea
                   value={lineupSubstitutes}
-                  onChange={event => setLineupSubstitutes(event.target.value)}
+                  onChange={event => {
+                    setLineupSubstitutes(event.target.value)
+                    onLineupChanged()
+                  }}
                   placeholder={'16. Player Name\n17. Player Name'}
                   rows={5}
                   style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '10px', fontSize: '16px', lineHeight: 1.5 }}
@@ -3325,6 +3346,154 @@ onChange={e => {
       </button>
     )}
   </section></main>
+}
+
+function MatchDayChecklist({ fixture, lineupPublished }) {
+  const [open, setOpen] = useState(true)
+  const [connection, setConnection] = useState('checking')
+  const [notificationDevices, setNotificationDevices] = useState(null)
+  const [notificationsReady, setNotificationsReady] = useState(null)
+  const [batteryChecked, setBatteryChecked] = useState(false)
+  const batteryKey = `soh-match-day-power-${fixture.id}`
+
+  const missingFixtureDetails = [
+    !fixture.opposition && 'opposition',
+    !fixture.match_date && 'date',
+    !fixture.throw_in && 'throw-in',
+    !fixture.venue && 'venue'
+  ].filter(Boolean)
+  const fixtureReady = missingFixtureDetails.length === 0
+
+  useEffect(() => {
+    try {
+      setBatteryChecked(localStorage.getItem(batteryKey) === 'true')
+    } catch {}
+  }, [batteryKey])
+
+  async function refreshChecks() {
+    setConnection('checking')
+    setNotificationsReady(null)
+
+    if (!navigator.onLine) {
+      setConnection('offline')
+    } else {
+      const { error } = await supabase.from('teams').select('id').limit(1)
+      setConnection(error ? 'offline' : 'online')
+    }
+
+    try {
+      const { data } = await supabase.auth.getSession()
+      const token = data?.session?.access_token
+      if (!token) throw new Error('No admin session')
+      const response = await fetch('/api/admin/live-insights', {
+        headers: { Authorization: `Bearer ${token}` },
+        cache: 'no-store'
+      })
+      const result = await response.json()
+      if (!response.ok) throw new Error(result.error || 'Notification check failed')
+      setNotificationDevices(result.notificationDevices || 0)
+      setNotificationsReady(true)
+    } catch {
+      setNotificationDevices(null)
+      setNotificationsReady(false)
+    }
+  }
+
+  useEffect(() => {
+    refreshChecks()
+    function updateOnlineStatus() {
+      if (!navigator.onLine) setConnection('offline')
+      else refreshChecks()
+    }
+    window.addEventListener('online', updateOnlineStatus)
+    window.addEventListener('offline', updateOnlineStatus)
+    return () => {
+      window.removeEventListener('online', updateOnlineStatus)
+      window.removeEventListener('offline', updateOnlineStatus)
+    }
+  }, [])
+
+  function toggleBatteryChecked() {
+    const next = !batteryChecked
+    setBatteryChecked(next)
+    try { localStorage.setItem(batteryKey, String(next)) } catch {}
+  }
+
+  const checks = [
+    {
+      label: 'Fixture details',
+      ready: fixtureReady,
+      detail: fixtureReady ? 'Date, time and venue confirmed' : `Missing ${missingFixtureDetails.join(', ')}`
+    },
+    {
+      label: 'Team line-up published',
+      ready: lineupPublished,
+      detail: lineupPublished ? 'Visible to supporters before throw-in' : 'Publish when the teamsheet is available'
+    },
+    {
+      label: 'Connection stable',
+      ready: connection === 'online',
+      checking: connection === 'checking',
+      detail: connection === 'checking' ? 'Checking website and database' : connection === 'online' ? 'Website and database connected' : 'No working database connection'
+    },
+    {
+      label: 'Notifications ready',
+      ready: notificationsReady === true,
+      checking: notificationsReady === null,
+      detail: notificationsReady === null
+        ? 'Checking notification service'
+        : notificationsReady
+          ? `${notificationDevices} subscribed ${notificationDevices === 1 ? 'device' : 'devices'}`
+          : 'Notification service check failed'
+    },
+    {
+      label: 'Battery and power checked',
+      ready: batteryChecked,
+      manual: true,
+      detail: batteryChecked ? 'Confirmed on this device' : 'Confirm charge level and power bank'
+    }
+  ]
+  const readyCount = checks.filter(check => check.ready).length
+
+  return (
+    <section style={{ margin: '16px 0', border: '1px solid #2f6f4e', borderRadius: '13px', background: '#0d281c', overflow: 'hidden', textAlign: 'left' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(current => !current)}
+        style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', background: 'transparent', border: 0, padding: '13px 14px', color: '#ffffff', cursor: 'pointer' }}
+      >
+        <span style={{ fontWeight: '900' }}>MATCH-DAY CHECKLIST</span>
+        <span style={{ color: readyCount === checks.length ? '#4ade80' : '#f4c430', fontWeight: '900', whiteSpace: 'nowrap' }}>
+          {readyCount}/{checks.length} {open ? '▲' : '▼'}
+        </span>
+      </button>
+
+      {open && (
+        <div style={{ borderTop: '1px solid #1c4932', padding: '5px 14px 14px' }}>
+          {checks.map(check => (
+            <button
+              key={check.label}
+              type="button"
+              disabled={!check.manual}
+              onClick={check.manual ? toggleBatteryChecked : undefined}
+              style={{ width: '100%', display: 'grid', gridTemplateColumns: '26px minmax(0, 1fr)', gap: '9px', alignItems: 'start', padding: '10px 0', background: 'transparent', border: 0, borderBottom: '1px solid #173c2a', color: '#ffffff', textAlign: 'left', cursor: check.manual ? 'pointer' : 'default', opacity: 1 }}
+            >
+              <span style={{ color: check.checking ? '#f4c430' : check.ready ? '#4ade80' : '#f87171', fontSize: '18px', fontWeight: '900' }}>
+                {check.checking ? '…' : check.ready ? '✓' : '○'}
+              </span>
+              <span>
+                <strong style={{ display: 'block', fontSize: '14px' }}>{check.label}</strong>
+                <small style={{ display: 'block', color: '#aebdb4', marginTop: '2px', lineHeight: 1.35 }}>{check.detail}</small>
+              </span>
+            </button>
+          ))}
+          <button type="button" onClick={refreshChecks} style={{ width: '100%', marginTop: '11px', padding: '9px', background: '#174e35', border: '1px solid #2f6f4e', borderRadius: '8px', color: '#ffffff', fontWeight: '800', cursor: 'pointer' }}>
+            Refresh automatic checks
+          </button>
+        </div>
+      )}
+    </section>
+  )
 }
 
 function TeamPanel({name,team,total,crest}){return <div className="team-panel">{crest&&<img className="team-crest" src={getCrestSrc(crest)} alt={`${name} crest`}/>}<h2>{name}</h2><div className="gaa-score">{team.goals}-{String(team.points).padStart(2,'0')}</div><div className="points-total">{total} pts</div></div>}

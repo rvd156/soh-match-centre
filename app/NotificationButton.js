@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 const storageKey = 'soh-notification-preferences-v1'
+const iosInstallTipKey = 'soh-ios-install-tip-dismissed'
 const defaultCustom = {
   goals: true,
   twoPointers: true,
@@ -64,11 +65,25 @@ export default function NotificationButton() {
   const [level, setLevel] = useState('key_updates')
   const [custom, setCustom] = useState(defaultCustom)
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [showIosInstallTip, setShowIosInstallTip] = useState(false)
 
   useEffect(() => {
     let cancelled = false
 
     async function checkStatus() {
+      const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true
+
+      if (isIos && !isStandalone) {
+        try {
+          setShowIosInstallTip(localStorage.getItem(iosInstallTipKey) !== 'true')
+        } catch {
+          setShowIosInstallTip(true)
+        }
+      }
+
       const saved = loadPreferences()
       setLevel(saved.level)
       setCustom(saved.custom)
@@ -126,6 +141,13 @@ export default function NotificationButton() {
         level: nextLevel,
         custom: nextCustom
       }))
+    } catch {}
+  }
+
+  function dismissIosInstallTip() {
+    setShowIosInstallTip(false)
+    try {
+      localStorage.setItem(iosInstallTipKey, 'true')
     } catch {}
   }
 
@@ -269,6 +291,26 @@ export default function NotificationButton() {
 
   return (
     <div style={{ textAlign: 'center', margin: '0 auto 20px', maxWidth: '430px' }}>
+      {showIosInstallTip && (
+        <div style={iosInstallTipStyle}>
+          <button
+            type="button"
+            aria-label="Dismiss iPhone installation guide"
+            onClick={dismissIosInstallTip}
+            style={iosInstallTipCloseStyle}
+          >
+            ×
+          </button>
+          <div style={{ color: '#f4c430', fontWeight: '900', marginBottom: '5px' }}>
+            Using an iPhone?
+          </div>
+          <div>
+            To receive match alerts, tap the Share button, choose <strong>Add to Home Screen</strong>,
+            then open Match Centre from your Home Screen and enable notifications.
+          </div>
+        </div>
+      )}
+
       {status === 'available' && (
         <button type="button" onClick={enableNotifications} disabled={busy}
           style={buttonStyle}>
@@ -419,6 +461,18 @@ function CustomChoice({ label, name, checked, disabled, onChange }) {
 const customStyle = {
   textAlign: 'left', borderTop: '1px solid #37634e',
   padding: '8px 4px 0', marginTop: '10px'
+}
+
+const iosInstallTipStyle = {
+  position: 'relative', marginBottom: '12px', padding: '12px 38px 12px 14px',
+  background: '#102d20', border: '1px solid #37634e', borderRadius: '10px',
+  color: '#ffffff', fontSize: '13px', lineHeight: 1.45, textAlign: 'left'
+}
+
+const iosInstallTipCloseStyle = {
+  position: 'absolute', top: '4px', right: '8px', border: 0,
+  background: 'transparent', color: '#c4d0c8', fontSize: '24px',
+  lineHeight: 1, cursor: 'pointer', padding: '3px'
 }
 
 const buttonStyle = {

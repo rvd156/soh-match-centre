@@ -150,6 +150,9 @@ export default function MatchReportPage() {
             referee,
             match_date,
             status,
+            half_length,
+            clock_seconds,
+            extra_time_seconds,
             home_goals,
             home_points,
             away_goals,
@@ -341,7 +344,13 @@ export default function MatchReportPage() {
           </section>
         )}
 
-        <MatchStats events={events} home={home} away={away} />
+        <MatchStats
+          events={events}
+          home={home}
+          away={away}
+          match={match}
+          milestones={milestones}
+        />
 
         <section style={styles.timelineSection}>
           <h2 style={styles.timelineTitle}>MATCH ACTION</h2>

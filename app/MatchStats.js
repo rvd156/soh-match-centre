@@ -13,7 +13,75 @@ function countForTeam(events, team, type) {
   ).length
 }
 
-export default function MatchStats({ events = [], home, away }) {
+const scoringTypes = ['goal', 'point', 'two_pointer']
+
+function longestScorelessSpell(events, team, match, milestones = []) {
+  if (!match || !['full_time', 'after_extra_time'].includes(match.status)) return null
+
+  const halfLengthSeconds = Number(match.half_length || 30) * 60
+  const extraHalfLengthSeconds = 10 * 60
+  const statusTimes = new Map(
+    milestones.map(item => [item.status, Date.parse(item.created_at)])
+  )
+  const secondHalfStartedAt = statusTimes.get('second_half') || Infinity
+  const extraTimeStartedAt = statusTimes.get('extra_time') || Infinity
+  const extraSecondHalfStartedAt = statusTimes.get('extra_time_second_half') || Infinity
+  const scoringEvents = events.filter(event => scoringTypes.includes(event.event_type))
+
+  function phaseFor(event) {
+    const createdAt = Date.parse(event.created_at)
+    if (createdAt >= extraSecondHalfStartedAt) return 'extra_second'
+    if (createdAt >= extraTimeStartedAt) return 'extra_first'
+    if (createdAt >= secondHalfStartedAt) return 'second'
+    return 'first'
+  }
+
+  const firstHalfScoreTimes = scoringEvents
+    .filter(event => phaseFor(event) === 'first')
+    .map(event => Number(event.clock_seconds) || 0)
+  const extraFirstHalfScoreTimes = scoringEvents
+    .filter(event => phaseFor(event) === 'extra_first')
+    .map(event => Number(event.clock_seconds) || 0)
+  const firstHalfDuration = Math.max(halfLengthSeconds, ...firstHalfScoreTimes)
+  const regularEnd = firstHalfDuration + Math.max(
+    0,
+    Number(match.clock_seconds || halfLengthSeconds) - halfLengthSeconds
+  )
+  const extraFirstHalfDuration = Math.max(extraHalfLengthSeconds, ...extraFirstHalfScoreTimes)
+  const matchEnd = match.status === 'after_extra_time'
+    ? regularEnd + extraFirstHalfDuration + Math.max(
+      0,
+      Number(match.extra_time_seconds || extraHalfLengthSeconds) - extraHalfLengthSeconds
+    )
+    : regularEnd
+
+  const teamScoreTimes = scoringEvents
+    .filter(event => String(event.team_id) === String(team.id))
+    .map(event => {
+      const clock = Number(event.clock_seconds) || 0
+      const phase = phaseFor(event)
+      if (phase === 'second') {
+        return firstHalfDuration + Math.max(0, clock - halfLengthSeconds)
+      }
+      if (phase === 'extra_first') return regularEnd + clock
+      if (phase === 'extra_second') {
+        return regularEnd + extraFirstHalfDuration + Math.max(0, clock - extraHalfLengthSeconds)
+      }
+      return clock
+    })
+    .filter(time => time >= 0 && time <= matchEnd)
+    .sort((a, b) => a - b)
+
+  const boundaries = [0, ...teamScoreTimes, matchEnd]
+  let longestSeconds = 0
+  for (let index = 1; index < boundaries.length; index += 1) {
+    longestSeconds = Math.max(longestSeconds, boundaries[index] - boundaries[index - 1])
+  }
+
+  return Math.max(0, Math.floor(longestSeconds / 60))
+}
+
+export default function MatchStats({ events = [], home, away, match = null, milestones = [] }) {
   if (!home || !away) return null
   const rows = [
     ['Frees awarded', 'free'],
@@ -27,6 +95,15 @@ export default function MatchStats({ events = [], home, away }) {
     home: countForTeam(events, home, type),
     away: countForTeam(events, away, type)
   }))
+  const homeScoreless = longestScorelessSpell(events, home, match, milestones)
+  const awayScoreless = longestScorelessSpell(events, away, match, milestones)
+  if (homeScoreless !== null && awayScoreless !== null) {
+    values.push({
+      label: 'Longest scoreless spell',
+      home: `${homeScoreless} min`,
+      away: `${awayScoreless} min`
+    })
+  }
   if (!values.some(row => row.home || row.away)) return null
 
   return (

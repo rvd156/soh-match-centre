@@ -35,7 +35,7 @@ export async function POST(request) {
   }
 
   const { data: event, error: eventError } = await db.from('match_events')
-    .select('id, match_id, team_id, event_type').eq('id', eventId).maybeSingle()
+    .select('id, match_id, team_id, player_id, event_type, match_minute').eq('id', eventId).maybeSingle()
   if (eventError) return reply({ error: 'Could not load the scoring event.' }, 503)
   if (!event || !['goal', 'point', 'two_pointer'].includes(event.event_type)) {
     return reply({ error: 'Scoring event not found.' }, 404)
@@ -55,5 +55,21 @@ export async function POST(request) {
 
   const { error: updateError } = await db.from('match_events').update({ player_id: playerId }).eq('id', eventId)
   if (updateError) return reply({ error: 'Could not update the scorer.' }, 503)
+
+  const { error: activityError } = await db.from('admin_activity_log').insert({
+    match_id: event.match_id,
+    match_event_id: event.id,
+    admin_user_id: userData.user.id,
+    action: 'corrected',
+    event_type: event.event_type,
+    details: {
+      team_id: event.team_id,
+      previous_player_id: event.player_id,
+      player_id: playerId,
+      match_minute: event.match_minute
+    }
+  })
+  if (activityError) console.error('Unable to record scorer correction:', activityError)
+
   return reply({ updated: true, player: { id: player.id, name: player.name } })
 }

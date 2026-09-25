@@ -194,7 +194,7 @@ export default function ControlLayout({ children }) {
             grid-column: 1 / -1;
             grid-row: 2;
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 7px;
           }
           .control-nav > a, .control-nav > button {
@@ -272,6 +272,17 @@ export default function ControlLayout({ children }) {
     }}
   >
     Players
+  </a>
+  <a
+    href="/control/activity"
+    style={{
+      color: '#ffffff',
+      fontSize: '12px',
+      fontWeight: '800',
+      textDecoration: 'none'
+    }}
+  >
+    Admin Log
   </a>
   <button
     type="button"

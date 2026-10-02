@@ -78,6 +78,7 @@ export default function LiveMatchPage() {
   const [showAllScorers, setShowAllScorers] = useState(false)
   const [showAllMatchEvents, setShowAllMatchEvents] = useState(false)
   const [showStickyScore, setShowStickyScore] = useState(false)
+  const [periodStartedAt, setPeriodStartedAt] = useState(null)
   const scoreboardRef = useRef(null)
   const viewerIsAdminRef = useRef(null)
 
@@ -143,6 +144,30 @@ async function loadMatchEvents(matchId) {
   }
 
   setMatchEvents(data || [])
+}
+
+async function loadPeriodStart(matchData) {
+  if (!matchData?.id || !['first_half', 'second_half'].includes(matchData.status)) {
+    setPeriodStartedAt(null)
+    return
+  }
+
+  const { data, error } = await supabase
+    .from('match_status_events')
+    .select('created_at')
+    .eq('match_id', matchData.id)
+    .eq('status', matchData.status)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  if (error) {
+    console.error('Error loading current period start:', error)
+    setPeriodStartedAt(null)
+    return
+  }
+
+  setPeriodStartedAt(data?.created_at || null)
 }
   
   async function loadUpcomingFixture() {
@@ -221,6 +246,7 @@ async function loadMatchEvents(matchId) {
 setHomeTeam(teams.find(team => team.id === matchData.home_team_id))
 setAwayTeam(teams.find(team => team.id === matchData.away_team_id))
 loadMatchEvents(matchData.id)
+loadPeriodStart(matchData)
 setLoading(false)
   }
 
@@ -365,6 +391,7 @@ useEffect(() => {
     return
   }
 
+  if (payload.new.status !== match.status) loadPeriodStart(payload.new)
   setMatch(payload.new)
 }
     )
@@ -373,7 +400,7 @@ useEffect(() => {
   return () => {
     supabase.removeChannel(channel)
   }
-}, [match?.id])
+}, [match?.id, match?.status])
   useEffect(() => {
   if (!match?.id) return
 
@@ -769,12 +796,18 @@ const awayEvents = matchEvents.filter(
 const scorelessActive = ['first_half', 'second_half'].includes(match.status)
 function teamScorelessMinutes(teamId) {
   if (!scorelessActive) return 0
+  const periodStartSeconds = match.status === 'second_half'
+    ? Number(match.half_length || 30) * 60
+    : 0
+  const periodStartTime = periodStartedAt ? Date.parse(periodStartedAt) : null
   const teamScores = matchEvents.filter(event =>
-    String(event.team_id) === String(teamId) && scoringEventTypes.includes(event.event_type)
+    String(event.team_id) === String(teamId) &&
+    scoringEventTypes.includes(event.event_type) &&
+    (!periodStartTime || Date.parse(event.created_at) >= periodStartTime)
   )
   const lastScoreSeconds = teamScores.reduce(
     (latest, event) => Math.max(latest, Number(event.clock_seconds) || 0),
-    0
+    periodStartSeconds
   )
   return Math.max(0, Math.floor((liveSeconds - lastScoreSeconds) / 60))
 }

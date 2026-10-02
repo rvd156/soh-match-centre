@@ -43,39 +43,39 @@ function longestScorelessSpell(events, team, match, milestones = []) {
     .filter(event => phaseFor(event) === 'extra_first')
     .map(event => Number(event.clock_seconds) || 0)
   const firstHalfDuration = Math.max(halfLengthSeconds, ...firstHalfScoreTimes)
-  const regularEnd = firstHalfDuration + Math.max(
-    0,
-    Number(match.clock_seconds || halfLengthSeconds) - halfLengthSeconds
-  )
   const extraFirstHalfDuration = Math.max(extraHalfLengthSeconds, ...extraFirstHalfScoreTimes)
-  const matchEnd = match.status === 'after_extra_time'
-    ? regularEnd + extraFirstHalfDuration + Math.max(
-      0,
-      Number(match.extra_time_seconds || extraHalfLengthSeconds) - extraHalfLengthSeconds
+  const phases = [
+    { name: 'first', start: 0, end: firstHalfDuration },
+    {
+      name: 'second',
+      start: halfLengthSeconds,
+      end: Math.max(halfLengthSeconds, Number(match.clock_seconds || halfLengthSeconds))
+    }
+  ]
+  if (match.status === 'after_extra_time') {
+    phases.push(
+      { name: 'extra_first', start: 0, end: extraFirstHalfDuration },
+      {
+        name: 'extra_second',
+        start: extraHalfLengthSeconds,
+        end: Math.max(extraHalfLengthSeconds, Number(match.extra_time_seconds || extraHalfLengthSeconds))
+      }
     )
-    : regularEnd
+  }
 
-  const teamScoreTimes = scoringEvents
-    .filter(event => String(event.team_id) === String(team.id))
-    .map(event => {
-      const clock = Number(event.clock_seconds) || 0
-      const phase = phaseFor(event)
-      if (phase === 'second') {
-        return firstHalfDuration + Math.max(0, clock - halfLengthSeconds)
-      }
-      if (phase === 'extra_first') return regularEnd + clock
-      if (phase === 'extra_second') {
-        return regularEnd + extraFirstHalfDuration + Math.max(0, clock - extraHalfLengthSeconds)
-      }
-      return clock
-    })
-    .filter(time => time >= 0 && time <= matchEnd)
-    .sort((a, b) => a - b)
-
-  const boundaries = [0, ...teamScoreTimes, matchEnd]
   let longestSeconds = 0
-  for (let index = 1; index < boundaries.length; index += 1) {
-    longestSeconds = Math.max(longestSeconds, boundaries[index] - boundaries[index - 1])
+  for (const phase of phases) {
+    const scoreTimes = scoringEvents
+      .filter(event =>
+        String(event.team_id) === String(team.id) && phaseFor(event) === phase.name
+      )
+      .map(event => Number(event.clock_seconds) || 0)
+      .filter(time => time >= phase.start && time <= phase.end)
+      .sort((a, b) => a - b)
+    const boundaries = [phase.start, ...scoreTimes, phase.end]
+    for (let index = 1; index < boundaries.length; index += 1) {
+      longestSeconds = Math.max(longestSeconds, boundaries[index] - boundaries[index - 1])
+    }
   }
 
   return Math.max(0, Math.floor(longestSeconds / 60))

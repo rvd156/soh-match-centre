@@ -146,6 +146,8 @@ export default function MatchReportPage() {
             competition,
             match_summary,
             soh_lineup,
+            county_final_mode,
+            road_to_final,
             venue,
             referee,
             match_date,
@@ -254,6 +256,8 @@ export default function MatchReportPage() {
   const away = related(match.away_team)
   const homeTotal = Number(match.home_goals) * 3 + Number(match.home_points)
   const awayTotal = Number(match.away_goals) * 3 + Number(match.away_points)
+  const sohIsHome = Number(home?.id) === 1
+  const sohWon = sohIsHome ? homeTotal > awayTotal : awayTotal > homeTotal
   const timelineItems = [
     ...events.map(event => ({ ...event, timelineType: 'event' })),
     ...milestones.map(milestone => ({ ...milestone, timelineType: 'milestone' }))
@@ -274,6 +278,11 @@ export default function MatchReportPage() {
         <a href="/results" style={styles.backLink}>← Previous Results</a>
 
         <header style={styles.header}>
+          {match.county_final_mode && (
+            <div style={{ color: '#f4c430', fontSize: '14px', fontWeight: '900', letterSpacing: '2px', marginBottom: '10px' }}>
+              🏆 COUNTY FINAL
+            </div>
+          )}
           <span style={styles.finalBadge}>
             🏁 {match.status === 'after_extra_time' ? 'FINAL RESULT · AET' : 'FINAL RESULT'}
           </span>
@@ -301,6 +310,16 @@ export default function MatchReportPage() {
             <div style={styles.total}>{awayTotal} pts</div>
           </div>
         </section>
+
+        {match.county_final_mode && sohWon && (
+          <section style={{ margin: '22px auto 4px', padding: '18px 14px', borderRadius: '16px', background: 'linear-gradient(135deg, #6f5308, #d2a91d)', border: '1px solid #f4c430', color: '#ffffff', textAlign: 'center', boxShadow: '0 12px 32px rgba(0,0,0,.3)' }}>
+            <div style={{ fontSize: '34px' }}>🏆</div>
+            <div style={{ fontSize: 'clamp(24px, 7vw, 42px)', fontWeight: '900', letterSpacing: '1.5px' }}>
+              COUNTY CHAMPIONS
+            </div>
+            <div style={{ marginTop: '5px', fontWeight: '800' }}>Ballinamore SOH</div>
+          </section>
+        )}
 
         <TeamLineup lineup={match.soh_lineup} />
 

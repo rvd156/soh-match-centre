@@ -31,6 +31,38 @@ function ScorelessBadge({ minutes, compact = false }) {
   )
 }
 
+function FinalCountdown({ date, throwIn }) {
+  const [now, setNow] = useState(Date.now())
+
+  useEffect(() => {
+    const interval = window.setInterval(() => setNow(Date.now()), 30000)
+    return () => window.clearInterval(interval)
+  }, [])
+
+  if (!date || !throwIn) return null
+  const target = new Date(`${date}T${throwIn.slice(0, 5)}:00`).getTime()
+  const remaining = target - now
+  if (!Number.isFinite(target)) return null
+
+  let text = 'FINAL DAY'
+  if (remaining > 0) {
+    const totalMinutes = Math.floor(remaining / 60000)
+    const days = Math.floor(totalMinutes / 1440)
+    const hours = Math.floor((totalMinutes % 1440) / 60)
+    const minutes = totalMinutes % 60
+    text = days > 0
+      ? `${days} ${days === 1 ? 'DAY' : 'DAYS'} · ${hours} ${hours === 1 ? 'HOUR' : 'HOURS'} TO THROW-IN`
+      : `${hours} ${hours === 1 ? 'HOUR' : 'HOURS'} · ${minutes} MIN TO THROW-IN`
+  }
+
+  return (
+    <div style={{ margin: '12px auto 20px', maxWidth: '560px', padding: '15px 12px', borderRadius: '14px', background: 'linear-gradient(135deg, #6f5308, #c49a16)', border: '1px solid #f4c430', color: '#ffffff', textAlign: 'center', boxShadow: '0 10px 28px rgba(0,0,0,.28)' }}>
+      <div style={{ fontSize: '12px', fontWeight: '900', letterSpacing: '2px' }}>🏆 COUNTY FINAL</div>
+      <div style={{ marginTop: '5px', fontSize: 'clamp(18px, 5vw, 28px)', fontWeight: '900' }}>{text}</div>
+    </div>
+  )
+}
+
 export default function LiveMatchPage() {
   const [match, setMatch] = useState(null)
   const [homeTeam, setHomeTeam] = useState(null)
@@ -567,8 +599,12 @@ function formatStatus(status = '') {
       {upcomingFixture ? (
   <>
     <div style={styles.upcomingBar}>
-      UPCOMING FIXTURE
+      {upcomingFixture.county_final_mode ? '🏆 COUNTY FINAL' : 'UPCOMING FIXTURE'}
     </div>
+
+    {upcomingFixture.county_final_mode && (
+      <FinalCountdown date={upcomingFixture.match_date} throwIn={upcomingFixture.throw_in} />
+    )}
 
 <div
   style={{
@@ -667,6 +703,17 @@ function formatStatus(status = '') {
   <div style={styles.supporterInfo}>
     ℹ️ {upcomingFixture.supporter_info}
   </div>
+)}
+
+{upcomingFixture.county_final_mode && upcomingFixture.road_to_final && (
+  <section style={{ margin: '22px auto', maxWidth: '620px', padding: '18px', borderRadius: '16px', background: '#0d281c', border: '1px solid #9d7a16', textAlign: 'center' }}>
+    <div style={{ color: '#f4c430', fontSize: '14px', fontWeight: '900', letterSpacing: '1.5px', marginBottom: '10px' }}>
+      ROAD TO THE FINAL
+    </div>
+    <div style={{ color: '#ffffff', fontWeight: '700', lineHeight: 1.7, whiteSpace: 'pre-line' }}>
+      {upcomingFixture.road_to_final}
+    </div>
+  </section>
 )}
 
 {preMatchLineup && <TeamLineup lineup={preMatchLineup} />}
@@ -917,6 +964,12 @@ const sohWon =
     </>
   )}
 </div>
+
+        {match.county_final_mode && (
+          <div style={{ width: 'fit-content', margin: '0 auto 14px', padding: '7px 14px', borderRadius: '999px', background: '#6f5308', border: '1px solid #f4c430', color: '#ffffff', fontSize: '13px', fontWeight: '900', letterSpacing: '1.2px' }}>
+            🏆 COUNTY FINAL
+          </div>
+        )}
 
         <div style={styles.matchInfo}>
           {match.competition && (

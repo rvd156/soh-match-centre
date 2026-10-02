@@ -5,7 +5,7 @@ import { supabase } from '../../lib/supabase'
 import { getCrestSrc } from '../../lib/crest'
 import { addedTimePeriod, getAddedTime, isPastHalfEnd, addedTimeStyle } from '../../lib/added-time'
 const emptyTeam = { goals: 0, points: 0 }
-const defaultSetup = { opposition: '', oppositionTeamId: '', oppositionCrest: '', competition: '', venue: '', referee: '', supporterInfo: '', date: '', throwIn: '', halfLength: '30', sohSide: 'home', notificationsEnabled: true }
+const defaultSetup = { opposition: '', oppositionTeamId: '', oppositionCrest: '', competition: '', venue: '', referee: '', supporterInfo: '', date: '', throwIn: '', halfLength: '30', sohSide: 'home', notificationsEnabled: true, countyFinalMode: false, roadToFinal: '' }
 
 function formatDate(value) {
   if (!value) return ''
@@ -875,7 +875,9 @@ if (isExtraTime) {
     throwIn: matchToResume.throw_in?.slice(0, 5) || '',
     halfLength: String(matchToResume.half_length || 30),
     sohSide,
-    notificationsEnabled: matchToResume.notifications_enabled !== false
+    notificationsEnabled: matchToResume.notifications_enabled !== false,
+    countyFinalMode: matchToResume.county_final_mode === true,
+    roadToFinal: matchToResume.road_to_final || ''
   }))
 
   setPeriod(periodMap[matchToResume.status] || 'PRE-MATCH')
@@ -1031,6 +1033,8 @@ async function ensureMatchRecord(matchSetup = setup) {
       throw_in: matchSetup.throwIn || null,
       half_length: Number(matchSetup.halfLength || 30),
       notifications_enabled: matchSetup.notificationsEnabled !== false,
+      county_final_mode: matchSetup.countyFinalMode === true,
+      road_to_final: matchSetup.roadToFinal?.trim() || null,
       status: 'pre_match',
       active: true,
       home_goals: 0,
@@ -1373,6 +1377,8 @@ const fixturePayload = {
   throw_in: setup.throwIn || null,
   soh_side: setup.sohSide,
   opposition_crest: setup.oppositionCrest || null,
+  county_final_mode: setup.countyFinalMode === true,
+  road_to_final: setup.roadToFinal?.trim() || null,
   active: true
 }
 
@@ -1450,7 +1456,9 @@ function detailsForUpcomingFixture() {
     supporterInfo: upcomingFixture?.supporter_info || '',
     date: upcomingFixture?.match_date || '',
     throwIn: upcomingFixture?.throw_in || '',
-    sohSide: upcomingFixture?.soh_side || 'home'
+    sohSide: upcomingFixture?.soh_side || 'home',
+    countyFinalMode: upcomingFixture?.county_final_mode === true,
+    roadToFinal: upcomingFixture?.road_to_final || ''
   }
 }
 
@@ -3033,7 +3041,9 @@ if (upcomingFixture && !testSetupMode && !editingUpcomingFixture) {
               supporterInfo: upcomingFixture.supporter_info || '',
               date: upcomingFixture.match_date || '',
               throwIn: upcomingFixture.throw_in || '',
-              sohSide: upcomingFixture.soh_side || 'home'
+              sohSide: upcomingFixture.soh_side || 'home',
+              countyFinalMode: upcomingFixture.county_final_mode === true,
+              roadToFinal: upcomingFixture.road_to_final || ''
             }))
 
             onStart()
@@ -3069,6 +3079,28 @@ if (upcomingFixture && !testSetupMode && !editingUpcomingFixture) {
 
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '14px' }}>
                 {[
+                  ...(upcomingFixture.county_final_mode ? [
+                    {
+                      label: 'Final this weekend',
+                      title: 'COUNTY FINAL THIS WEEKEND',
+                      message: `Ballinamore SOH face ${upcomingFixture.opposition} in the County Final. Follow every score through the SOH Match Centre.`
+                    },
+                    {
+                      label: 'Final day',
+                      title: 'COUNTY FINAL DAY',
+                      message: `It’s County Final day! Ballinamore SOH v ${upcomingFixture.opposition} throws in at ${upcomingFixture.throw_in?.slice(0, 5) || 'the advertised time'}${upcomingFixture.venue ? ` in ${upcomingFixture.venue}` : ''}.`
+                    },
+                    {
+                      label: 'One hour to go',
+                      title: 'ONE HOUR TO THROW-IN',
+                      message: `One hour to go until Ballinamore SOH face ${upcomingFixture.opposition} in the County Final. Live updates will be available in the SOH Match Centre.`
+                    },
+                    {
+                      label: 'Team announced',
+                      title: 'COUNTY FINAL TEAM ANNOUNCED',
+                      message: `The Ballinamore SOH team for the County Final against ${upcomingFixture.opposition} is now available in the Match Centre.`
+                    }
+                  ] : []),
                   {
                     label: 'Match today',
                     title: 'MATCH TODAY',
@@ -3320,6 +3352,36 @@ onChange={e => {
       />
       <small>{setup.supporterInfo.length}/280 · Optional</small>
     </label>
+    {(
+      <div className="field full" style={{ padding: '14px', border: '1px solid #9d7a16', borderRadius: '12px', background: '#302608' }}>
+        <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}>
+          <input
+            type="checkbox"
+            checked={setup.countyFinalMode}
+            onChange={event => update('countyFinalMode', event.target.checked)}
+            style={{ width: '20px', height: '20px' }}
+          />
+          <span style={{ color: '#f4c430', fontWeight: '900' }}>🏆 County Final Mode</span>
+        </label>
+        <small style={{ display: 'block', marginTop: '7px', color: '#e8d897' }}>
+          Adds the final countdown, match branding and special result presentation.
+        </small>
+      </div>
+    )}
+    {setup.countyFinalMode && (
+      <label className="field full">
+        <span>Road to the Final</span>
+        <textarea
+          placeholder={'Quarter-final: Ballinamore SOH 1-15 …\nSemi-final: Ballinamore SOH 0-18 …'}
+          value={setup.roadToFinal}
+          maxLength={500}
+          rows={4}
+          onChange={event => update('roadToFinal', event.target.value)}
+          style={{ width: '100%', boxSizing: 'border-box', padding: '12px', borderRadius: '10px', fontSize: '16px', lineHeight: 1.45 }}
+        />
+        <small>{setup.roadToFinal.length}/500 · One result per line</small>
+      </label>
+    )}
     <label className="field"><span>Date</span><input type="date" value={setup.date} onChange={e=>update('date',e.target.value)}/>{setup.date && <small className="date-preview">{formatDate(setup.date)}</small>}</label>
       <label className="field"><span>Throw-in</span><input type="time" value={setup.throwIn} onChange={e=>update('throwIn',e.target.value)}/></label>
       <label className="field"><span>Half Length</span><select value={setup.halfLength} onChange={e=>update('halfLength',e.target.value)}><option value="30">30 minutes</option><option value="35">35 minutes</option><option value="20">20 minutes</option></select></label>

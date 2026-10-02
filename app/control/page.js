@@ -2101,7 +2101,7 @@ console.log('RESET RESULT:', data, error)
       }}
       style={{ width: '100%', marginBottom: '14px' }}
     >
-      ⬇️ Download Result Graphic
+      📤 Save / Share Result Graphic
     </button>
     <h3>Match Summary</h3>
 

@@ -325,7 +325,7 @@ export default function ControlMatchReportsPage() {
                     }}
                     style={{ ...styles.button, background: '#174e35', color: '#ffffff' }}
                   >
-                    ⬇️ Result Graphic
+                    📤 Save / Share Graphic
                   </button>
                 </div>
 

@@ -35,7 +35,7 @@ function FinalCountdown({ date, throwIn }) {
   const [now, setNow] = useState(Date.now())
 
   useEffect(() => {
-    const interval = window.setInterval(() => setNow(Date.now()), 30000)
+    const interval = window.setInterval(() => setNow(Date.now()), 1000)
     return () => window.clearInterval(interval)
   }, [])
 
@@ -46,13 +46,14 @@ function FinalCountdown({ date, throwIn }) {
 
   let text = 'FINAL DAY'
   if (remaining > 0) {
-    const totalMinutes = Math.floor(remaining / 60000)
-    const days = Math.floor(totalMinutes / 1440)
-    const hours = Math.floor((totalMinutes % 1440) / 60)
-    const minutes = totalMinutes % 60
+    const totalSeconds = Math.floor(remaining / 1000)
+    const days = Math.floor(totalSeconds / 86400)
+    const hours = Math.floor((totalSeconds % 86400) / 3600)
+    const minutes = Math.floor((totalSeconds % 3600) / 60)
+    const seconds = totalSeconds % 60
     text = days > 0
-      ? `${days} ${days === 1 ? 'DAY' : 'DAYS'} · ${hours} ${hours === 1 ? 'HOUR' : 'HOURS'} TO THROW-IN`
-      : `${hours} ${hours === 1 ? 'HOUR' : 'HOURS'} · ${minutes} MIN TO THROW-IN`
+      ? `${days}D · ${String(hours).padStart(2, '0')}H · ${String(minutes).padStart(2, '0')}M · ${String(seconds).padStart(2, '0')}S`
+      : `${String(hours).padStart(2, '0')}H · ${String(minutes).padStart(2, '0')}M · ${String(seconds).padStart(2, '0')}S TO THROW-IN`
   }
 
   return (

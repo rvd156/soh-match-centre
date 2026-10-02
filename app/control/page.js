@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import { getCrestSrc } from '../../lib/crest'
 import { addedTimePeriod, getAddedTime, isPastHalfEnd, addedTimeStyle } from '../../lib/added-time'
+import { downloadResultGraphic } from '../../lib/result-graphic'
 const emptyTeam = { goals: 0, points: 0 }
 const defaultSetup = { opposition: '', oppositionTeamId: '', oppositionCrest: '', competition: '', venue: '', referee: '', supporterInfo: '', date: '', throwIn: '', halfLength: '30', sohSide: 'home', notificationsEnabled: true, countyFinalMode: false, roadToFinal: '' }
 
@@ -1240,9 +1241,11 @@ async function secondHalf() {
 async function fullTime() {
   if (!confirmMatchStage('Are you sure you want to end the match at full time?')) return
 
-  const publishResult = window.confirm(
-  'Publish this result to Previous Results?\n\nSelect Cancel for a test match or if extra time will follow.'
-)
+  const publishResult = setup.notificationsEnabled === false
+    ? false
+    : window.confirm(
+      'Publish this result to Previous Results?\n\nSelect Cancel if extra time will follow.'
+    )
   setRunning(false)
   setPeriod('FULL TIME')
 
@@ -1339,9 +1342,9 @@ async function secondHalfExtraTime() {
 async function extraTimeFullTime() {
   if (!confirmMatchStage('Are you sure you want to end the match after extra time?')) return
 
-  const publishResult = window.confirm(
-  'Publish this final extra-time result to Previous Results?\n\nSelect Cancel if this is a test match.'
-)
+  const publishResult = setup.notificationsEnabled === false
+    ? false
+    : window.confirm('Publish this final extra-time result to Previous Results?')
   setRunning(false)
   setPeriod('AET')
 
@@ -2072,6 +2075,34 @@ console.log('RESET RESULT:', data, error)
 )}
 {(period === 'FULL TIME' || period === 'AET') && (
   <div className="control-card" style={{ marginTop: '16px' }}>
+    <button
+      type="button"
+      className="primary"
+      onClick={() => {
+        const homeName = setup.sohSide === 'home' ? 'Ballinamore SOH' : setup.opposition
+        const awayName = setup.sohSide === 'away' ? 'Ballinamore SOH' : setup.opposition
+        const sohTotal = setup.sohSide === 'home'
+          ? (home.goals * 3) + home.points
+          : (away.goals * 3) + away.points
+        const oppositionTotal = setup.sohSide === 'home'
+          ? (away.goals * 3) + away.points
+          : (home.goals * 3) + home.points
+        downloadResultGraphic({
+          competition: setup.competition,
+          homeName,
+          awayName,
+          homeGoals: home.goals,
+          homePoints: home.points,
+          awayGoals: away.goals,
+          awayPoints: away.points,
+          countyFinalMode: setup.countyFinalMode,
+          sohWon: sohTotal > oppositionTotal
+        })
+      }}
+      style={{ width: '100%', marginBottom: '14px' }}
+    >
+      ⬇️ Download Result Graphic
+    </button>
     <h3>Match Summary</h3>
 
     <p style={{ color: '#b9c7be', lineHeight: 1.5 }}>

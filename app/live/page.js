@@ -818,6 +818,35 @@ const sohWon =
   .live-pulse {
     animation: livePulse 1.5s infinite;
   }
+
+  @keyframes championsRise {
+    0% { opacity: 0; transform: translateY(22px) scale(.92); }
+    65% { opacity: 1; transform: translateY(-3px) scale(1.02); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  @keyframes championsGlow {
+    0%, 100% { box-shadow: 0 0 14px rgba(244,196,48,.28); }
+    50% { box-shadow: 0 0 38px rgba(244,196,48,.72); }
+  }
+
+  @keyframes trophyFloat {
+    0%, 100% { transform: translateY(0) rotate(-4deg); }
+    50% { transform: translateY(-10px) rotate(4deg); }
+  }
+
+  .champions-celebration {
+    animation: championsRise .8s ease-out both, championsGlow 2.2s ease-in-out .8s infinite;
+  }
+
+  .champions-trophy {
+    display: inline-block;
+    animation: trophyFloat 1.8s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .champions-celebration, .champions-trophy { animation: none; }
+  }
 `}</style>
       <div style={styles.container}>
 
@@ -1201,7 +1230,19 @@ const sohWon =
     </div>
   </>
 )}
-{sohWon && (
+{sohWon && match.county_final_mode && (
+  <section
+    className="champions-celebration"
+    style={{ margin: '26px auto', maxWidth: '700px', padding: '24px 16px', borderRadius: '20px', background: 'linear-gradient(135deg, #6f5308, #d2a91d)', border: '2px solid #f7dc74', color: '#ffffff', textAlign: 'center' }}
+  >
+    <div className="champions-trophy" style={{ fontSize: '52px' }}>🏆</div>
+    <div style={{ marginTop: '4px', fontSize: 'clamp(26px, 8vw, 48px)', fontWeight: '900', letterSpacing: '1.5px' }}>
+      COUNTY CHAMPIONS
+    </div>
+    <div style={{ marginTop: '5px', fontSize: '18px', fontWeight: '900' }}>BALLINAMORE SOH</div>
+  </section>
+)}
+{sohWon && !match.county_final_mode && (
   <div style={styles.winBanner}>
     BALLINAMORE SOH WIN
   </div>

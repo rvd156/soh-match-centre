@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { supabase } from '../../../lib/supabase'
+import { downloadResultGraphic } from '../../../lib/result-graphic'
 
 function related(value) {
   return Array.isArray(value) ? value[0] : value
@@ -46,6 +47,7 @@ export default function ControlMatchReportsPage() {
           match_date,
           status,
           match_summary,
+          county_final_mode,
           home_team_id,
           away_team_id,
           home_goals,
@@ -140,6 +142,26 @@ export default function ControlMatchReportsPage() {
       match.id === matchId ? { ...match, match_summary: summary } : match
     ))
     alert('Match summary saved.')
+  }
+
+  async function hideResult(match) {
+    if (!window.confirm(
+      `Hide this result from Previous Results?\n\n${related(match.home_team)?.name || 'Home'} v ${related(match.away_team)?.name || 'Away'}\n\nThe match data will be kept.`
+    )) return
+
+    const { error: hideError } = await supabase
+      .from('matches')
+      .update({ result_published: false, active: false })
+      .eq('id', match.id)
+
+    if (hideError) {
+      alert(`Could not hide the result: ${hideError.message}`)
+      return
+    }
+
+    setMatches(current => current.filter(item => item.id !== match.id))
+    setCorrections(current => ({ ...current, [match.id]: null }))
+    alert('The result has been removed from the public Previous Results page.')
   }
 
 
@@ -281,6 +303,30 @@ export default function ControlMatchReportsPage() {
                   >
                     {isSaving ? 'Saving…' : 'Save Summary'}
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const homeTotal = (Number(match.home_goals) || 0) * 3 + (Number(match.home_points) || 0)
+                      const awayTotal = (Number(match.away_goals) || 0) * 3 + (Number(match.away_points) || 0)
+                      const sohWon = Number(match.home_team_id) === 1
+                        ? homeTotal > awayTotal
+                        : awayTotal > homeTotal
+                      downloadResultGraphic({
+                        competition: match.competition,
+                        homeName: home,
+                        awayName: away,
+                        homeGoals: match.home_goals,
+                        homePoints: match.home_points,
+                        awayGoals: match.away_goals,
+                        awayPoints: match.away_points,
+                        countyFinalMode: match.county_final_mode,
+                        sohWon
+                      })
+                    }}
+                    style={{ ...styles.button, background: '#174e35', color: '#ffffff' }}
+                  >
+                    ⬇️ Result Graphic
+                  </button>
                 </div>
 
                 <button
@@ -329,6 +375,13 @@ export default function ControlMatchReportsPage() {
                 <a href={`/results/${match.id}`} style={styles.reportLink}>
                   Open public match report →
                 </a>
+                <button
+                  type="button"
+                  onClick={() => hideResult(match)}
+                  style={{ ...styles.button, width: '100%', marginTop: '12px', background: '#7f1d1d', color: '#ffffff', border: '1px solid #dc2626' }}
+                >
+                  Hide Result from Public
+                </button>
               </section>
             )
           })}

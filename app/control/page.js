@@ -1764,10 +1764,9 @@ console.log('RESET RESULT:', data, error)
     onOpenTestSetup={() => {
       setSetup({
         ...defaultSetup,
-        competition: 'County Final Test',
+        competition: 'Test Match',
         date: new Date().toLocaleDateString('en-CA'),
-        notificationsEnabled: false,
-        countyFinalMode: true
+        notificationsEnabled: false
       })
       setTestSetupMode(true)
     }}

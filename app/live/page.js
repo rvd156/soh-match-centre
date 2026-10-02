@@ -79,6 +79,7 @@ export default function LiveMatchPage() {
   const [showAllMatchEvents, setShowAllMatchEvents] = useState(false)
   const [showStickyScore, setShowStickyScore] = useState(false)
   const [periodStartedAt, setPeriodStartedAt] = useState(null)
+  const [showChampionsCelebration, setShowChampionsCelebration] = useState(false)
   const scoreboardRef = useRef(null)
   const viewerIsAdminRef = useRef(null)
 
@@ -535,6 +536,35 @@ useEffect(() => {
   match?.extra_time_started_at
 ])
 
+useEffect(() => {
+  if (!match?.county_final_mode || !['full_time', 'after_extra_time'].includes(match.status)) return
+
+  const homeScore = (Number(match.home_goals) || 0) * 3 + (Number(match.home_points) || 0)
+  const awayScore = (Number(match.away_goals) || 0) * 3 + (Number(match.away_points) || 0)
+  const sohIsHome = Number(match.home_team_id) === 1
+  const won = sohIsHome ? homeScore > awayScore : awayScore > homeScore
+  if (!won) return
+
+  const storageKey = `soh-champions-celebration-${match.id}`
+  try {
+    if (sessionStorage.getItem(storageKey) === 'shown') return
+    sessionStorage.setItem(storageKey, 'shown')
+  } catch {}
+
+  setShowChampionsCelebration(true)
+  const timeout = window.setTimeout(() => setShowChampionsCelebration(false), 7000)
+  return () => window.clearTimeout(timeout)
+}, [
+  match?.id,
+  match?.status,
+  match?.county_final_mode,
+  match?.home_team_id,
+  match?.home_goals,
+  match?.home_points,
+  match?.away_goals,
+  match?.away_points
+])
+
   function formatClock(seconds = 0) {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
@@ -818,7 +848,7 @@ const matchFinished =
   match.status === 'full_time' ||
   match.status === 'after_extra_time'
 
-const sohIsHome = match.home_team_id === 1
+const sohIsHome = Number(match.home_team_id) === 1
 
 const sohWon =
   matchFinished &&
@@ -877,10 +907,37 @@ const sohWon =
     animation: trophyFloat 1.8s ease-in-out infinite;
   }
 
+  @keyframes celebrationBackdrop {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .champions-overlay {
+    animation: celebrationBackdrop .35s ease-out both;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .champions-celebration, .champions-trophy { animation: none; }
   }
 `}</style>
+      {showChampionsCelebration && (
+        <div
+          className="champions-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Ballinamore SOH County Champions"
+          onClick={() => setShowChampionsCelebration(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 10000, display: 'grid', placeItems: 'center', padding: '22px', background: 'radial-gradient(circle, rgba(111,83,8,.94), rgba(0,12,7,.98))', cursor: 'pointer' }}
+        >
+          <div className="champions-celebration" style={{ width: '100%', maxWidth: '680px', padding: '34px 18px', borderRadius: '24px', background: 'linear-gradient(135deg, #6f5308, #d2a91d)', border: '3px solid #f7dc74', color: '#ffffff', textAlign: 'center' }}>
+            <div className="champions-trophy" style={{ fontSize: 'clamp(70px, 18vw, 130px)' }}>🏆</div>
+            <div style={{ marginTop: '8px', color: '#fff5bf', fontSize: '14px', fontWeight: '900', letterSpacing: '3px' }}>FINAL WHISTLE</div>
+            <div style={{ marginTop: '8px', fontSize: 'clamp(34px, 10vw, 72px)', lineHeight: 1.02, fontWeight: '900' }}>COUNTY CHAMPIONS</div>
+            <div style={{ marginTop: '14px', fontSize: 'clamp(22px, 6vw, 38px)', fontWeight: '900' }}>BALLINAMORE SOH</div>
+            <div style={{ marginTop: '22px', color: '#fff5bf', fontSize: '13px', fontWeight: '800' }}>Tap to close</div>
+          </div>
+        </div>
+      )}
       <div style={styles.container}>
 
   {showStickyScore && match && homeTeam && awayTeam && (

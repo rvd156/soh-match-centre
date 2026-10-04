@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase'
 import { getCrestSrc } from '../../lib/crest'
 import NotificationButton from '../NotificationButton'
 import TeamLineup from '../TeamLineup'
+import { downloadResultGraphic } from '../../lib/result-graphic'
 import MatchStats from '../MatchStats'
 
 function ScorelessBadge({ minutes, compact = false }) {
@@ -857,6 +858,21 @@ const sohWon =
     (!sohIsHome && awayTotal > homeTotal)
   )
 
+function shareChampionsGraphic(event) {
+  event?.stopPropagation()
+  downloadResultGraphic({
+    competition: match.competition,
+    homeName: homeTeam?.name || 'Home',
+    awayName: awayTeam?.name || 'Away',
+    homeGoals: match.home_goals,
+    homePoints: match.home_points,
+    awayGoals: match.away_goals,
+    awayPoints: match.away_points,
+    countyFinalMode: true,
+    sohWon: true
+  })
+}
+
   return (
     <main style={styles.page}>
     <style>{`
@@ -934,7 +950,14 @@ const sohWon =
             <div style={{ marginTop: '8px', color: '#fff5bf', fontSize: '14px', fontWeight: '900', letterSpacing: '3px' }}>FINAL WHISTLE</div>
             <div style={{ marginTop: '8px', fontSize: 'clamp(34px, 10vw, 72px)', lineHeight: 1.02, fontWeight: '900' }}>COUNTY CHAMPIONS</div>
             <div style={{ marginTop: '14px', fontSize: 'clamp(22px, 6vw, 38px)', fontWeight: '900' }}>BALLINAMORE SOH</div>
-            <div style={{ marginTop: '22px', color: '#fff5bf', fontSize: '13px', fontWeight: '800' }}>Tap to close</div>
+            <button
+              type="button"
+              onClick={shareChampionsGraphic}
+              style={{ marginTop: '24px', padding: '13px 18px', borderRadius: '11px', background: '#ffffff', border: '2px solid #fff5bf', color: '#5a4205', fontSize: '15px', fontWeight: '900', cursor: 'pointer' }}
+            >
+              📤 Share Champions Graphic
+            </button>
+            <div style={{ marginTop: '14px', color: '#fff5bf', fontSize: '13px', fontWeight: '800' }}>Tap outside to close</div>
           </div>
         </div>
       )}
@@ -1330,6 +1353,13 @@ const sohWon =
       COUNTY CHAMPIONS
     </div>
     <div style={{ marginTop: '5px', fontSize: '18px', fontWeight: '900' }}>BALLINAMORE SOH</div>
+    <button
+      type="button"
+      onClick={shareChampionsGraphic}
+      style={{ marginTop: '16px', padding: '11px 16px', borderRadius: '10px', background: '#ffffff', border: '1px solid #fff5bf', color: '#5a4205', fontSize: '14px', fontWeight: '900', cursor: 'pointer' }}
+    >
+      📤 Share County Champions Graphic
+    </button>
   </section>
 )}
 {sohWon && !match.county_final_mode && (

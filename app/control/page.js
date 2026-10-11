@@ -1664,6 +1664,7 @@ const heading =
 
   const postLines = [
     heading,
+    ...(setup.countyFinalMode ? ['', 'Leitrim Senior County Final 2026'] : []),
     ''
   ]
 

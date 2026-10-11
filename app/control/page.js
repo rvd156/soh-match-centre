@@ -1656,11 +1656,17 @@ const heading =
     ? homeTotal - awayTotal
     : awayTotal - homeTotal
   const marginLabel = `${Math.abs(margin)} ${Math.abs(margin) === 1 ? 'point' : 'points'}`
-  const scoreSummary = margin === 0
-    ? 'Both sides are level.'
-    : margin > 0
-      ? `Ballinamore SOH lead by ${marginLabel}.`
-      : `Ballinamore SOH trail by ${marginLabel}.`
+  const isFinalUpdate = period === 'FULL TIME' || period === 'AET'
+  const winnerName = homeTotal > awayTotal ? homeName : awayName
+  const scoreSummary = isFinalUpdate
+    ? homeTotal === awayTotal
+      ? 'The match finished level.'
+      : `${winnerName} won by ${Math.abs(homeTotal - awayTotal)} ${Math.abs(homeTotal - awayTotal) === 1 ? 'point' : 'points'}${period === 'AET' ? ' after extra time' : ''}.`
+    : margin === 0
+      ? 'Both sides are level.'
+      : margin > 0
+        ? `Ballinamore SOH lead by ${marginLabel}.`
+        : `Ballinamore SOH trail by ${marginLabel}.`
 
   const postLines = [
     heading,

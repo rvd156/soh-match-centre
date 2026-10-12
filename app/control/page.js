@@ -1667,10 +1667,13 @@ const heading =
       : margin > 0
         ? `Ballinamore SOH lead by ${marginLabel}.`
         : `Ballinamore SOH trail by ${marginLabel}.`
+  const countyFinalLabel = /replay/i.test(setup.competition || '')
+    ? 'Leitrim Senior County Final Replay 2026'
+    : 'Leitrim Senior County Final 2026'
 
   const postLines = [
     heading,
-    ...(setup.countyFinalMode ? ['', 'Leitrim Senior County Final 2026'] : []),
+    ...(setup.countyFinalMode ? ['', countyFinalLabel] : []),
     ''
   ]
 

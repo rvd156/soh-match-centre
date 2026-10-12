@@ -280,7 +280,7 @@ export default function MatchReportPage() {
         <header style={styles.header}>
           {match.county_final_mode && (
             <div style={{ color: '#f4c430', fontSize: '14px', fontWeight: '900', letterSpacing: '2px', marginBottom: '10px' }}>
-              🏆 COUNTY FINAL
+              🏆 {/replay/i.test(match.competition || '') ? 'COUNTY FINAL REPLAY' : 'COUNTY FINAL'}
             </div>
           )}
           <span style={styles.finalBadge}>

@@ -32,7 +32,11 @@ function ScorelessBadge({ minutes, compact = false }) {
   )
 }
 
-function FinalCountdown({ date, throwIn }) {
+function countyFinalTitle(competition) {
+  return /replay/i.test(competition || '') ? 'COUNTY FINAL REPLAY' : 'COUNTY FINAL'
+}
+
+function FinalCountdown({ date, throwIn, competition }) {
   const [now, setNow] = useState(Date.now())
 
   useEffect(() => {
@@ -59,7 +63,7 @@ function FinalCountdown({ date, throwIn }) {
 
   return (
     <div style={{ margin: '12px auto 20px', maxWidth: '560px', padding: '15px 12px', borderRadius: '14px', background: 'linear-gradient(135deg, #6f5308, #c49a16)', border: '1px solid #f4c430', color: '#ffffff', textAlign: 'center', boxShadow: '0 10px 28px rgba(0,0,0,.28)' }}>
-      <div style={{ fontSize: '12px', fontWeight: '900', letterSpacing: '2px' }}>🏆 COUNTY FINAL</div>
+      <div style={{ fontSize: '12px', fontWeight: '900', letterSpacing: '2px' }}>🏆 {countyFinalTitle(competition)}</div>
       <div style={{ marginTop: '5px', fontSize: 'clamp(18px, 5vw, 28px)', fontWeight: '900' }}>{text}</div>
     </div>
   )
@@ -658,11 +662,11 @@ function formatStatus(status = '') {
       {upcomingFixture ? (
   <>
     <div style={styles.upcomingBar}>
-      {upcomingFixture.county_final_mode ? '🏆 COUNTY FINAL' : 'UPCOMING FIXTURE'}
+      {upcomingFixture.county_final_mode ? `🏆 ${countyFinalTitle(upcomingFixture.competition)}` : 'UPCOMING FIXTURE'}
     </div>
 
     {upcomingFixture.county_final_mode && (
-      <FinalCountdown date={upcomingFixture.match_date} throwIn={upcomingFixture.throw_in} />
+      <FinalCountdown date={upcomingFixture.match_date} throwIn={upcomingFixture.throw_in} competition={upcomingFixture.competition} />
     )}
 
 <div
@@ -1110,7 +1114,7 @@ function shareChampionsGraphic(event) {
 
         {match.county_final_mode && (
           <div style={{ width: 'fit-content', margin: '0 auto 14px', padding: '7px 14px', borderRadius: '999px', background: '#6f5308', border: '1px solid #f4c430', color: '#ffffff', fontSize: '13px', fontWeight: '900', letterSpacing: '1.2px' }}>
-            🏆 COUNTY FINAL
+            🏆 {countyFinalTitle(match.competition)}
           </div>
         )}
 

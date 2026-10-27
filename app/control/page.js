@@ -1751,6 +1751,11 @@ console.log('RESET RESULT:', data, error)
     teams={teams}
     teamsLoading={teamsLoading}
     teamsError={teamsError}
+    onTeamAdded={team => {
+      setTeams(current => [...current.filter(item => item.id !== team.id), team]
+        .sort((a, b) => a.name.localeCompare(b.name)))
+      setTeamsError('')
+    }}
     existingMatch={existingMatch}
     onResumeMatch={resumeMatch}
     onResetExistingMatch={resetExistingMatch}
@@ -2930,6 +2935,7 @@ function Setup({
   teams,
   teamsLoading,
   teamsError,
+  onTeamAdded,
   onStart,
   onPublishFixture,
   existingMatch,
@@ -2960,6 +2966,48 @@ function Setup({
   const [sendingNotice, setSendingNotice] = useState(false)
   const [upcomingLineupOpen, setUpcomingLineupOpen] = useState(false)
   const [lastNoticeSentAt, setLastNoticeSentAt] = useState(null)
+  const [addingTeam, setAddingTeam] = useState(false)
+  const [newTeamName, setNewTeamName] = useState('')
+  const [savingTeam, setSavingTeam] = useState(false)
+
+  async function addOppositionTeam() {
+    const name = newTeamName.trim().replace(/\s+/g, ' ')
+    if (!name || savingTeam) return
+
+    setSavingTeam(true)
+    try {
+      const { data } = await supabase.auth.getSession()
+      const token = data?.session?.access_token
+      if (!token) throw new Error('Your admin session has expired. Please sign in again.')
+
+      const response = await fetch('/api/admin/teams', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ name })
+      })
+      const result = await response.json()
+      if (!response.ok || !result.team) {
+        throw new Error(result.error || 'Could not add the team.')
+      }
+
+      onTeamAdded(result.team)
+      setSetup(current => ({
+        ...current,
+        opposition: result.team.name,
+        oppositionTeamId: result.team.id,
+        oppositionCrest: result.team.crest_url || ''
+      }))
+      setNewTeamName('')
+      setAddingTeam(false)
+    } catch (teamError) {
+      alert(teamError.message)
+    } finally {
+      setSavingTeam(false)
+    }
+  }
   function uploadCrest(event) {
   const file = event.target.files?.[0]
   if (!file) return
@@ -3370,6 +3418,36 @@ onChange={e => {
     ))}
   </select>
   {teamsError && <small>{teamsError}</small>}
+  {!addingTeam ? (
+    <button type="button" className="add-opposition-toggle" onClick={() => setAddingTeam(true)}>
+      + Add new opposition
+    </button>
+  ) : (
+    <div className="add-opposition-form">
+      <input
+        value={newTeamName}
+        maxLength={100}
+        autoComplete="off"
+        placeholder="Team name"
+        onChange={event => setNewTeamName(event.target.value)}
+        onKeyDown={event => {
+          if (event.key === 'Enter') {
+            event.preventDefault()
+            addOppositionTeam()
+          }
+        }}
+      />
+      <div>
+        <button type="button" disabled={!newTeamName.trim() || savingTeam} onClick={addOppositionTeam}>
+          {savingTeam ? 'Adding…' : 'Add team'}
+        </button>
+        <button type="button" disabled={savingTeam} onClick={() => { setAddingTeam(false); setNewTeamName('') }}>
+          Cancel
+        </button>
+      </div>
+      <small>Add the crest and player names later when they are available.</small>
+    </div>
+  )}
 </label>
       <label className="field"><span>Competition</span><input placeholder="e.g. Senior Championship" value={setup.competition} onChange={e=>update('competition',e.target.value)}/></label>
       <label className="field full"><span>Venue</span><input placeholder="e.g. Pairc Sheáin Uí Eislin" value={setup.venue} onChange={e=>update('venue',e.target.value)}/></label>

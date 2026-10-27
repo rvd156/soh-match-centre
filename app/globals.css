@@ -75,6 +75,13 @@ button:hover { filter: brightness(1.08); }
 .field>span { font-size:.8rem; font-weight:900; color:#d7e0da; letter-spacing:.4px; }
 .field input,.field select { width:100%; background:#16241d; color:white; border:1px solid rgba(255,255,255,.12); border-radius:12px; padding:14px; outline:none; }
 .field input:focus,.field select:focus { border-color:#f6bd16; }
+.add-opposition-toggle { align-self:flex-start; padding:8px 11px; border:1px solid rgba(246,189,22,.45); background:transparent; color:#f6bd16; font-size:.78rem; font-weight:900; }
+.add-opposition-form { display:grid; gap:8px; padding:12px; border:1px solid rgba(246,189,22,.35); border-radius:12px; background:#111d17; }
+.add-opposition-form>div { display:flex; gap:8px; flex-wrap:wrap; }
+.add-opposition-form button { padding:9px 12px; background:#168044; font-size:.78rem; }
+.add-opposition-form button+button { background:#2b3a32; }
+.add-opposition-form button:disabled { opacity:.45; cursor:not-allowed; }
+.add-opposition-form small { color:var(--muted); line-height:1.35; }
 .side-picker { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
 .side-picker button { border:1px solid rgba(255,255,255,.12); }
 .side-picker button.selected { background:#f6bd16; color:#102017; }
